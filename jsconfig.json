@@ -1,0 +1,12 @@
+{
+	"compilerOptions": {
+		"target": "esnext",
+		"checkJs": true,
+		"module": "esnext",
+		"strict": true,
+	},
+	"include": ["src/**/*.js"],
+	"files": [
+		"mod.js",
+	]
+}
