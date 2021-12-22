@@ -1,5 +1,11 @@
+import {CollectedImport} from "./CollectedImport.js";
+
 export class ImportResolver {
+
 	#importMeta = "";
+
+	/** @type {Map<string, CollectedImport>} */
+	#collectedImports = new Map();
 
 	/**
 	 * @param {string | URL} importMeta
@@ -28,8 +34,18 @@ export class ImportResolver {
 			if (typeof importUrl === "string") {
 				importUrl = new URL(importUrl, this.#importMeta);
 			}
-			return await import(importUrl.href);
+			const collectedImport = this.#collectImport(importUrl.href);
+			return await import(await collectedImport.getBlobUrl());
 		}
 		return this.createdImportFunction;
+	}
+
+	/**
+	 * @param {string} url The full (non relative) url to fetch.
+	 */
+	#collectImport(url) {
+		const collectedImport = new CollectedImport(url, this);
+		this.#collectedImports.set(url, collectedImport);
+		return collectedImport;
 	}
 }
