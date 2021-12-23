@@ -4,7 +4,7 @@ import { replaceImports } from "./replaceImports.js";
 /**
  * @typedef {Object} ResolveImportData
  * @property {string} url
- * @property {boolean} [forceNoFake = false]
+ * @property {boolean} [allowFakes = true]
  */
 
 export class CollectedImport {
@@ -49,7 +49,7 @@ export class CollectedImport {
       const resolveData = this.handleResolveImport(resolvedUrl.href);
       const collectedImport = this.#resolver.createCollectedImport(
         resolveData.url,
-        resolveData.forceNoFake ?? false,
+        resolveData.allowFakes ?? true,
       );
       blobUrlPromises.push(collectedImport.getBlobUrl());
     }

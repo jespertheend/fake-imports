@@ -25,7 +25,7 @@ export class CollectedImportFake extends CollectedImport {
    * @returns {import("./CollectedImport.js").ResolveImportData}
    */
   handleResolveImport(url) {
-    const forceNoFake = url === this.url;
-    return { url, forceNoFake };
+    const allowFakes = url !== this.url;
+    return { url, allowFakes };
   }
 }

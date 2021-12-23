@@ -85,9 +85,9 @@ Deno.test({
     const basePath = toFileUrl(dirPath) + "/";
     const importer = new Importer(basePath);
     importer.fakeModule("./replaced.js", `export const replaced = "replaced";`);
-    const {a, b} = await importer.import("./main.js");
+    const { a, b } = await importer.import("./main.js");
 
-    assertEquals({a, b}, {a: "replaced", b: "replaced"});
+    assertEquals({ a, b }, { a: "replaced", b: "replaced" });
 
     await cleanup();
   },
@@ -106,11 +106,14 @@ Deno.test({
     const importer = new Importer(basePath);
     importer.fakeModule("./replaced.js", `export const replaced = "replaced";`);
 
-    const {replaced: firstImport} = await importer.import("./main.js");
-    const {replaced: secondImport} = await importer.import("./main.js");
+    const { replaced: firstImport } = await importer.import("./main.js");
+    const { replaced: secondImport } = await importer.import("./main.js");
 
-    assertEquals({firstImport, secondImport}, {firstImport: "replaced", secondImport: "replaced"});
+    assertEquals({ firstImport, secondImport }, {
+      firstImport: "replaced",
+      secondImport: "replaced",
+    });
 
     await cleanup();
   },
-})
+});

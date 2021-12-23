@@ -17,6 +17,6 @@ Deno.test("handleResolveImport", () => {
   const resolveData = collectedImport.handleResolveImport(script);
   assertEquals(resolveData, {
     url: script,
-    forceNoFake: true,
+    allowFakes: false,
   });
 });

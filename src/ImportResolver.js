@@ -49,11 +49,11 @@ export class ImportResolver {
   /**
    * Creates a new CollectedImport instance and adds it to the collectedImports map.
    * @param {string} url The full (non relative) url to fetch.
-   * @param {boolean} forceNoFake If true, the real module will be loaded instead of the fake one.
+   * @param {boolean} allowFakes If true, the real module will be loaded instead of the fake one.
    */
-  createCollectedImport(url, forceNoFake = false) {
+  createCollectedImport(url, allowFakes = true) {
     let collectedImport;
-    if (this.#fakedModules.has(url) && !forceNoFake) {
+    if (this.#fakedModules.has(url) && allowFakes) {
       const fake = /** @type {string} */ (this.#fakedModules.get(url));
       collectedImport = new CollectedImportFake(fake, url, this);
     } else {
