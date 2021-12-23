@@ -32,7 +32,7 @@ export class CollectedImport {
   }
 
   /**
-   * @param {string} url
+   * @param {string} url The full (non-relative) url to resolve.
    * @returns {ResolveImportData}
    */
   handleResolveImport(url) {
@@ -43,7 +43,6 @@ export class CollectedImport {
     const scriptContent = await this.handleGetContent();
 
     const imports = parseImports(scriptContent);
-    const collectedImports = [];
     const blobUrlPromises = [];
     for (const importData of imports) {
       const resolvedUrl = new URL(importData.url, this.url);
@@ -52,7 +51,6 @@ export class CollectedImport {
         resolveData.url,
         resolveData.forceNoFake ?? false,
       );
-      collectedImports.push(collectedImport);
       blobUrlPromises.push(collectedImport.getBlobUrl());
     }
 

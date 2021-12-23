@@ -21,7 +21,7 @@ export class CollectedImportFake extends CollectedImport {
 
   /**
    * @override
-   * @param {string} url
+   * @param {string} url The full (non-relative) url to resolve.
    * @returns {import("./CollectedImport.js").ResolveImportData}
    */
   handleResolveImport(url) {
