@@ -1,15 +1,20 @@
 {
-	"compilerOptions": {
-		"allowJs": true,
-		"checkJs": true,
-		"strict": true
-	},
-	"lint": {
-		"files": {
-			"include": ["src/", "mod.js"]
-		},
-		"rules": {
-			"tags": ["recommended"]
-		}
-	}
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "strict": true
+  },
+  "lint": {
+    "files": {
+      "include": ["src/", "mod.js"]
+    },
+    "rules": {
+      "tags": ["recommended"]
+    }
+  },
+  "fmt": {
+    "files": {
+      "include": ["src/", "mod.js"]
+    }
+  }
 }

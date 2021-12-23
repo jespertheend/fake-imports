@@ -4,25 +4,30 @@
  * @param {string} scriptSource
  */
 export function replaceImports(importLocations, replacedImports, scriptSource) {
-	if (importLocations.length == 0) return scriptSource;
+  if (importLocations.length == 0) return scriptSource;
 
-	let newScriptSource = "";
-	for (let i = 0; i < importLocations.length; i++) {
-		const currentImport = importLocations[i];
-		const nextImport = importLocations[i + 1];
+  let newScriptSource = "";
+  for (let i = 0; i < importLocations.length; i++) {
+    const currentImport = importLocations[i];
+    const nextImport = importLocations[i + 1];
 
-		if (i == 0) {
-			newScriptSource += scriptSource.slice(0, currentImport.start);
-		}
+    if (i == 0) {
+      newScriptSource += scriptSource.slice(0, currentImport.start);
+    }
 
-		newScriptSource += replacedImports[i];
+    newScriptSource += replacedImports[i];
 
-		if (nextImport) {
-			newScriptSource += scriptSource.slice(currentImport.start + currentImport.length, nextImport.start);
-		} else {
-			newScriptSource += scriptSource.slice(currentImport.start + currentImport.length);
-		}
-	}
+    if (nextImport) {
+      newScriptSource += scriptSource.slice(
+        currentImport.start + currentImport.length,
+        nextImport.start,
+      );
+    } else {
+      newScriptSource += scriptSource.slice(
+        currentImport.start + currentImport.length,
+      );
+    }
+  }
 
-	return newScriptSource;
+  return newScriptSource;
 }

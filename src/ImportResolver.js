@@ -1,52 +1,51 @@
-import {CollectedImport} from "./CollectedImport.js";
+import { CollectedImport } from "./CollectedImport.js";
 
 export class ImportResolver {
+  #importMeta = "";
 
-	#importMeta = "";
+  /** @type {Map<string, CollectedImport>} */
+  #collectedImports = new Map();
 
-	/** @type {Map<string, CollectedImport>} */
-	#collectedImports = new Map();
+  /**
+   * @param {string | URL} importMeta
+   */
+  constructor(importMeta) {
+    if (importMeta instanceof URL) {
+      this.#importMeta = importMeta.href;
+    } else {
+      this.#importMeta = importMeta;
+    }
 
-	/**
-	 * @param {string | URL} importMeta
-	 */
-	constructor(importMeta) {
-		if (importMeta instanceof URL) {
-			this.#importMeta = importMeta.href;
-		} else {
-			this.#importMeta = importMeta;
-		}
+    /**
+     * @template T
+     * @type {((importUrl: string | URL) => Promise<any>) | null})}
+     */
+    this.createdImportFunction = null;
+  }
 
-		/**
-		 * @template T
-		 * @type {((importUrl: string | URL) => Promise<any>) | null})}
-		 */
-		this.createdImportFunction = null;
-	}
+  /**
+   * @returns {<T>(importUrl: string | URL) => Promise<T>}
+   */
+  getImportFunction() {
+    if (this.createdImportFunction) return this.createdImportFunction;
 
-	/**
-	 * @returns {<T>(importUrl: string | URL) => Promise<T>}
-	 */
-	getImportFunction() {
-		if (this.createdImportFunction) return this.createdImportFunction;
+    this.createdImportFunction = async (importUrl) => {
+      if (typeof importUrl === "string") {
+        importUrl = new URL(importUrl, this.#importMeta);
+      }
+      const collectedImport = this.createCollectedImport(importUrl.href);
+      return await import(await collectedImport.getBlobUrl());
+    };
+    return this.createdImportFunction;
+  }
 
-		this.createdImportFunction = async importUrl => {
-			if (typeof importUrl === "string") {
-				importUrl = new URL(importUrl, this.#importMeta);
-			}
-			const collectedImport = this.createCollectedImport(importUrl.href);
-			return await import(await collectedImport.getBlobUrl());
-		}
-		return this.createdImportFunction;
-	}
-
-	/**
-	 * Creates a new CollectedImport instance and adds it to the collectedImports map.
-	 * @param {string} url The full (non relative) url to fetch.
-	 */
-	createCollectedImport(url) {
-		const collectedImport = new CollectedImport(url, this);
-		this.#collectedImports.set(url, collectedImport);
-		return collectedImport;
-	}
+  /**
+   * Creates a new CollectedImport instance and adds it to the collectedImports map.
+   * @param {string} url The full (non relative) url to fetch.
+   */
+  createCollectedImport(url) {
+    const collectedImport = new CollectedImport(url, this);
+    this.#collectedImports.set(url, collectedImport);
+    return collectedImport;
+  }
 }
