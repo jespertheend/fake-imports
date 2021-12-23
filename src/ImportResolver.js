@@ -34,16 +34,17 @@ export class ImportResolver {
 			if (typeof importUrl === "string") {
 				importUrl = new URL(importUrl, this.#importMeta);
 			}
-			const collectedImport = this.#collectImport(importUrl.href);
+			const collectedImport = this.createCollectedImport(importUrl.href);
 			return await import(await collectedImport.getBlobUrl());
 		}
 		return this.createdImportFunction;
 	}
 
 	/**
+	 * Creates a new CollectedImport instance and adds it to the collectedImports map.
 	 * @param {string} url The full (non relative) url to fetch.
 	 */
-	#collectImport(url) {
+	createCollectedImport(url) {
 		const collectedImport = new CollectedImport(url, this);
 		this.#collectedImports.set(url, collectedImport);
 		return collectedImport;

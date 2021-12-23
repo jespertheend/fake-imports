@@ -1,6 +1,10 @@
+import {parseImports} from "./parseImports.js";
+import { replaceImports } from "./replaceImports.js";
+
 export class CollectedImport {
 
-	#url = "";
+	#url;
+	#resolver;
 
 	/** @type {string?} */
 	#createdBlobUrl = null;
@@ -13,6 +17,7 @@ export class CollectedImport {
 	 */
 	constructor(url, resolver) {
 		this.#url = url;
+		this.#resolver = resolver;
 
 		this.#fetchContent();
 	}
@@ -21,7 +26,21 @@ export class CollectedImport {
 		const response = await fetch(this.#url);
 		const scriptContent = await response.text();
 
-		const blobUrl = URL.createObjectURL(new Blob([scriptContent], {type: "text/javascript"}));
+		const imports = parseImports(scriptContent);
+		const collectedImports = [];
+		const blobUrlPromises = [];
+		for (const importData of imports) {
+			const resolvedUrl = new URL(importData.url, this.#url);
+			const collectedImport = this.#resolver.createCollectedImport(resolvedUrl.href);
+			collectedImports.push(collectedImport);
+			blobUrlPromises.push(collectedImport.getBlobUrl());
+		}
+
+		const blobUrls = await Promise.all(blobUrlPromises);
+
+		const newScriptContent = replaceImports(imports, blobUrls, scriptContent);
+
+		const blobUrl = URL.createObjectURL(new Blob([newScriptContent], {type: "text/javascript"}));
 		this.#createdBlobUrl = blobUrl;
 		this.#onBlobUrlReadyCbs.forEach(cb => cb(blobUrl));
 		this.#onBlobUrlReadyCbs.clear();
