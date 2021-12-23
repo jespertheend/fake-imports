@@ -98,21 +98,28 @@ Deno.test({
   permissions: {
     net: true,
   },
-  ignore: true,
   fn: async () => {
-    const { cleanup, dirPath } = await simpleReplacementDir();
+    const { cleanup, dirPath } = await setupScriptTempDir({
+      "main.js": `
+        import {mutable} from "./replaced.js";
+        export {mutable};
+      `,
+      "replaced.js": `
+        export const mutable = {changedBy: "not changed"};
+      `,
+    }, {
+      prefix: "import_twice_test",
+    });
 
     const basePath = toFileUrl(dirPath) + "/";
     const importer = new Importer(basePath);
-    importer.fakeModule("./replaced.js", `export const replaced = "replaced";`);
+    importer.fakeModule("./replaced.js", `export const mutable = {changedBy: "fake"};`);
 
-    const { replaced: firstImport } = await importer.import("./main.js");
-    const { replaced: secondImport } = await importer.import("./main.js");
+    const firstModule = await importer.import("./main.js");
+    firstModule.mutable.changedBy = "first import";
+    const secondModule = await importer.import("./main.js");
 
-    assertEquals({ firstImport, secondImport }, {
-      firstImport: "replaced",
-      secondImport: "replaced",
-    });
+    assertEquals(secondModule.mutable.changedBy, "first import");
 
     await cleanup();
   },

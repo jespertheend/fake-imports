@@ -52,6 +52,14 @@ export class ImportResolver {
    * @param {boolean} allowFakes If true, the real module will be loaded instead of the fake one.
    */
   createCollectedImport(url, allowFakes = true) {
+    let collectedImportKey = "";
+    collectedImportKey += allowFakes ? "1" : "0";
+    collectedImportKey += url;
+
+    if (this.#collectedImports.has(collectedImportKey)) {
+      return this.#collectedImports.get(collectedImportKey);
+    }
+
     let collectedImport;
     if (this.#fakedModules.has(url) && allowFakes) {
       const fake = /** @type {string} */ (this.#fakedModules.get(url));
@@ -59,7 +67,7 @@ export class ImportResolver {
     } else {
       collectedImport = new CollectedImportFetch(url, this);
     }
-    this.#collectedImports.set(url, collectedImport);
+    this.#collectedImports.set(collectedImportKey, collectedImport);
     return collectedImport;
   }
 }
