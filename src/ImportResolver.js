@@ -1,10 +1,14 @@
-import { CollectedImport } from "./CollectedImport.js";
+import { CollectedImportFake } from "./CollectedImportFake.js";
+import { CollectedImportFetch } from "./CollectedImportFetch.js";
 
 export class ImportResolver {
   #importMeta = "";
 
-  /** @type {Map<string, CollectedImport>} */
+  /** @type {Map<string, import("./CollectedImport.js").CollectedImport>} */
   #collectedImports = new Map();
+
+  /** @type {Map<string, string>} */
+  #fakedModules = new Map();
 
   /**
    * @param {string | URL} importMeta
@@ -15,36 +19,46 @@ export class ImportResolver {
     } else {
       this.#importMeta = importMeta;
     }
-
-    /**
-     * @template T
-     * @type {((importUrl: string | URL) => Promise<any>) | null})}
-     */
-    this.createdImportFunction = null;
   }
 
   /**
-   * @returns {<T>(importUrl: string | URL) => Promise<T>}
+   * @param {string | URL} url
+   * @param {string} moduleImplementation
    */
-  getImportFunction() {
-    if (this.createdImportFunction) return this.createdImportFunction;
+  registerFakeModule(url, moduleImplementation) {
+    if (typeof url === "string") {
+      url = new URL(url, this.#importMeta);
+    }
 
-    this.createdImportFunction = async (importUrl) => {
-      if (typeof importUrl === "string") {
-        importUrl = new URL(importUrl, this.#importMeta);
-      }
-      const collectedImport = this.createCollectedImport(importUrl.href);
-      return await import(await collectedImport.getBlobUrl());
-    };
-    return this.createdImportFunction;
+    this.#fakedModules.set(url.href, moduleImplementation);
+  }
+
+  /**
+   * @template T
+   * @param {string | URL} url
+   * @returns {Promise<T>}
+   */
+  async import(url) {
+    if (typeof url === "string") {
+      url = new URL(url, this.#importMeta);
+    }
+    const collectedImport = this.createCollectedImport(url.href);
+    return await import(await collectedImport.getBlobUrl());
   }
 
   /**
    * Creates a new CollectedImport instance and adds it to the collectedImports map.
    * @param {string} url The full (non relative) url to fetch.
+   * @param {boolean} forceNoFake If true, the real module will be loaded instead of the fake one.
    */
-  createCollectedImport(url) {
-    const collectedImport = new CollectedImport(url, this);
+  createCollectedImport(url, forceNoFake = false) {
+    let collectedImport;
+    if (this.#fakedModules.has(url) && !forceNoFake) {
+      const fake = /** @type {string} */ (this.#fakedModules.get(url));
+      collectedImport = new CollectedImportFake(fake, url, this);
+    } else {
+      collectedImport = new CollectedImportFetch(url, this);
+    }
     this.#collectedImports.set(url, collectedImport);
     return collectedImport;
   }

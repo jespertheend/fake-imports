@@ -1,8 +1,13 @@
 import { parseImports } from "./parseImports.js";
 import { replaceImports } from "./replaceImports.js";
 
+/**
+ * @typedef {Object} ResolveImportData
+ * @property {string} url
+ * @property {boolean} [forceNoFake = false]
+ */
+
 export class CollectedImport {
-  #url;
   #resolver;
 
   /** @type {string?} */
@@ -15,23 +20,37 @@ export class CollectedImport {
    * @param {import("./ImportResolver.js").ImportResolver} resolver
    */
   constructor(url, resolver) {
-    this.#url = url;
+    this.url = url;
     this.#resolver = resolver;
-
-    this.#fetchContent();
   }
 
-  async #fetchContent() {
-    const response = await fetch(this.#url);
-    const scriptContent = await response.text();
+  /**
+   * @returns {Promise<string>}
+   */
+  async handleGetContent() {
+    return await "";
+  }
+
+  /**
+   * @param {string} url
+   * @returns {ResolveImportData}
+   */
+  handleResolveImport(url) {
+    return { url };
+  }
+
+  async init() {
+    const scriptContent = await this.handleGetContent();
 
     const imports = parseImports(scriptContent);
     const collectedImports = [];
     const blobUrlPromises = [];
     for (const importData of imports) {
-      const resolvedUrl = new URL(importData.url, this.#url);
+      const resolvedUrl = new URL(importData.url, this.url);
+      const resolveData = this.handleResolveImport(resolvedUrl.href);
       const collectedImport = this.#resolver.createCollectedImport(
-        resolvedUrl.href,
+        resolveData.url,
+        resolveData.forceNoFake ?? false,
       );
       collectedImports.push(collectedImport);
       blobUrlPromises.push(collectedImport.getBlobUrl());
