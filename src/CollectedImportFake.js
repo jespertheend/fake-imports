@@ -22,7 +22,7 @@ export class CollectedImportFake extends CollectedImport {
   /**
    * @override
    * @param {string} url
-   * @returns {ResolveImportData}
+   * @returns {import("./CollectedImport.js").ResolveImportData}
    */
   handleResolveImport(url) {
     const forceNoFake = url === this.url;
