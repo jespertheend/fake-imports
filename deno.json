@@ -3,5 +3,13 @@
 		"allowJs": true,
 		"checkJs": true,
 		"strict": true
+	},
+	"lint": {
+		"files": {
+			"include": ["src/", "mod.js"]
+		},
+		"rules": {
+			"tags": ["recommended"]
+		}
 	}
 }
