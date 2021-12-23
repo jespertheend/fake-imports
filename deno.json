@@ -6,7 +6,7 @@
   },
   "lint": {
     "files": {
-      "include": ["src/", "mod.js"]
+      "include": ["src/", "mod.js", "test/"]
     },
     "rules": {
       "tags": ["recommended"]
@@ -14,7 +14,7 @@
   },
   "fmt": {
     "files": {
-      "include": ["src/", "mod.js"]
+      "include": ["src/", "mod.js", "test/"]
     }
   }
 }
