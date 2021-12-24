@@ -93,8 +93,8 @@ importer.fakeModule(
 );
 ```
 
-And then just continue running your test like usual. Here's what that looks
-like:
+And then just continue running your test like usual. Be sure to run it with
+`--allow-read` and `--allow-net`. Here's what that the full file looks like:
 
 ```js
 import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
@@ -114,3 +114,24 @@ Deno.test("getX", async () => {
   assertEquals(x, 1);
 });
 ```
+
+## How it works internally
+
+When you import via `importer.import()`, the resource is first downloaded using
+`fetch()`. The content is then parsed and any `import`s from the file get the
+same treatment recursively. Then the content of all downloads are passed into
+`URL.createObjectURL()`, replacing all `import` statements with the generated
+object URL. Finally, the root file is loaded using a regular `await import()`.
+Causing all files to get parsed and executed by the JavaScript parser of the
+system. Except, instead of running the real files, it runs all code from the
+created `blob:` urls.
+
+## Caveats
+
+- Circular imports are not supported. Because of the way object URLs work, it is
+  unfortunately not possible to load modules in a circular manner. To make this
+  work, it would require the loader to first create all object URLs, and then
+  modify the imported script urls from the files afterwards. And there is
+  currently no way of doing this using object URLs.
+- Because `fetch()` is being used, the `--allow-net` permission is required. If
+  you want to load scripts from the disk, `--allow-read` is also required.
