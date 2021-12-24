@@ -5,8 +5,6 @@
 [![deno doc](https://doc.deno.land/badge.svg)](https://doc.deno.land/https://deno.land/x/fake_imports@v0.0.2/mod.js/~/Importer)
 [![license](https://img.shields.io/github/license/jespertheend/fake-imports)](https://github.com/jespertheend/fake-imports/blob/master/LICENSE)
 
-
-
 This is a small module for Deno and browser environments that can be used for
 blocking specific imports using the esm `import` syntax. It is mostly meant for
 Stubbing and Mocking modules in unit tests, but can be used for other purposes
