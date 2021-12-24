@@ -113,7 +113,10 @@ Deno.test({
 
     const basePath = toFileUrl(dirPath) + "/";
     const importer = new Importer(basePath);
-    importer.fakeModule("./replaced.js", `export const mutable = {changedBy: "fake"};`);
+    importer.fakeModule(
+      "./replaced.js",
+      `export const mutable = {changedBy: "fake"};`,
+    );
 
     const firstModule = await importer.import("./main.js");
     firstModule.mutable.changedBy = "first import";
@@ -145,15 +148,18 @@ Deno.test({
 
     const basePath = toFileUrl(dirPath) + "/";
     const importer = new Importer(basePath);
-    importer.fakeModule("./replaced.js", `
+    importer.fakeModule(
+      "./replaced.js",
+      `
       import {mutable} from "./replaced.js";
       mutable.changedBy = "fake";
       export {mutable};
-    `);
+    `,
+    );
 
     const main = await importer.import("./main.js");
     assertEquals(main.mutable.changedBy, "fake");
 
     await cleanup();
   },
-})
+});
