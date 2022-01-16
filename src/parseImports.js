@@ -9,7 +9,6 @@
  * @param {string} scriptSource
  */
 export function parseImports(scriptSource) {
-  // deno-lint-ignore no-invalid-regexp no-empty-character-class
   const re = /import[\s\S]+?["'](?<url>.+)["']/gd;
   /** @type {ImportLocation[]} */
   const imports = [];
