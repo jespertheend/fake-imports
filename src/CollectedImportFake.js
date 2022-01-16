@@ -2,12 +2,12 @@ import { CollectedImport } from "./CollectedImport.js";
 
 export class CollectedImportFake extends CollectedImport {
   /**
-   * @param {string} fakeScriptSource
+   * @param {import("../mod.js").ModuleImplementation} fakeModuleImplementation
    * @param {ConstructorParameters<typeof CollectedImport>} args
    */
-  constructor(fakeScriptSource, ...args) {
+  constructor(fakeModuleImplementation, ...args) {
     super(...args);
-    this.fakeScriptSource = fakeScriptSource;
+    this.fakeModuleImplementation = fakeModuleImplementation;
 
     this.init();
   }
@@ -16,7 +16,20 @@ export class CollectedImportFake extends CollectedImport {
    * @override
    */
   async handleGetContent() {
-    return await this.fakeScriptSource;
+    if (this.fakeModuleImplementation.length <= 0) {
+      const castFn =
+        /** @type {() => string} */ (this.fakeModuleImplementation);
+      return castFn();
+    } else {
+      const response = await fetch(this.url);
+      const fullContent = await response.text();
+      /** @type {import("../mod.js").OriginalModuleData} */
+      const originalData = {
+        url: this.url,
+        fullContent,
+      };
+      return this.fakeModuleImplementation(originalData);
+    }
   }
 
   /**

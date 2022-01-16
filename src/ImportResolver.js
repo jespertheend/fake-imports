@@ -7,7 +7,7 @@ export class ImportResolver {
   /** @type {Map<string, import("./CollectedImport.js").CollectedImport>} */
   #collectedImports = new Map();
 
-  /** @type {Map<string, string>} */
+  /** @type {Map<string, import("../mod.js").ModuleImplementation>} */
   #fakedModules = new Map();
 
   /**
@@ -23,14 +23,21 @@ export class ImportResolver {
 
   /**
    * @param {string | URL} url
-   * @param {string} moduleImplementation
+   * @param {string | import("../mod.js").ModuleImplementation} moduleImplementation
    */
   registerFakeModule(url, moduleImplementation) {
     if (typeof url === "string") {
       url = new URL(url, this.#importMeta);
     }
 
-    this.#fakedModules.set(url.href, moduleImplementation);
+    let newModuleImplementation;
+    if (typeof moduleImplementation === "string") {
+      newModuleImplementation = () => moduleImplementation;
+    } else {
+      newModuleImplementation = moduleImplementation;
+    }
+
+    this.#fakedModules.set(url.href, newModuleImplementation);
   }
 
   /**
@@ -61,8 +68,14 @@ export class ImportResolver {
 
     let collectedImport;
     if (this.#fakedModules.has(url) && allowFakes) {
-      const fake = /** @type {string} */ (this.#fakedModules.get(url));
-      collectedImport = new CollectedImportFake(fake, url, this);
+      const moduleImplementation =
+        /** @type {import("../mod.js").ModuleImplementation} */ (this
+          .#fakedModules.get(url));
+      collectedImport = new CollectedImportFake(
+        moduleImplementation,
+        url,
+        this,
+      );
     } else {
       collectedImport = new CollectedImportFetch(url, this);
     }

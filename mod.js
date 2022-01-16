@@ -1,5 +1,15 @@
 import { ImportResolver } from "./src/ImportResolver.js";
 
+/**
+ * @typedef OriginalModuleData
+ * @property {string} url
+ * @property {string} fullContent The full script content fetched from the original url without any modifications.
+ */
+
+/**
+ * @typedef {(() => string) | ((original: OriginalModuleData) => string)} ModuleImplementation
+ */
+
 export class Importer {
   #resolver;
 
@@ -56,7 +66,7 @@ export class Importer {
    * Fakes a module.
    * @param {string | URL} url should be relative to the `importMeta` argument
    * provided in the {@link constructor}.
-   * @param {string} moduleImplementation The code to replace the imported content with.
+   * @param {string | ModuleImplementation} moduleImplementation The code to replace the imported content with.
    */
   fakeModule(url, moduleImplementation) {
     this.#resolver.registerFakeModule(url, moduleImplementation);
