@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "checkJs": true,
+    "module": "esnext",
+    "useDefineForClassFields": true,
+    "strict": true
+  },
+  "include": [
+    "**/*.js"
+  ]
+}
