@@ -63,7 +63,29 @@ export class Importer {
   }
 
   /**
-   * Fakes a module.
+   * Fakes a module. You can either pass a string or a function that returns a string.
+   *
+   * ## Usage
+   * If you just want to replace the entire content of a module, you can pass a string:
+   * ```js
+   * importer.fakeModule("./module.js", "export 'replaced'");
+   * ```
+   *
+   * If you want access to the original exports, faked modules can simply import themselves:
+   * ```js
+   * importer.fakeModule("./module.js", `
+   *  import { original } from "./module.js";
+   *  // Do something with original
+   *  export { original };
+   * `);
+   * ```
+   *
+   * For more complex cases, you can pass a function that receives the original module data:
+   * ```js
+   * importer.fakeModule("./module.js", original => {
+   *  return original.fullContent.replace("foo", "bar");
+   * });
+   * ```
    * @param {string | URL} url should be relative to the `importMeta` argument
    * provided in the {@link constructor}.
    * @param {string | ModuleImplementation} moduleImplementation The code to replace the imported content with.

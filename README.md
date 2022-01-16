@@ -118,6 +118,31 @@ Deno.test("getX", async () => {
 });
 ```
 
+For more complex cases, it is also possible for faked modules to import
+themselves.
+
+```js
+const importer = new Importer(import.meta.url);
+importer.fakeModule(
+  "./original.js",
+  `
+  import {someObject} from "./original.js";
+  // Modify someObject here
+  export {someObject};
+`,
+);
+```
+
+You can also pass in a function, if you want complete controll over what gets
+modified:
+
+```js
+const importer = new Importer(import.meta.url);
+importer.fakeModule("./original.js", (original) => {
+  return original.fullContent.replace("foo", "bar");
+});
+```
+
 ## How it works internally
 
 When you import via `importer.import()`, the resource is first downloaded using
@@ -138,3 +163,6 @@ created `blob:` urls.
   currently no way of doing this using object URLs.
 - Because `fetch()` is being used, the `--allow-net` permission is required. If
   you want to load scripts from the disk, `--allow-read` is also required.
+
+```
+```
