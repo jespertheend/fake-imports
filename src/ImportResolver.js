@@ -56,9 +56,8 @@ export class ImportResolver {
     collectedImportKey += allowFakes ? "1" : "0";
     collectedImportKey += url;
 
-    if (this.#collectedImports.has(collectedImportKey)) {
-      return this.#collectedImports.get(collectedImportKey);
-    }
+    const existing = this.#collectedImports.get(collectedImportKey);
+    if (existing) return existing;
 
     let collectedImport;
     if (this.#fakedModules.has(url) && allowFakes) {
