@@ -110,4 +110,8 @@ export class Importer {
   fakeModule(url, moduleImplementation) {
     this.#resolver.registerFakeModule(url, moduleImplementation);
   }
+
+  getCoverageMap() {
+    return this.#resolver.getCoverageMap();
+  }
 }

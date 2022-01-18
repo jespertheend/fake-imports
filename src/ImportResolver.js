@@ -119,4 +119,16 @@ export class ImportResolver {
     this.#collectedImports.set(collectedImportKey, collectedImport);
     return collectedImport;
   }
+
+  getCoverageMap() {
+    /** @type {Object.<string, string>} */
+    const map = {};
+    for (const collectedImport of this.#collectedImports.values()) {
+      const entry = collectedImport.getCoverageMapEntry();
+      if (entry) {
+        map[entry.blobUrl] = entry.url;
+      }
+    }
+    return map;
+  }
 }

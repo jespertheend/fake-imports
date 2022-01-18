@@ -73,4 +73,12 @@ export class CollectedImport {
     if (this.#createdBlobUrl) return this.#createdBlobUrl;
     return await new Promise((r) => this.#onBlobUrlReadyCbs.add(r));
   }
+
+  getCoverageMapEntry() {
+    if (!this.#createdBlobUrl) return null;
+    return {
+      blobUrl: this.#createdBlobUrl,
+      url: this.url,
+    };
+  }
 }
