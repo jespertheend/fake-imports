@@ -113,6 +113,12 @@ Deno.test({
     const exists = await pathExists(fullOutputPath);
     assert(exists, "basePath/coverage should exist");
 
+    let fileCount = 0;
+    for await (const _ of Deno.readDir(fullOutputPath)) {
+      fileCount++;
+    }
+    assertEquals(fileCount, 2);
+
     await Deno.remove(fullOutputPath, { recursive: true });
     await cleanup();
   },
@@ -131,6 +137,12 @@ Deno.test({
 
     const exists = await pathExists(fullOutputPath);
     assert(exists, "coverage dir should exist");
+
+    let fileCount = 0;
+    for await (const _ of Deno.readDir(fullOutputPath)) {
+      fileCount++;
+    }
+    assertEquals(fileCount, 2);
 
     await Deno.remove(tempDir, { recursive: true });
     await cleanup();

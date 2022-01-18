@@ -19,6 +19,10 @@ export class ImportResolver {
   #generateCoverageMap = false;
   #coverageMapOutPath = "";
 
+  #env = "browser";
+  /** @type {Deno?} */
+  #deno = null;
+
   /** @type {Set<(entry: import("../mod.js").CoverageMapEntry) => void>} */
   #onCoverageMapEntryAddedCbs = new Set();
 
@@ -27,6 +31,9 @@ export class ImportResolver {
 
   /** @type {Map<string, import("../mod.js").ModuleImplementation>} */
   #fakedModules = new Map();
+
+  /** @type {Promise<void>?} */
+  #makeCoverageDirPromise = null;
 
   /**
    * @param {string | URL} importMeta
@@ -45,6 +52,9 @@ export class ImportResolver {
       deno = null,
     } = {},
   ) {
+    this.#env = env;
+    this.#deno = deno;
+
     if (env == "browser" && coverageMapOutPath != "") {
       throw new Error(
         "Writing coverageMap data to files is not supported in browser environments.",
@@ -86,7 +96,9 @@ export class ImportResolver {
           fromFileUrl(this.#importMeta),
           this.#coverageMapOutPath,
         );
-        deno.mkdirSync(this.#coverageMapOutPath, { recursive: true });
+        this.#makeCoverageDirPromise = deno.mkdir(this.#coverageMapOutPath, {
+          recursive: true,
+        });
       }
     }
   }
@@ -162,6 +174,7 @@ export class ImportResolver {
       const entry = collectedImport2.getCoverageMapEntry();
       if (!entry) return;
       this.#onCoverageMapEntryAddedCbs.forEach((cb) => cb(entry));
+      this.writeCoverageEntry(entry);
     });
     collectedImport.init();
     this.#collectedImports.set(collectedImportKey, collectedImport);
@@ -192,5 +205,21 @@ export class ImportResolver {
    */
   removeOnCoverageMapEntryAdded(cb) {
     this.#onCoverageMapEntryAddedCbs.delete(cb);
+  }
+
+  /**
+   * @param {import("../mod.js").CoverageMapEntry} entry
+   */
+  async writeCoverageEntry(entry) {
+    if (this.#env == "deno" && this.#deno && this.#coverageMapOutPath != "") {
+      if (!this.#makeCoverageDirPromise) return;
+      await this.#makeCoverageDirPromise;
+
+      const str = JSON.stringify(entry);
+      const uuid = crypto.randomUUID();
+      const fileName = `${uuid}.json`;
+      const writePath = resolve(this.#coverageMapOutPath, fileName);
+      await this.#deno.writeTextFile(writePath, str);
+    }
   }
 }
