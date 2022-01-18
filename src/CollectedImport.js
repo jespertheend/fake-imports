@@ -76,9 +76,11 @@ export class CollectedImport {
 
   getCoverageMapEntry() {
     if (!this.#createdBlobUrl) return null;
-    return {
-      blobUrl: this.#createdBlobUrl,
-      url: this.url,
+    /** @type {import("../mod.js").CoverageMapEntry} */
+    const entry = {
+      replacedUrl: this.#createdBlobUrl,
+      originalUrl: this.url,
     };
+    return entry;
   }
 }

@@ -16,6 +16,12 @@ import { ImportResolver } from "./src/ImportResolver.js";
  * @property {string} [coverageMapOutPath]
  */
 
+/**
+ * @typedef CoverageMapEntry
+ * @property {string} replacedUrl
+ * @property {string} originalUrl
+ */
+
 export class Importer {
   #resolver;
 

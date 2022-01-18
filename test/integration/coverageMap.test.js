@@ -17,12 +17,12 @@ Deno.test({
     assertEquals(Array.from(Object.entries(coverageMap)).length, 2);
 
     const mappedUrls = [];
-    for (const [key, value] of Object.entries(coverageMap)) {
+    for (const [key, entry] of Object.entries(coverageMap)) {
       assert(
         key.startsWith("blob:"),
         "Coverage map keys should always start with blob:",
       );
-      mappedUrls.push(value);
+      mappedUrls.push(entry.originalUrl);
     }
     mappedUrls.sort();
 

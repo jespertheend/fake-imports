@@ -121,12 +121,12 @@ export class ImportResolver {
   }
 
   getCoverageMap() {
-    /** @type {Object.<string, string>} */
+    /** @type {Object.<string, import("../mod.js").CoverageMapEntry>} */
     const map = {};
     for (const collectedImport of this.#collectedImports.values()) {
       const entry = collectedImport.getCoverageMapEntry();
       if (entry) {
-        map[entry.blobUrl] = entry.url;
+        map[entry.replacedUrl] = entry;
       }
     }
     return map;
