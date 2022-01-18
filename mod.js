@@ -120,4 +120,18 @@ export class Importer {
   getCoverageMap() {
     return this.#resolver.getCoverageMap();
   }
+
+  /**
+   * @param {(entry: CoverageMapEntry) => void} cb
+   */
+  onCoverageMapEntryAdded(cb) {
+    this.#resolver.onCoverageMapEntryAdded(cb);
+  }
+
+  /**
+   * @param {(entry: CoverageMapEntry) => void} cb
+   */
+  removeOnCoverageMapEntryAdded(cb) {
+    this.#resolver.removeOnCoverageMapEntryAdded(cb);
+  }
 }

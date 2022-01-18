@@ -8,6 +8,9 @@ export class ImportResolver {
   #generateCoverageMap = false;
   #coverageMapOutPath = "";
 
+  /** @type {Set<(entry: import("../mod.js").CoverageMapEntry) => void>} */
+  #onCoverageMapEntryAddedCbs = new Set();
+
   /** @type {Map<string, import("./CollectedImport.js").CollectedImport>} */
   #collectedImports = new Map();
 
@@ -116,6 +119,13 @@ export class ImportResolver {
     } else {
       collectedImport = new CollectedImportFetch(url, this);
     }
+    const collectedImport2 = collectedImport;
+    collectedImport.onCreatedBlobUrl(() => {
+      const entry = collectedImport2.getCoverageMapEntry();
+      if (!entry) return;
+      this.#onCoverageMapEntryAddedCbs.forEach((cb) => cb(entry));
+    });
+    collectedImport.init();
     this.#collectedImports.set(collectedImportKey, collectedImport);
     return collectedImport;
   }
@@ -130,5 +140,19 @@ export class ImportResolver {
       }
     }
     return map;
+  }
+
+  /**
+   * @param {(entry: import("../mod.js").CoverageMapEntry) => void} cb
+   */
+  onCoverageMapEntryAdded(cb) {
+    this.#onCoverageMapEntryAddedCbs.add(cb);
+  }
+
+  /**
+   * @param {(entry: import("../mod.js").CoverageMapEntry) => void} cb
+   */
+  removeOnCoverageMapEntryAdded(cb) {
+    this.#onCoverageMapEntryAddedCbs.delete(cb);
   }
 }

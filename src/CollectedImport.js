@@ -83,4 +83,11 @@ export class CollectedImport {
     };
     return entry;
   }
+
+  /**
+   * @param {(blobUrl: string) => void} cb
+   */
+  onCreatedBlobUrl(cb) {
+    this.#onBlobUrlReadyCbs.add(cb);
+  }
 }

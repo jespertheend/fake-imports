@@ -34,3 +34,49 @@ Deno.test({
     await cleanup();
   },
 });
+
+Deno.test({
+  name: "Via api callback",
+  fn: async () => {
+    const { cleanup, basePath } = await simpleReplacementDir();
+    const importer = new Importer(basePath);
+    /** @type {import("../../mod.js").CoverageMapEntry[]} */
+    const firedEvents = [];
+
+    importer.onCoverageMapEntryAdded((entry) => {
+      firedEvents.push(entry);
+    });
+
+    await importer.import("./main.js");
+
+    assertEquals(firedEvents.length, 2);
+    const mappedUrls = firedEvents.map((e) => e.originalUrl);
+    mappedUrls.sort();
+    assertEquals(mappedUrls, [
+      `${basePath}main.js`,
+      `${basePath}replaced.js`,
+    ]);
+
+    await cleanup();
+  },
+});
+
+Deno.test({
+  name: "Removing api callback",
+  fn: async () => {
+    const { cleanup, basePath } = await simpleReplacementDir();
+    const importer = new Importer(basePath);
+    let callCount = 0;
+    const callback = () => {
+      callCount++;
+    };
+
+    importer.onCoverageMapEntryAdded(callback);
+    importer.removeOnCoverageMapEntryAdded(callback);
+    await importer.import("./main.js");
+
+    assertEquals(callCount, 0);
+
+    await cleanup();
+  },
+});

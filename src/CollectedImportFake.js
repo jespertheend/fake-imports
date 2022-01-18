@@ -8,8 +8,6 @@ export class CollectedImportFake extends CollectedImport {
   constructor(fakeModuleImplementation, ...args) {
     super(...args);
     this.fakeModuleImplementation = fakeModuleImplementation;
-
-    this.init();
   }
 
   /**
