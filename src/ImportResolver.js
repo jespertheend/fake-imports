@@ -1,8 +1,12 @@
 import { CollectedImportFake } from "./CollectedImportFake.js";
 import { CollectedImportFetch } from "./CollectedImportFetch.js";
 
+/** @typedef {"browser" | "deno"} Environment */
+
 export class ImportResolver {
   #importMeta = "";
+  #generateCoverageMap = false;
+  #coverageMapOutPath = "";
 
   /** @type {Map<string, import("./CollectedImport.js").CollectedImport>} */
   #collectedImports = new Map();
@@ -12,13 +16,46 @@ export class ImportResolver {
 
   /**
    * @param {string | URL} importMeta
+   * @param {import("../mod.js").ImporterOptions} options
+   * @param {Environment} env
+   * @param {string[]} args
    */
-  constructor(importMeta) {
+  constructor(
+    importMeta,
+    {
+      generateCoverageMap = "auto",
+      coverageMapOutPath = "",
+    },
+    env,
+    args,
+  ) {
+    if (generateCoverageMap === "auto") {
+      if (env == "deno") {
+        for (const arg of args) {
+          const coverageArg = "--coverage=";
+          if (arg.startsWith(coverageArg)) {
+            this.#generateCoverageMap = true;
+            this.#coverageMapOutPath = arg.substring(coverageArg.length);
+          }
+        }
+      }
+    } else {
+      this.#generateCoverageMap = generateCoverageMap;
+      this.#coverageMapOutPath = coverageMapOutPath;
+    }
     if (importMeta instanceof URL) {
       this.#importMeta = importMeta.href;
     } else {
       this.#importMeta = importMeta;
     }
+  }
+
+  get generateCoverageMap() {
+    return this.#generateCoverageMap;
+  }
+
+  get coverageMapOutPath() {
+    return this.#coverageMapOutPath;
   }
 
   /**

@@ -10,6 +10,12 @@ import { ImportResolver } from "./src/ImportResolver.js";
  * @typedef {(() => string) | ((original: OriginalModuleData) => string)} ModuleImplementation
  */
 
+/**
+ * @typedef ImporterOptions
+ * @property {"auto" | boolean} [generateCoverageMap]
+ * @property {string} [coverageMapOutPath]
+ */
+
 export class Importer {
   #resolver;
 
@@ -45,9 +51,20 @@ export class Importer {
    * console.log(result2.modified); // false
    * ```
    * @param {string | URL} importMeta
+   * @param {ImporterOptions} [options]
    */
-  constructor(importMeta) {
-    this.#resolver = new ImportResolver(importMeta);
+  constructor(importMeta, options = {}) {
+    /** @type {import("./src/ImportResolver.js").Environment} */
+    let env = "browser";
+    if ("Deno" in globalThis) {
+      env = "deno";
+    }
+    /** @type {string[]} */
+    let args = [];
+    if (env === "deno") {
+      args = Deno.args;
+    }
+    this.#resolver = new ImportResolver(importMeta, options, env, args);
   }
 
   /**
