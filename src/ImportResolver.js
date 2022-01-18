@@ -38,7 +38,10 @@ export class ImportResolver {
       );
     }
     if (generateCoverageMap === "auto") {
-      if (env == "deno") {
+      if (coverageMapOutPath != "") {
+        this.#coverageMapOutPath = coverageMapOutPath;
+        this.#generateCoverageMap = true;
+      } else if (env == "deno") {
         for (const arg of args) {
           const coverageArg = "--coverage=";
           if (arg.startsWith(coverageArg)) {
@@ -51,6 +54,13 @@ export class ImportResolver {
       this.#generateCoverageMap = generateCoverageMap;
       this.#coverageMapOutPath = coverageMapOutPath;
     }
+
+    if (generateCoverageMap == false && coverageMapOutPath != "") {
+      throw new Error(
+        "coverageMapOutPath is only allowed when generateCoverageMap is true.",
+      );
+    }
+
     if (importMeta instanceof URL) {
       this.#importMeta = importMeta.href;
     } else {

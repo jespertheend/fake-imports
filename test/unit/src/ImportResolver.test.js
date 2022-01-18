@@ -54,6 +54,45 @@ Deno.test({
 });
 
 Deno.test({
+  name: "coverageMapOutPath should force generateCoverageMap option to true",
+  fn: () => {
+    const importer = new ImportResolver(
+      "/basPath",
+      {
+        coverageMapOutPath: "/path/to/coverage",
+      },
+      "deno",
+      [],
+    );
+
+    assertEquals(importer.generateCoverageMap, true);
+    assertEquals(importer.coverageMapOutPath, "/path/to/coverage");
+  },
+});
+
+Deno.test({
+  name:
+    "generateCoverageMap=false and coverageMapOutPath should not be compatible",
+  fn: () => {
+    let didThrow = false;
+    try {
+      new ImportResolver(
+        "/basPath",
+        {
+          generateCoverageMap: false,
+          coverageMapOutPath: "/path/to/coverage",
+        },
+        "deno",
+        [],
+      );
+    } catch {
+      didThrow = true;
+    }
+    assertEquals(didThrow, true);
+  },
+});
+
+Deno.test({
   name: "generateCoverageMap is false when set, regardless of arguments",
   fn: () => {
     const importer1 = new ImportResolver(
