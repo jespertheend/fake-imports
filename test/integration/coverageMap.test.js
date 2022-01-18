@@ -2,6 +2,7 @@ import {
   assert,
   assertEquals,
 } from "https://deno.land/std@0.100.0/testing/asserts.ts";
+import { join } from "https://deno.land/std@0.121.0/path/mod.ts";
 import { simpleReplacementDir } from "./shared.js";
 import { Importer } from "../../mod.js";
 
@@ -77,6 +78,61 @@ Deno.test({
 
     assertEquals(callCount, 0);
 
+    await cleanup();
+  },
+});
+
+/**
+ * @param {string} path
+ */
+async function pathExists(path) {
+  let exists = false;
+  try {
+    await Deno.stat(path);
+    exists = true;
+  } catch (e) {
+    if (e instanceof Deno.errors.NotFound) {
+      exists = false;
+    } else {
+      throw e;
+    }
+  }
+  return exists;
+}
+
+Deno.test({
+  name: "Relative output path",
+  fn: async () => {
+    const { cleanup, basePath } = await simpleReplacementDir();
+    const importer = new Importer(basePath, {
+      coverageMapOutPath: "./coverage",
+    });
+    await importer.import("./main.js");
+
+    const fullOutputPath = join(basePath, "coverage");
+    const exists = await pathExists(fullOutputPath);
+    assert(exists, "basePath/coverage should exist");
+
+    await Deno.remove(fullOutputPath, { recursive: true });
+    await cleanup();
+  },
+});
+
+Deno.test({
+  name: "Absolute output path",
+  fn: async () => {
+    const { cleanup, basePath } = await simpleReplacementDir();
+    const tempDir = await Deno.makeTempDir();
+    const fullOutputPath = join(tempDir, "coverage");
+    const importer = new Importer(basePath, {
+      coverageMapOutPath: fullOutputPath,
+    });
+    await importer.import("./main.js");
+
+    const exists = await pathExists(fullOutputPath);
+    assert(exists, "coverage dir should exist");
+
+    await Deno.remove(tempDir, { recursive: true });
     await cleanup();
   },
 });
