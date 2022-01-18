@@ -4,8 +4,8 @@ import { ImportResolver } from "../../../src/ImportResolver.js";
 Deno.test({
   name: "generateCoverageMap is false by default",
   fn: () => {
-    const importer1 = new ImportResolver("/basepath", {}, "browser", []);
-    const importer2 = new ImportResolver("/basepath", {}, "deno", []);
+    const importer1 = new ImportResolver("/basepath", {});
+    const importer2 = new ImportResolver("/basepath", {}, { env: "deno" });
 
     assertEquals(importer1.generateCoverageMap, false);
     assertEquals(importer2.generateCoverageMap, false);
@@ -15,9 +15,12 @@ Deno.test({
 Deno.test({
   name: "generateCoverageMap with argument",
   fn: () => {
-    const importer = new ImportResolver("/basepath", {}, "deno", [
-      "--coverage=/path/to/coverage",
-    ]);
+    const importer = new ImportResolver("/basepath", {}, {
+      env: "deno",
+      args: [
+        "--coverage=/path/to/coverage",
+      ],
+    });
 
     assertEquals(importer.generateCoverageMap, true);
     assertEquals(importer.coverageMapOutPath, "/path/to/coverage");
@@ -32,8 +35,6 @@ Deno.test({
       {
         generateCoverageMap: true,
       },
-      "browser",
-      [],
     );
     const importer2 = new ImportResolver(
       "/basepath",
@@ -41,8 +42,7 @@ Deno.test({
         generateCoverageMap: true,
         coverageMapOutPath: "/path/to/coverage",
       },
-      "deno",
-      [],
+      { env: "deno" },
     );
 
     assertEquals(importer1.generateCoverageMap, true);
@@ -61,8 +61,7 @@ Deno.test({
       {
         coverageMapOutPath: "/path/to/coverage",
       },
-      "deno",
-      [],
+      { env: "deno" },
     );
 
     assertEquals(importer.generateCoverageMap, true);
@@ -82,8 +81,7 @@ Deno.test({
           generateCoverageMap: false,
           coverageMapOutPath: "/path/to/coverage",
         },
-        "deno",
-        [],
+        { env: "deno" },
       );
     } catch {
       didThrow = true;
@@ -98,14 +96,15 @@ Deno.test({
     const importer1 = new ImportResolver(
       "/basepath",
       { generateCoverageMap: false },
-      "browser",
-      [],
+      { env: "deno" },
     );
     const importer2 = new ImportResolver(
       "/basepath",
       { generateCoverageMap: false },
-      "deno",
-      ["--coverage=/path/to/coverage"],
+      {
+        env: "deno",
+        args: ["--coverage=/path/to/coverage"],
+      },
     );
 
     assertEquals(importer1.generateCoverageMap, false);
@@ -124,8 +123,6 @@ Deno.test({
       new ImportResolver(
         "/basepath",
         { coverageMapOutPath: "/coveragePath", generateCoverageMap: true },
-        "browser",
-        [],
       );
     } catch {
       didThrow = true;

@@ -70,7 +70,7 @@ export class Importer {
     if (env === "deno") {
       args = Deno.args;
     }
-    this.#resolver = new ImportResolver(importMeta, options, env, args);
+    this.#resolver = new ImportResolver(importMeta, options, { env, args });
   }
 
   /**

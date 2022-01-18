@@ -3,6 +3,12 @@ import { CollectedImportFetch } from "./CollectedImportFetch.js";
 
 /** @typedef {"browser" | "deno"} Environment */
 
+/**
+ * @typedef RuntimeData
+ * @property {Environment} [env]
+ * @property {string[]} [args]
+ */
+
 export class ImportResolver {
   #importMeta = "";
   #generateCoverageMap = false;
@@ -20,8 +26,7 @@ export class ImportResolver {
   /**
    * @param {string | URL} importMeta
    * @param {import("../mod.js").ImporterOptions} options
-   * @param {Environment} env
-   * @param {string[]} args
+   * @param {RuntimeData} [runtimeData]
    */
   constructor(
     importMeta,
@@ -29,8 +34,10 @@ export class ImportResolver {
       generateCoverageMap = "auto",
       coverageMapOutPath = "",
     },
-    env,
-    args,
+    {
+      env = "browser",
+      args = [],
+    } = {},
   ) {
     if (env == "browser" && coverageMapOutPath != "") {
       throw new Error(
