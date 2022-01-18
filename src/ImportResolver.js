@@ -32,6 +32,11 @@ export class ImportResolver {
     env,
     args,
   ) {
+    if (env == "browser" && coverageMapOutPath != "") {
+      throw new Error(
+        "Writing coverageMap data to files is not supported in browser environments.",
+      );
+    }
     if (generateCoverageMap === "auto") {
       if (env == "deno") {
         for (const arg of args) {

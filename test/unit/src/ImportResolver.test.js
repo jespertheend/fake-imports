@@ -31,7 +31,6 @@ Deno.test({
       "/basepath",
       {
         generateCoverageMap: true,
-        coverageMapOutPath: "/path/to/coverage",
       },
       "browser",
       [],
@@ -47,7 +46,7 @@ Deno.test({
     );
 
     assertEquals(importer1.generateCoverageMap, true);
-    assertEquals(importer1.coverageMapOutPath, "/path/to/coverage");
+    assertEquals(importer1.coverageMapOutPath, "");
 
     assertEquals(importer2.generateCoverageMap, true);
     assertEquals(importer2.coverageMapOutPath, "/path/to/coverage");
@@ -75,5 +74,24 @@ Deno.test({
 
     assertEquals(importer2.generateCoverageMap, false);
     assertEquals(importer2.coverageMapOutPath, "");
+  },
+});
+
+Deno.test({
+  name: "Errors when coverageMapOutPath is provided in browser environment",
+  fn: () => {
+    let didThrow = false;
+    try {
+      new ImportResolver(
+        "/basepath",
+        { coverageMapOutPath: "/coveragePath", generateCoverageMap: true },
+        "browser",
+        [],
+      );
+    } catch {
+      didThrow = true;
+    }
+
+    assertEquals(didThrow, true);
   },
 });
