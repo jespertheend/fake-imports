@@ -103,13 +103,13 @@ async function pathExists(path) {
 Deno.test({
   name: "Relative output path",
   fn: async () => {
-    const { cleanup, basePath } = await simpleReplacementDir();
+    const { cleanup, basePath, dirPath } = await simpleReplacementDir();
     const importer = new Importer(basePath, {
       coverageMapOutPath: "./coverage",
     });
     await importer.import("./main.js");
 
-    const fullOutputPath = join(basePath, "coverage");
+    const fullOutputPath = join(dirPath, "coverage");
     const exists = await pathExists(fullOutputPath);
     assert(exists, "basePath/coverage should exist");
 

@@ -1,4 +1,7 @@
-import { resolve } from "https://deno.land/std@0.121.0/path/mod.ts";
+import {
+  fromFileUrl,
+  resolve,
+} from "https://deno.land/std@0.121.0/path/mod.ts";
 import { CollectedImportFake } from "./CollectedImportFake.js";
 import { CollectedImportFetch } from "./CollectedImportFetch.js";
 
@@ -80,7 +83,7 @@ export class ImportResolver {
     if (this.#coverageMapOutPath != "") {
       if (env == "deno" && deno) {
         this.#coverageMapOutPath = resolve(
-          this.#importMeta,
+          fromFileUrl(this.#importMeta),
           this.#coverageMapOutPath,
         );
         deno.mkdirSync(this.#coverageMapOutPath, { recursive: true });

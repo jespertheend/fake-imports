@@ -3,6 +3,7 @@ import { join } from "https://deno.land/std@0.119.0/path/mod.ts";
 
 /**
  * @typedef {Object} SetupScriptTempDirResult
+ * @property {string} dirPath The path to the created directory
  * @property {string} basePath The path to the created directory in file:// format
  * @property {() => Promise<void>} cleanup
  */
@@ -35,7 +36,7 @@ export async function setupScriptTempDir(scriptFiles, {
     await Deno.remove(dirPath, { recursive: true });
   };
   const basePath = toFileUrl(dirPath) + "/";
-  return { basePath, cleanup };
+  return { basePath, dirPath, cleanup };
 }
 
 export async function simpleReplacementDir() {
