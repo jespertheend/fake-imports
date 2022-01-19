@@ -1,5 +1,5 @@
 import { toFileUrl } from "https://deno.land/std@0.119.0/path/mod.ts";
-import { join } from "https://deno.land/std@0.119.0/path/mod.ts";
+import { dirname, join } from "https://deno.land/std@0.119.0/path/mod.ts";
 
 /**
  * @typedef {Object} SetupScriptTempDirResult
@@ -28,7 +28,10 @@ export async function setupScriptTempDir(scriptFiles, {
   const promises = [];
   for (const [fileName, scriptContent] of Object.entries(scriptFiles)) {
     const filePath = join(dirPath, fileName);
-    const promise = Deno.writeTextFile(filePath, scriptContent);
+    const promise = (async () => {
+      await Deno.mkdir(dirname(filePath), { recursive: true });
+      await Deno.writeTextFile(filePath, scriptContent);
+    })();
     promises.push(promise);
   }
   await Promise.all(promises);

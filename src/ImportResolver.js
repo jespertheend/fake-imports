@@ -215,7 +215,7 @@ export class ImportResolver {
       if (!this.#makeCoverageDirPromise) return;
       await this.#makeCoverageDirPromise;
 
-      const str = JSON.stringify(entry, null, "\t");
+      const str = JSON.stringify(entry, null, 2);
       const uuid = crypto.randomUUID();
       const fileName = `${uuid}.json`;
       const writePath = resolve(this.#coverageMapOutPath, fileName);
