@@ -66,7 +66,7 @@ export class ImportResolver {
         this.#generateCoverageMap = true;
       } else if (env == "deno") {
         for (const arg of args) {
-          const coverageArg = "--coverage=";
+          const coverageArg = "--fi-coverage-map=";
           if (arg.startsWith(coverageArg)) {
             this.#generateCoverageMap = true;
             this.#coverageMapOutPath = arg.substring(coverageArg.length);

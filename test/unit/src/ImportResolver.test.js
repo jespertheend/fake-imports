@@ -18,7 +18,7 @@ Deno.test({
     const importer = new ImportResolver("/basepath", {}, {
       env: "deno",
       args: [
-        "--coverage=/path/to/coverage",
+        "--fi-coverage-map=/path/to/coverage",
       ],
     });
 
@@ -103,7 +103,7 @@ Deno.test({
       { generateCoverageMap: false },
       {
         env: "deno",
-        args: ["--coverage=/path/to/coverage"],
+        args: ["--fi-coverage-map=/path/to/coverage"],
       },
     );
 
