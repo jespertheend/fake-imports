@@ -114,7 +114,8 @@ Deno.test({
     assert(exists, "basePath/coverage should exist");
 
     let fileCount = 0;
-    for await (const _ of Deno.readDir(fullOutputPath)) {
+    for await (const file of Deno.readDir(fullOutputPath)) {
+      if (!file.isFile) continue;
       fileCount++;
     }
     assertEquals(fileCount, 2);
@@ -139,12 +140,42 @@ Deno.test({
     assert(exists, "coverage dir should exist");
 
     let fileCount = 0;
-    for await (const _ of Deno.readDir(fullOutputPath)) {
+    for await (const file of Deno.readDir(fullOutputPath)) {
+      if (!file.isFile) continue;
       fileCount++;
     }
     assertEquals(fileCount, 2);
 
     await Deno.remove(tempDir, { recursive: true });
+    await cleanup();
+  },
+});
+
+Deno.test({
+  name: "Coverage map contents",
+  fn: async () => {
+    const { cleanup, basePath, dirPath } = await simpleReplacementDir();
+    const importer = new Importer(basePath, {
+      coverageMapOutPath: "./coverage",
+    });
+    await importer.import("./main.js");
+
+    const fullOutputPath = join(dirPath, "coverage");
+
+    const fileContents = [];
+    for await (const file of Deno.readDir(fullOutputPath)) {
+      if (!file.isFile) continue;
+      const content = await Deno.readTextFile(join(fullOutputPath, file.name));
+      fileContents.push(JSON.parse(content));
+    }
+
+    const mappedUrls = fileContents.map((e) => e.originalUrl);
+    mappedUrls.sort();
+    assertEquals(mappedUrls, [
+      `${basePath}main.js`,
+      `${basePath}replaced.js`,
+    ]);
+
     await cleanup();
   },
 });
