@@ -23,10 +23,13 @@ export class ImportResolver {
   /** @type {Deno?} */
   #deno = null;
 
-  /** @type {Set<(entry: import("../mod.js").CoverageMapEntry) => void>} */
+  /** @typedef {import("../mod.js").CoverageMapEntry} CoverageMapEntry */
+  /** @typedef {import("./CollectedImport.js").CollectedImport} CollectedImport */
+
+  /** @type {Set<(entry: CoverageMapEntry) => void>} */
   #onCoverageMapEntryAddedCbs = new Set();
 
-  /** @type {Map<string, import("./CollectedImport.js").CollectedImport>} */
+  /** @type {Map<string, CollectedImport>} */
   #collectedImports = new Map();
 
   /** @type {Map<string, import("../mod.js").ModuleImplementation>} */
@@ -182,7 +185,7 @@ export class ImportResolver {
   }
 
   getCoverageMap() {
-    /** @type {Object.<string, import("../mod.js").CoverageMapEntry>} */
+    /** @type {Object.<string, CoverageMapEntry>} */
     const map = {};
     for (const collectedImport of this.#collectedImports.values()) {
       const entry = collectedImport.getCoverageMapEntry();
@@ -194,21 +197,21 @@ export class ImportResolver {
   }
 
   /**
-   * @param {(entry: import("../mod.js").CoverageMapEntry) => void} cb
+   * @param {(entry: CoverageMapEntry) => void} cb
    */
   onCoverageMapEntryAdded(cb) {
     this.#onCoverageMapEntryAddedCbs.add(cb);
   }
 
   /**
-   * @param {(entry: import("../mod.js").CoverageMapEntry) => void} cb
+   * @param {(entry: CoverageMapEntry) => void} cb
    */
   removeOnCoverageMapEntryAdded(cb) {
     this.#onCoverageMapEntryAddedCbs.delete(cb);
   }
 
   /**
-   * @param {import("../mod.js").CoverageMapEntry} entry
+   * @param {CoverageMapEntry} entry
    */
   async writeCoverageEntry(entry) {
     if (this.#env == "deno" && this.#deno && this.#coverageMapOutPath != "") {
