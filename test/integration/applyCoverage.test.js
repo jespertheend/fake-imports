@@ -1,7 +1,7 @@
 import { assertEquals } from "https://deno.land/std@0.100.0/testing/asserts.ts";
 import { join } from "https://deno.land/std@0.121.0/path/mod.ts";
 import { setupScriptTempDir } from "./shared.js";
-import { applyCoverage } from "../../patchCoverage.js";
+import { applyCoverage } from "../../applyCoverage.js";
 
 Deno.test({
   name: "Basic",
