@@ -1,3 +1,5 @@
+// @ts-check
+
 import { ImportResolver } from "./src/ImportResolver.js";
 
 /**

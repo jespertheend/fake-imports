@@ -1,3 +1,5 @@
+// @ts-check
+
 import { parseImports } from "./parseImports.js";
 import { replaceImports } from "./replaceImports.js";
 

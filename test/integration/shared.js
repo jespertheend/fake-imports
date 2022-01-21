@@ -1,3 +1,5 @@
+// @ts-check
+
 import { toFileUrl } from "https://deno.land/std@0.119.0/path/mod.ts";
 import { dirname, join } from "https://deno.land/std@0.119.0/path/mod.ts";
 
