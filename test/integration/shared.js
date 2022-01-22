@@ -1,3 +1,4 @@
+import { assertEquals } from "https://deno.land/std@0.100.0/testing/asserts.ts";
 import { toFileUrl } from "https://deno.land/std@0.119.0/path/mod.ts";
 import { dirname, join } from "https://deno.land/std@0.119.0/path/mod.ts";
 
@@ -54,4 +55,19 @@ export async function simpleReplacementDir() {
   }, {
     prefix: "simple_replacement_test",
   });
+}
+
+/**
+ * Counts the number of files (exluding directories) in the given directory and
+ * checks if the number is equal to the expected number.
+ * @param {string} path
+ * @param {number} count
+ */
+export async function assertFileCount(path, count) {
+  let fileCount = 0;
+  for await (const file of Deno.readDir(path)) {
+    if (!file.isFile) continue;
+    fileCount++;
+  }
+  assertEquals(fileCount, count);
 }

@@ -264,6 +264,12 @@ export class ImportResolver {
       if (!this.#makeCoverageDirPromise) return;
       await this.#makeCoverageDirPromise;
 
+      if (this.forceCoverageMapWriteTimeout > 0) {
+        await new Promise((resolve) => {
+          setTimeout(resolve, this.forceCoverageMapWriteTimeout);
+        });
+      }
+
       const str = JSON.stringify(entry, null, 2);
       const uuid = crypto.randomUUID();
       const fileName = `${uuid}.json`;

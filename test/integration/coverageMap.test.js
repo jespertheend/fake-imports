@@ -3,7 +3,7 @@ import {
   assertEquals,
 } from "https://deno.land/std@0.100.0/testing/asserts.ts";
 import { join } from "https://deno.land/std@0.121.0/path/mod.ts";
-import { simpleReplacementDir } from "./shared.js";
+import { assertFileCount, simpleReplacementDir } from "./shared.js";
 import { Importer } from "../../mod.js";
 
 Deno.test({
@@ -113,12 +113,7 @@ Deno.test({
     const exists = await pathExists(fullOutputPath);
     assert(exists, "basePath/coverage should exist");
 
-    let fileCount = 0;
-    for await (const file of Deno.readDir(fullOutputPath)) {
-      if (!file.isFile) continue;
-      fileCount++;
-    }
-    assertEquals(fileCount, 2);
+    assertFileCount(fullOutputPath, 2);
 
     await Deno.remove(fullOutputPath, { recursive: true });
     await cleanup();
@@ -139,12 +134,7 @@ Deno.test({
     const exists = await pathExists(fullOutputPath);
     assert(exists, "coverage dir should exist");
 
-    let fileCount = 0;
-    for await (const file of Deno.readDir(fullOutputPath)) {
-      if (!file.isFile) continue;
-      fileCount++;
-    }
-    assertEquals(fileCount, 2);
+    assertFileCount(fullOutputPath, 2);
 
     await Deno.remove(tempDir, { recursive: true });
     await cleanup();
