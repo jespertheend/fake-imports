@@ -1,10 +1,26 @@
 // @ts-check
 
 import { join } from "https://deno.land/std@0.119.0/path/mod.ts";
+import { mapIndex } from "./src/mapDiffOffsetsIndex.js";
 
 /**
  * @typedef DenoCoverageData
- * @property {string} url
+ * @property {string} [url]
+ * @property {DenoCoverageFunctionData[]} [functions]
+ */
+
+/**
+ * @typedef DenoCoverageFunctionData
+ * @property {string} [functionName]
+ * @property {boolean} [isBlockCoverage]
+ * @property {DenoCoverageRangeData[]} [ranges]
+ */
+
+/**
+ * @typedef DenoCoverageRangeData
+ * @property {number} [startOffset]
+ * @property {number} [endOffset]
+ * @property {number} [count]
  */
 
 /**
@@ -50,10 +66,34 @@ export async function applyCoverage(coverageMapPath, denoCoveragePath) {
       const oldContent = await Deno.readTextFile(filePath);
       const coverageJson =
         /** @type {DenoCoverageData} */ (JSON.parse(oldContent));
+      if (!coverageJson.url) return;
+
       const mappedEntry = collectedMapEntries.get(coverageJson.url);
       if (!mappedEntry) return;
 
       coverageJson.url = mappedEntry.originalUrl;
+
+      if (coverageJson.functions) {
+        for (const fn of coverageJson.functions) {
+          if (fn.ranges) {
+            for (const range of fn.ranges) {
+              if (range.startOffset != undefined) {
+                range.startOffset = mapIndex(
+                  range.startOffset,
+                  mappedEntry.diffOffsets,
+                );
+              }
+              if (range.endOffset != undefined) {
+                range.endOffset = mapIndex(
+                  range.endOffset,
+                  mappedEntry.diffOffsets,
+                );
+              }
+            }
+          }
+        }
+      }
+
       const newContent = JSON.stringify(coverageJson, null, 2);
       await Deno.writeTextFile(filePath, newContent);
     })();
