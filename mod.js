@@ -14,6 +14,7 @@ import { ImportResolver } from "./src/ImportResolver.js";
  * @typedef ImporterOptions
  * @property {"auto" | boolean} [generateCoverageMap]
  * @property {string} [coverageMapOutPath]
+ * @property {number} [forceCoverageMapWriteTimeout]
  */
 
 /**

@@ -14,10 +14,15 @@ import { CollectedImportFetch } from "./CollectedImportFetch.js";
  * @property {Deno?} [deno]
  */
 
+const COVERAGE_MAP_ARG = "--fi-coverage-map=";
+const FORCE_COVERAGE_ARG_WRITE_TIMEOUT_ARG =
+  "--fi-force-coverage-map-write-timeout=";
+
 export class ImportResolver {
   #importMeta = "";
   #generateCoverageMap = false;
   #coverageMapOutPath = "";
+  #forceCoverageMapWriteTimeout = 0;
 
   #env = "browser";
   /** @type {Deno?} */
@@ -51,6 +56,7 @@ export class ImportResolver {
     {
       generateCoverageMap = "auto",
       coverageMapOutPath = "",
+      forceCoverageMapWriteTimeout = 0,
     },
     {
       env = "browser",
@@ -60,6 +66,7 @@ export class ImportResolver {
   ) {
     this.#env = env;
     this.#deno = deno;
+    this.#forceCoverageMapWriteTimeout = forceCoverageMapWriteTimeout;
 
     if (env == "browser" && coverageMapOutPath != "") {
       throw new Error(
@@ -72,10 +79,9 @@ export class ImportResolver {
         this.#generateCoverageMap = true;
       } else if (env == "deno") {
         for (const arg of args) {
-          const coverageArg = "--fi-coverage-map=";
-          if (arg.startsWith(coverageArg)) {
+          if (arg.startsWith(COVERAGE_MAP_ARG)) {
             this.#generateCoverageMap = true;
-            this.#coverageMapOutPath = arg.substring(coverageArg.length);
+            this.#coverageMapOutPath = arg.substring(COVERAGE_MAP_ARG.length);
           }
         }
       }
@@ -107,6 +113,38 @@ export class ImportResolver {
         });
       }
     }
+
+    for (const arg of args) {
+      if (arg.startsWith(FORCE_COVERAGE_ARG_WRITE_TIMEOUT_ARG)) {
+        const strValue = arg.substring(
+          FORCE_COVERAGE_ARG_WRITE_TIMEOUT_ARG.length,
+        );
+        const numValue = parseInt(strValue);
+        if (isNaN(numValue)) {
+          throw new Error(
+            `Invalid value for ${FORCE_COVERAGE_ARG_WRITE_TIMEOUT_ARG}`,
+          );
+        } else {
+          this.#forceCoverageMapWriteTimeout = numValue;
+        }
+        this.#assertCoverageMapWriteTimeoutArg(
+          `${FORCE_COVERAGE_ARG_WRITE_TIMEOUT_ARG} requires ${COVERAGE_MAP_ARG}`,
+        );
+      }
+    }
+
+    this.#assertCoverageMapWriteTimeoutArg(
+      `forceCoverageMapWriteTimeout requires generateCoverageMap to be true or "auto" with ${COVERAGE_MAP_ARG}`,
+    );
+  }
+
+  /**
+   * @param {string} message
+   */
+  #assertCoverageMapWriteTimeoutArg(message) {
+    if (this.forceCoverageMapWriteTimeout > 0 && !this.coverageMapOutPath) {
+      throw new Error(message);
+    }
   }
 
   get generateCoverageMap() {
@@ -115,6 +153,10 @@ export class ImportResolver {
 
   get coverageMapOutPath() {
     return this.#coverageMapOutPath;
+  }
+
+  get forceCoverageMapWriteTimeout() {
+    return this.#forceCoverageMapWriteTimeout;
   }
 
   /**
