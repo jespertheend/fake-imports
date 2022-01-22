@@ -38,6 +38,9 @@ export class ImportResolver {
   /** @type {Promise<void>?} */
   #makeCoverageDirPromise = null;
 
+  /** @type {Promise<void>[]} */
+  #coverageMapWritePromises = [];
+
   /**
    * @param {string | URL} importMeta
    * @param {import("../mod.js").ImporterOptions} options
@@ -177,7 +180,8 @@ export class ImportResolver {
       const entry = collectedImport2.getCoverageMapEntry();
       if (!entry) return;
       this.#onCoverageMapEntryAddedCbs.forEach((cb) => cb(entry));
-      this.writeCoverageEntry(entry);
+      const promise = this.writeCoverageEntry(entry);
+      this.#coverageMapWritePromises.push(promise);
     });
     collectedImport.init();
     this.#collectedImports.set(collectedImportKey, collectedImport);
@@ -224,5 +228,9 @@ export class ImportResolver {
       const writePath = resolve(this.#coverageMapOutPath, fileName);
       await this.#deno.writeTextFile(writePath, str);
     }
+  }
+
+  async finishCoverageMapWrites() {
+    await Promise.all(this.#coverageMapWritePromises);
   }
 }

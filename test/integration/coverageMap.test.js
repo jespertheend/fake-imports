@@ -101,7 +101,7 @@ async function pathExists(path) {
 }
 
 Deno.test({
-  name: "Relative output path",
+  name: "Via cli with relative output path",
   fn: async () => {
     const { cleanup, basePath, dirPath } = await simpleReplacementDir();
     const importer = new Importer(basePath, {
@@ -126,7 +126,7 @@ Deno.test({
 });
 
 Deno.test({
-  name: "Absolute output path",
+  name: "Via cli with absolute output path",
   fn: async () => {
     const { cleanup, basePath } = await simpleReplacementDir();
     const tempDir = await Deno.makeTempDir();

@@ -139,4 +139,8 @@ export class Importer {
   removeOnCoverageMapEntryAdded(cb) {
     this.#resolver.removeOnCoverageMapEntryAdded(cb);
   }
+
+  async finishCoverageMapWrites() {
+    await this.#resolver.finishCoverageMapWrites();
+  }
 }
