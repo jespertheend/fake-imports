@@ -80,7 +80,7 @@ export class CollectedImport {
 
     const newScriptContent = replaceImports(imports, blobUrls, scriptContent);
 
-    this.#diffOffsets = computeDiffOffsets(originalContent, newScriptContent);
+    this.#diffOffsets = computeDiffOffsets(newScriptContent, originalContent);
 
     const blobUrl = URL.createObjectURL(
       new Blob([newScriptContent], { type: "text/javascript" }),
