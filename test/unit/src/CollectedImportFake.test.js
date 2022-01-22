@@ -48,6 +48,22 @@ function createCollectedImport(fakeModuleImplementation = () => "") {
   return { collectedImport, scriptUrl };
 }
 
+Deno.test({
+  name: "handleGetOriginalContent",
+  async fn() {
+    const spyFetch = installSpyFetch("original");
+    const { collectedImport, scriptUrl } = createCollectedImport(() => "fake");
+
+    const originalContent = await collectedImport.handleGetOriginalContent();
+
+    assertEquals(originalContent, "original");
+
+    assertEquals(spyFetch.calls, [{ url: scriptUrl, init: undefined }]);
+
+    uninstallSpyFetch();
+  },
+});
+
 Deno.test("handleResolveImport", () => {
   const { collectedImport, scriptUrl } = createCollectedImport();
 
@@ -93,4 +109,19 @@ Deno.test("handleGetContent with args", async () => {
   assertEquals(spyFetch.calls, [{ url: scriptUrl, init: undefined }]);
 
   uninstallSpyFetch();
+});
+
+Deno.test({
+  name: "Fetch is only called once",
+  async fn() {
+    const spyFetch = installSpyFetch("original");
+    const { collectedImport, scriptUrl } = createCollectedImport(() => "fake");
+
+    collectedImport.handleGetOriginalContent();
+    await collectedImport.handleGetContent();
+
+    assertEquals(spyFetch.calls, [{ url: scriptUrl, init: undefined }]);
+
+    uninstallSpyFetch();
+  },
 });

@@ -3,6 +3,8 @@
 import { CollectedImport } from "./CollectedImport.js";
 
 export class CollectedImportFake extends CollectedImport {
+  /** @type {Promise<string>?} */
+  #originalContentPromise = null;
   /**
    * @param {import("../mod.js").ModuleImplementation} fakeModuleImplementation
    * @param {ConstructorParameters<typeof CollectedImport>} args
@@ -10,6 +12,23 @@ export class CollectedImportFake extends CollectedImport {
   constructor(fakeModuleImplementation, ...args) {
     super(...args);
     this.fakeModuleImplementation = fakeModuleImplementation;
+  }
+
+  getOriginalContentPromise() {
+    if (this.#originalContentPromise) return this.#originalContentPromise;
+
+    this.#originalContentPromise = (async () => {
+      const response = await fetch(this.url);
+      return await response.text();
+    })();
+    return this.#originalContentPromise;
+  }
+
+  /**
+   * @override
+   */
+  async handleGetOriginalContent() {
+    return await this.getOriginalContentPromise();
   }
 
   /**
@@ -21,8 +40,7 @@ export class CollectedImportFake extends CollectedImport {
         /** @type {() => string} */ (this.fakeModuleImplementation);
       return castFn();
     } else {
-      const response = await fetch(this.url);
-      const fullContent = await response.text();
+      const fullContent = await this.getOriginalContentPromise();
       /** @type {import("../mod.js").OriginalModuleData} */
       const originalData = {
         url: this.url,

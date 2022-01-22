@@ -1,5 +1,6 @@
 // @ts-check
 
+import { computeDiffOffsets } from "./computeDiffOffsets.js";
 import { parseImports } from "./parseImports.js";
 import { replaceImports } from "./replaceImports.js";
 
@@ -17,6 +18,9 @@ export class CollectedImport {
   /** @type {Set<(blobUrl: string) => any>} */
   #onBlobUrlReadyCbs = new Set();
 
+  /** @type {import("./computeDiffOffsets.js").DiffOffsets?} */
+  #diffOffsets = null;
+
   /**
    * @param {string} url The full (non relative) url to fetch.
    * @param {import("./ImportResolver.js").ImportResolver} resolver
@@ -27,10 +31,22 @@ export class CollectedImport {
   }
 
   /**
+   * Should return the original content before any modifications were made.
+   * Return null if the content will not be changed. In this case the value
+   * of `handleGetContent` will be used as original.
+   * @abstract
+   * @returns {Promise<string?>}
+   */
+  async handleGetOriginalContent() {
+    return await new Promise((r) => r(null));
+  }
+
+  /**
+   * @abstract
    * @returns {Promise<string>}
    */
   async handleGetContent() {
-    return await "";
+    return await new Promise((r) => r(""));
   }
 
   /**
@@ -42,7 +58,11 @@ export class CollectedImport {
   }
 
   async init() {
+    let originalContent = await this.handleGetOriginalContent();
     const scriptContent = await this.handleGetContent();
+    if (originalContent === null) {
+      originalContent = scriptContent;
+    }
 
     const imports = parseImports(scriptContent);
     const blobUrlPromises = [];
@@ -59,6 +79,8 @@ export class CollectedImport {
     const blobUrls = await Promise.all(blobUrlPromises);
 
     const newScriptContent = replaceImports(imports, blobUrls, scriptContent);
+
+    this.#diffOffsets = computeDiffOffsets(originalContent, newScriptContent);
 
     const blobUrl = URL.createObjectURL(
       new Blob([newScriptContent], { type: "text/javascript" }),
@@ -77,11 +99,12 @@ export class CollectedImport {
   }
 
   getCoverageMapEntry() {
-    if (!this.#createdBlobUrl) return null;
+    if (!this.#createdBlobUrl || !this.#diffOffsets) return null;
     /** @type {import("../mod.js").CoverageMapEntry} */
     const entry = {
       replacedUrl: this.#createdBlobUrl,
       originalUrl: this.url,
+      diffOffsets: this.#diffOffsets,
     };
     return entry;
   }

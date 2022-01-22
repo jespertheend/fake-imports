@@ -22,6 +22,7 @@ import { ImportResolver } from "./src/ImportResolver.js";
  * @typedef CoverageMapEntry
  * @property {string} replacedUrl
  * @property {string} originalUrl
+ * @property {import("./src/computeDiffOffsets.js").DiffOffsets} diffOffsets
  */
 
 export class Importer {
