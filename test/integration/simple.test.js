@@ -1,5 +1,3 @@
-// @ts-check
-
 import { assertEquals } from "https://deno.land/std@0.100.0/testing/asserts.ts";
 import { setupScriptTempDir, simpleReplacementDir } from "./shared.js";
 import { Importer } from "../../mod.js";

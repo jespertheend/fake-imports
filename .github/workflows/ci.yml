@@ -28,7 +28,6 @@ jobs:
         with:
           deno-version: v1.x
 
-      # Uncomment this step to verify the use of 'deno fmt' on each commit.
       - name: Verify formatting
         run: deno fmt --check
 
@@ -36,4 +35,4 @@ jobs:
         run: deno lint
 
       - name: Run tests
-        run: deno test -A --unstable
+        run: deno test -A --no-check=remote

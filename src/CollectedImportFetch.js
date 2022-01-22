@@ -1,5 +1,3 @@
-// @ts-check
-
 import { CollectedImport } from "./CollectedImport.js";
 
 export class CollectedImportFetch extends CollectedImport {

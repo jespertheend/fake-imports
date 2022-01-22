@@ -1,5 +1,3 @@
-// @ts-check
-
 /**
  * @typedef {Object} ImportLocation
  * @property {number} start

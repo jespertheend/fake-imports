@@ -1,5 +1,3 @@
-// @ts-check
-
 import { computeDiffOffsets } from "./computeDiffOffsets.js";
 import { parseImports } from "./parseImports.js";
 import { replaceImports } from "./replaceImports.js";

@@ -1,5 +1,3 @@
-// @ts-check
-
 /**
  * Maps a character index from one text to another using the provided offsets.
  * @param {number} index

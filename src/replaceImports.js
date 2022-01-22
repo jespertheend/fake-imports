@@ -1,5 +1,3 @@
-// @ts-check
-
 /**
  * @param {import("./parseImports.js").ImportLocation[]} importLocations
  * @param {string[]} replacedImports

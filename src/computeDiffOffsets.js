@@ -1,5 +1,3 @@
-// @ts-check
-
 import { diffChars } from "https://unpkg.com/diff@5.0.0/lib/index.mjs";
 
 /** @typedef {[number, (number | null)]} DiffOffsetRange  */
