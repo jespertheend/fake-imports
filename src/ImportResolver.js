@@ -1,3 +1,15 @@
+/**
+ * @fileoverview
+ * An ImportResolver is responsible for keeping track of imported and faked
+ * modules, as well as options and command line arguments. It is essentially the
+ * entry point of the library.
+ *
+ * An ImportResolver is almost the same as the `Importer` exported in
+ * mod.js, except that it has some extra functionality available that should
+ * normally not be exposed to users of the library. This allows for easier
+ * unit tests for different arguments and environments.
+ */
+
 import {
   fromFileUrl,
   resolve,
@@ -160,6 +172,10 @@ export class ImportResolver {
   }
 
   /**
+   * Before a module is imported, all the imports are first recursively
+   * collected and and placed in the #collectedImports map.
+   * Once every file has loaded and its import urls replaced with blobs,
+   * the entry point is imported with a regular async import call.
    * @template T
    * @param {string | URL} url
    * @returns {Promise<T>}
@@ -174,6 +190,8 @@ export class ImportResolver {
 
   /**
    * Creates a new CollectedImport instance and adds it to the collectedImports map.
+   * The created collected import will call this function as well, this way
+   * all modules are recursively collected.
    * @param {string} url The full (non relative) url to fetch.
    * @param {boolean} allowFakes If true, the real module will be loaded instead of the fake one.
    */

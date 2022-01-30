@@ -8,6 +8,12 @@ import { replaceImports } from "./replaceImports.js";
  * @property {boolean} [allowFakes = true]
  */
 
+/**
+ * A single imported module. This class is responsible for loading the contents
+ * of the module and generating a blob url for it. This class only provides
+ * logic for getting module content is handled in CollectedImportFake and
+ * CollectedImportFetch.
+ */
 export class CollectedImport {
   #resolver;
 

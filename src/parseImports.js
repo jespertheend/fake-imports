@@ -6,6 +6,8 @@
  */
 
 /**
+ * Takes a script source and returns positions of where import strings are
+ * located in the source.
  * @param {string} scriptSource
  */
 export function parseImports(scriptSource) {
