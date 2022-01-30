@@ -71,8 +71,6 @@ This module was created to solve this problem. By allowing you to overwrite the
 code of an imported file, you can change its behaviour, or prevent it from doing
 anything at all.
 
----
-
 ## Usage
 
 Let's take our previous test as an example. Rather than importing `"./foo.js"`
@@ -218,8 +216,6 @@ writes to take a little longer with
 `--fi-force-coverage-map-write-timeout=1000`. This will make all writes take one
 second to finish. That way you can easily verify which of your tests would fail
 in case writes take longer.
-
----
 
 ## How it works internally
 
