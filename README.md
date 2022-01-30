@@ -241,3 +241,7 @@ created `blob:` urls.
   currently no way of doing this using object URLs.
 - Because `fetch()` is being used, the `--allow-net` permission is required. If
   you want to load scripts from the disk, `--allow-read` is also required.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md)
