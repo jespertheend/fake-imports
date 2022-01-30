@@ -1,7 +1,7 @@
 import { assertEquals } from "https://deno.land/std@0.100.0/testing/asserts.ts";
 import { join } from "https://deno.land/std@0.121.0/path/mod.ts";
 import { setupScriptTempDir } from "./shared.js";
-import { applyCoverage } from "../../applyCoverage.js";
+import { applyCoverageMap } from "../../applyCoverageMap.js";
 
 Deno.test({
   name: "Url replacement",
@@ -18,7 +18,7 @@ Deno.test({
 
     const coverageMapPath = join(dirPath, "fakeImportsCoverage");
     const denoCoveragePath = join(dirPath, "denoCoverage");
-    await applyCoverage(coverageMapPath, denoCoveragePath);
+    await applyCoverageMap(coverageMapPath, denoCoveragePath);
 
     const denoCoverageFilePath = join(
       denoCoveragePath,
@@ -73,7 +73,7 @@ Deno.test({
 
     const coverageMapPath = join(dirPath, "fakeImportsCoverage");
     const denoCoveragePath = join(dirPath, "denoCoverage");
-    await applyCoverage(coverageMapPath, denoCoveragePath);
+    await applyCoverageMap(coverageMapPath, denoCoveragePath);
 
     const denoCoverageFilePath = join(
       denoCoveragePath,
