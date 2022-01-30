@@ -12,8 +12,10 @@ import { ImportResolver } from "./src/ImportResolver.js";
 
 /**
  * @typedef ImporterOptions
- * @property {string} [coverageMapOutPath]
- * @property {number} [forceCoverageMapWriteTimeout]
+ * @property {string} [coverageMapOutPath] When set, writes coverage map data to this directory.
+ * [more info about coverage maps](https://github.com/jespertheend/fake-imports#coverage)
+ * @property {number} [forceCoverageMapWriteTimeout] Forces coverage map data to wait for this amount
+ * of milliseconds before writing to disk. Useful for finding flaky tests. [more info](https://github.com/jespertheend/fake-imports#waiting-for-writes-to-finish)
  */
 
 /**
@@ -122,11 +124,20 @@ export class Importer {
     this.#resolver.registerFakeModule(url, moduleImplementation);
   }
 
+  /**
+   * Gets all coverage map data from all modules imported by this importer.
+   *
+   * [more info about coverage maps](https://github.com/jespertheend/fake-imports#coverage)
+   */
   getCoverageMap() {
     return this.#resolver.getCoverageMap();
   }
 
   /**
+   * Fires when a new module is imported and provides coverage map data for
+   * this import.
+   *
+   * [more info about coverage maps](https://github.com/jespertheend/fake-imports#coverage)
    * @param {(entry: CoverageMapEntry) => void} cb
    */
   onCoverageMapEntryAdded(cb) {
@@ -140,6 +151,11 @@ export class Importer {
     this.#resolver.removeOnCoverageMapEntryAdded(cb);
   }
 
+  /**
+   * Resolves when all coverage map data has been written to disk.
+   *
+   * [more info](https://github.com/jespertheend/fake-imports#waiting-for-writes-to-finish)
+   */
   async finishCoverageMapWrites() {
     await this.#resolver.finishCoverageMapWrites();
   }
