@@ -1,6 +1,19 @@
 import { assertEquals } from "https://deno.land/std@0.100.0/testing/asserts.ts";
 import { parseImports } from "../../../src/parseImports.js";
 
+Deno.test({
+  name: "No imports",
+  fn() {
+    const script = `
+      //empty script
+    `;
+
+    const imports = parseImports(script);
+
+    assertEquals(imports, []);
+  },
+});
+
 Deno.test("Single quote", () => {
   const script = `
 		import './script.js';
@@ -16,6 +29,7 @@ Deno.test("Single quote", () => {
     },
   ]);
 });
+
 Deno.test("Double quote", () => {
   const script = `
 		import "./script.js";
