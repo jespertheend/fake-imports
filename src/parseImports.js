@@ -30,7 +30,7 @@ function parseMatch(match, imports) {
 export function parseImports(scriptSource) {
   /** @type {ImportLocation[]} */
   const imports = [];
-  const staticImportRegex = /^\s*import[\s\S]+?["'](?<url>.+)["']/gmd;
+  const staticImportRegex = /(?:^|;)\s*import[\s\S]+?["'](?<url>.+?)["']/gmd;
   for (const match of scriptSource.matchAll(staticImportRegex)) {
     parseMatch(match, imports);
   }

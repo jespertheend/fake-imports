@@ -68,6 +68,30 @@ Deno.test("Multiple", () => {
   ]);
 });
 
+Deno.test({
+  name: "Multiple on a single line",
+  fn() {
+    const script = `
+      import "./scriptA.js"; import './scriptB.js';
+    `;
+
+    const imports = parseImports(script);
+
+    assertEquals(imports, [
+      {
+        start: 15,
+        length: 12,
+        url: "./scriptA.js",
+      },
+      {
+        start: 38,
+        length: 12,
+        url: "./scriptB.js",
+      },
+    ]);
+  },
+});
+
 Deno.test("With line break", () => {
   const script = `
 		import {named} from
