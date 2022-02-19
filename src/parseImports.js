@@ -1,3 +1,5 @@
+import { getCommentLocations } from "./parseComments.js";
+
 /**
  * @typedef {Object} ImportLocation
  * @property {number} start
@@ -7,14 +9,14 @@
 
 /**
  * @param {RegExpMatchArray} match
- * @param {ImportLocation[]} imports
+ * @param {Set<ImportLocation>} imports
  */
 function parseMatch(match, imports) {
   const url = match.groups?.url;
   // @ts-expect-error indices does not exist but all browsers support it
   const start = match.indices.groups?.url[0];
   if (url && start !== undefined) {
-    imports.push({
+    imports.add({
       start,
       length: url.length,
       url,
@@ -28,8 +30,8 @@ function parseMatch(match, imports) {
  * @param {string} scriptSource
  */
 export function parseImports(scriptSource) {
-  /** @type {ImportLocation[]} */
-  const imports = [];
+  /** @type {Set<ImportLocation>} */
+  const imports = new Set();
   const staticImportRegex = /(?:^|;)\s*import[\s\S]+?["'](?<url>.+?)["']/gmd;
   for (const match of scriptSource.matchAll(staticImportRegex)) {
     parseMatch(match, imports);
@@ -38,5 +40,25 @@ export function parseImports(scriptSource) {
   for (const match of scriptSource.matchAll(dynamicImportRegex)) {
     parseMatch(match, imports);
   }
-  return imports;
+
+  const commentLocation = getCommentLocations(scriptSource);
+
+  /** @type {ImportLocation[]} */
+  const overlappingImports = [];
+  for (const importLocation of imports) {
+    for (const comment of commentLocation) {
+      const importStart = importLocation.start;
+      const importEnd = importLocation.start + importLocation.length;
+      // If import overlaps with the comment
+      if (importEnd > comment.start && importStart < comment.end) {
+        overlappingImports.push(importLocation);
+      }
+    }
+  }
+
+  for (const overlapping of overlappingImports) {
+    imports.delete(overlapping);
+  }
+
+  return Array.from(imports);
 }

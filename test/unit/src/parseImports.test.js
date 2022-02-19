@@ -133,3 +133,59 @@ Deno.test("Dynamic", () => {
     },
   ]);
 });
+
+Deno.test({
+  name: "Doesn't import inside comments",
+  fn() {
+    const scriptSources = [
+      `
+		// import './script.js';
+	  `,
+      `
+		// import "./script.js";
+	  `,
+      `
+		// import {named} from "./script.js";
+	  `,
+      `
+		/* import './script.js'; */
+	  `,
+      `
+		/*
+		 * import "./script.js";
+		 */
+	  `,
+      `
+    // import("./script.js")
+    `,
+      `
+    // ;import "./script.js"
+    `,
+      `
+    /*
+    import "./script.js";
+    */
+    `,
+      `
+    /*
+    import("./script.js")
+    */
+    `,
+      `
+    /*
+     * import("./script.js")
+    */
+    `,
+    ];
+
+    for (const source of scriptSources) {
+      const imports = parseImports(source);
+
+      assertEquals(
+        imports,
+        [],
+        `The following should not have imports: ${source}`,
+      );
+    }
+  },
+});
