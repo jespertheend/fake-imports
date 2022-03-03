@@ -235,20 +235,27 @@ export class ImportResolver {
     } else {
       collectedImport = new CollectedImportFetch(url, this);
     }
-    const collectedImport2 = collectedImport;
-    collectedImport.onCreatedBlobUrl(() => {
-      const entry = collectedImport2.getCoverageMapEntry();
-      if (!entry) return;
-      this.#onCoverageMapEntryAddedCbs.forEach((cb) => cb(entry));
-      const promise = this.writeCoverageEntry(entry);
-      this.#coverageMapWritePromises.push(promise);
-    });
+    if (this.generateCoverageMap) {
+      const collectedImport2 = collectedImport;
+      collectedImport.onCreatedBlobUrl(() => {
+        const entry = collectedImport2.getCoverageMapEntry();
+        if (!entry) return;
+        this.#onCoverageMapEntryAddedCbs.forEach((cb) => cb(entry));
+        const promise = this.writeCoverageEntry(entry);
+        this.#coverageMapWritePromises.push(promise);
+      });
+    }
     collectedImport.init();
     this.#collectedImports.set(collectedImportKey, collectedImport);
     return collectedImport;
   }
 
   getCoverageMap() {
+    if (!this.generateCoverageMap) {
+      throw new Error(
+        "Coverage map generation is not enabled. Make sure to create your Importer with generateCoverageMap set to true.",
+      );
+    }
     /** @type {Object.<string, CoverageMapEntry>} */
     const map = {};
     for (const collectedImport of this.#collectedImports.values()) {

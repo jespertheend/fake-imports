@@ -84,7 +84,9 @@ export class CollectedImport {
 
     const newScriptContent = replaceImports(imports, blobUrls, scriptContent);
 
-    this.#diffOffsets = computeDiffOffsets(newScriptContent, originalContent);
+    if (this.#resolver.generateCoverageMap) {
+      this.#diffOffsets = computeDiffOffsets(newScriptContent, originalContent);
+    }
 
     const blobUrl = URL.createObjectURL(
       new Blob([newScriptContent], { type: "text/javascript" }),
@@ -103,6 +105,11 @@ export class CollectedImport {
   }
 
   getCoverageMapEntry() {
+    if (!this.#resolver.generateCoverageMap) {
+      throw new Error(
+        "Coverage map generation is not enabled. Make sure to create your Importer with generateCoverageMap set to true.",
+      );
+    }
     if (!this.#createdBlobUrl || !this.#diffOffsets) return null;
     /** @type {import("../mod.js").CoverageMapEntry} */
     const entry = {

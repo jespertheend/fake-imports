@@ -12,7 +12,7 @@ import { ImportResolver } from "./src/ImportResolver.js";
 
 /**
  * @typedef ImporterOptions
- * @property {"auto" | boolean} [generateCoverageMap]
+ * @property {"auto" | boolean} [generateCoverageMap] `"auto"` to look at command line flags for this option, or `true|false` to force enable or disable coverage map generation. Defaults to `"auto"`.
  * @property {string} [coverageMapOutPath] When set, writes coverage map data to this directory.
  * [more info about coverage maps](https://github.com/jespertheend/fake-imports#coverage)
  * @property {number} [forceCoverageMapWriteTimeout] Forces coverage map data to wait for this amount

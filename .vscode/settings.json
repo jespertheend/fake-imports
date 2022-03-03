@@ -2,5 +2,5 @@
   "deno.enable": true,
   "deno.lint": true,
   "deno.unstable": true,
-  "typescript.tsserver.experimental.enableProjectDiagnostics": false,
+  "typescript.tsserver.experimental.enableProjectDiagnostics": false
 }

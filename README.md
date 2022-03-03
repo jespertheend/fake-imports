@@ -184,7 +184,9 @@ Alternatively, a few methods are available for obtaining coverage map data via
 the api:
 
 ```js
-const importer = new Importer(import.meta.url);
+const importer = new Importer(import.meta.url, {
+  generateCoverageMap: true,
+});
 importer.onCoverageMapEntryAdded((entry) => {
   // do stuff with entry here
 });

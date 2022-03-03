@@ -1,4 +1,7 @@
-import { assertEquals } from "https://deno.land/std@0.100.0/testing/asserts.ts";
+import {
+  assertEquals,
+  assertThrows,
+} from "https://deno.land/std@0.100.0/testing/asserts.ts";
 import { ImportResolver } from "../../../src/ImportResolver.js";
 
 Deno.test({
@@ -211,5 +214,19 @@ Deno.test({
     }
 
     assertEquals(didThrow, true);
+  },
+});
+
+Deno.test({
+  name: "getCoverageMap throws if generating CoverageMaps is disabled",
+  fn() {
+    const resolver1 = new ImportResolver("/basepath", {}, {
+      env: "deno",
+    });
+    const resolver2 = new ImportResolver("/basepath", {}, {
+      env: "browser",
+    });
+    assertThrows(() => resolver1.getCoverageMap());
+    assertThrows(() => resolver2.getCoverageMap());
   },
 });

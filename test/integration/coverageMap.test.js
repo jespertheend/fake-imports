@@ -11,7 +11,9 @@ Deno.test({
   fn: async () => {
     const { cleanup, basePath } = await simpleReplacementDir();
 
-    const importer = new Importer(basePath);
+    const importer = new Importer(basePath, {
+      generateCoverageMap: true,
+    });
     await importer.import("./main.js");
 
     const coverageMap = importer.getCoverageMap();
@@ -40,7 +42,9 @@ Deno.test({
   name: "Via api callback",
   fn: async () => {
     const { cleanup, basePath } = await simpleReplacementDir();
-    const importer = new Importer(basePath);
+    const importer = new Importer(basePath, {
+      generateCoverageMap: true,
+    });
     /** @type {import("../../mod.js").CoverageMapEntry[]} */
     const firedEvents = [];
 
