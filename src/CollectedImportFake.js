@@ -16,8 +16,12 @@ export class CollectedImportFake extends CollectedImport {
     if (this.#originalContentPromise) return this.#originalContentPromise;
 
     this.#originalContentPromise = (async () => {
-      const response = await fetch(this.url);
-      return await response.text();
+      try {
+        const response = await fetch(this.url);
+        return await response.text();
+      } catch {
+        return "";
+      }
     })();
     return this.#originalContentPromise;
   }

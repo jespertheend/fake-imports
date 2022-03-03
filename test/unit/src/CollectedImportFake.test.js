@@ -5,6 +5,7 @@ const originalFetch = globalThis.fetch;
 
 function installMockFetch({
   responseText = "",
+  triggerNetworkError = false,
 } = {}) {
   const mockFetchData = {
     calls:
@@ -17,6 +18,9 @@ function installMockFetch({
   const mockFetch = async (url, init) => {
     await new Promise((r) => r(null));
     mockFetchData.calls.push({ url, init });
+    if (triggerNetworkError) {
+      throw new TypeError("NetworkError when attempting to fetch resource.");
+    }
     return /** @type {Response} */ ({
       text: () => new Promise((r) => r(responseText)),
     });
@@ -57,6 +61,25 @@ Deno.test({
     const originalContent = await collectedImport.handleGetOriginalContent();
 
     assertEquals(originalContent, "original");
+
+    assertEquals(mockFetch.calls, [{ url: scriptUrl, init: undefined }]);
+
+    uninstallMockFetch();
+  },
+});
+
+Deno.test({
+  name: "handleGetOriginalContent network error",
+  async fn() {
+    const mockFetch = installMockFetch({
+      responseText: "original",
+      triggerNetworkError: true,
+    });
+    const { collectedImport, scriptUrl } = createCollectedImport(() => "fake");
+
+    const originalContent = await collectedImport.handleGetOriginalContent();
+
+    assertEquals(originalContent, "");
 
     assertEquals(mockFetch.calls, [{ url: scriptUrl, init: undefined }]);
 
