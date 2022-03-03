@@ -32,6 +32,7 @@ const FORCE_COVERAGE_ARG_WRITE_TIMEOUT_ARG =
 
 export class ImportResolver {
   #importMeta = "";
+  #generateCoverageMap = false;
   #coverageMapOutPath = "";
   #forceCoverageMapWriteTimeout = 0;
 
@@ -65,6 +66,7 @@ export class ImportResolver {
   constructor(
     importMeta,
     {
+      generateCoverageMap = "auto",
       coverageMapOutPath = "",
       forceCoverageMapWriteTimeout = 0,
     },
@@ -83,14 +85,27 @@ export class ImportResolver {
         "Writing coverageMap data to files is not supported in browser environments.",
       );
     }
-    if (coverageMapOutPath != "") {
-      this.#coverageMapOutPath = coverageMapOutPath;
-    } else if (env == "deno") {
-      for (const arg of args) {
-        if (arg.startsWith(COVERAGE_MAP_ARG)) {
-          this.#coverageMapOutPath = arg.substring(COVERAGE_MAP_ARG.length);
+    if (generateCoverageMap === "auto") {
+      if (coverageMapOutPath != "") {
+        this.#coverageMapOutPath = coverageMapOutPath;
+        this.#generateCoverageMap = true;
+      } else if (env == "deno") {
+        for (const arg of args) {
+          if (arg.startsWith(COVERAGE_MAP_ARG)) {
+            this.#generateCoverageMap = true;
+            this.#coverageMapOutPath = arg.substring(COVERAGE_MAP_ARG.length);
+          }
         }
       }
+    } else {
+      this.#generateCoverageMap = generateCoverageMap;
+      this.#coverageMapOutPath = coverageMapOutPath;
+    }
+
+    if (generateCoverageMap == false && coverageMapOutPath != "") {
+      throw new Error(
+        "coverageMapOutPath is only allowed when generateCoverageMap is true.",
+      );
     }
 
     if (importMeta instanceof URL) {
@@ -142,6 +157,10 @@ export class ImportResolver {
     if (this.forceCoverageMapWriteTimeout > 0 && !this.coverageMapOutPath) {
       throw new Error(message);
     }
+  }
+
+  get generateCoverageMap() {
+    return this.#generateCoverageMap;
   }
 
   get coverageMapOutPath() {
