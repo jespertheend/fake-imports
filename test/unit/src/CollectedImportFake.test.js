@@ -3,8 +3,10 @@ import { CollectedImportFake } from "../../../src/CollectedImportFake.js";
 
 const originalFetch = globalThis.fetch;
 
-function installSpyFetch(responseText = "") {
-  const spyFetchData = {
+function installMockFetch({
+  responseText = "",
+} = {}) {
+  const mockFetchData = {
     calls:
       /** @type {{url: RequestInfo, init: RequestInit | undefined}[]} */ ([]),
   };
@@ -12,18 +14,18 @@ function installSpyFetch(responseText = "") {
    * @param {RequestInfo} url
    * @param {RequestInit} [init]
    */
-  const spyFetch = async (url, init) => {
+  const mockFetch = async (url, init) => {
     await new Promise((r) => r(null));
-    spyFetchData.calls.push({ url, init });
+    mockFetchData.calls.push({ url, init });
     return /** @type {Response} */ ({
       text: () => new Promise((r) => r(responseText)),
     });
   };
-  globalThis.fetch = /** @type {typeof fetch} */ (spyFetch);
-  return spyFetchData;
+  globalThis.fetch = /** @type {typeof fetch} */ (mockFetch);
+  return mockFetchData;
 }
 
-function uninstallSpyFetch() {
+function uninstallMockFetch() {
   globalThis.fetch = originalFetch;
 }
 
@@ -49,16 +51,16 @@ function createCollectedImport(fakeModuleImplementation = () => "") {
 Deno.test({
   name: "handleGetOriginalContent",
   async fn() {
-    const spyFetch = installSpyFetch("original");
+    const mockFetch = installMockFetch({ responseText: "original" });
     const { collectedImport, scriptUrl } = createCollectedImport(() => "fake");
 
     const originalContent = await collectedImport.handleGetOriginalContent();
 
     assertEquals(originalContent, "original");
 
-    assertEquals(spyFetch.calls, [{ url: scriptUrl, init: undefined }]);
+    assertEquals(mockFetch.calls, [{ url: scriptUrl, init: undefined }]);
 
-    uninstallSpyFetch();
+    uninstallMockFetch();
   },
 });
 
@@ -73,20 +75,20 @@ Deno.test("handleResolveImport", () => {
 });
 
 Deno.test("handleGetContent no args", async () => {
-  installSpyFetch();
+  installMockFetch();
   const fakeContent = "new fake content";
   const { collectedImport } = createCollectedImport(() => fakeContent);
 
   const getContentResult = await collectedImport.handleGetContent();
   assertEquals(getContentResult, fakeContent);
 
-  uninstallSpyFetch();
+  uninstallMockFetch();
 });
 
 Deno.test("handleGetContent with args", async () => {
   const originalContent = "old original content";
   const fakeContent = "new fake content";
-  const spyFetch = installSpyFetch(originalContent);
+  const mockFetch = installMockFetch({ responseText: originalContent });
 
   let receivedOriginalData = null;
   const { collectedImport, scriptUrl } = createCollectedImport(
@@ -104,22 +106,22 @@ Deno.test("handleGetContent with args", async () => {
     fullContent: originalContent,
   });
 
-  assertEquals(spyFetch.calls, [{ url: scriptUrl, init: undefined }]);
+  assertEquals(mockFetch.calls, [{ url: scriptUrl, init: undefined }]);
 
-  uninstallSpyFetch();
+  uninstallMockFetch();
 });
 
 Deno.test({
   name: "Fetch is only called once",
   async fn() {
-    const spyFetch = installSpyFetch("original");
+    const mockFetch = installMockFetch({ responseText: "original" });
     const { collectedImport, scriptUrl } = createCollectedImport(() => "fake");
 
     collectedImport.handleGetOriginalContent();
     await collectedImport.handleGetContent();
 
-    assertEquals(spyFetch.calls, [{ url: scriptUrl, init: undefined }]);
+    assertEquals(mockFetch.calls, [{ url: scriptUrl, init: undefined }]);
 
-    uninstallSpyFetch();
+    uninstallMockFetch();
   },
 });
