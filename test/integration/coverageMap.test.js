@@ -1,7 +1,4 @@
-import {
-  assert,
-  assertEquals,
-} from "https://deno.land/std@0.100.0/testing/asserts.ts";
+import { assert, assertEquals } from "asserts";
 import { join } from "https://deno.land/std@0.121.0/path/mod.ts";
 import { assertFileCount, simpleReplacementDir } from "./shared.js";
 import { Importer } from "../../mod.js";

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
     "checkJs": true
-  }
+  },
+  "importMap": "importmap.json"
 }

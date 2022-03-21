@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.100.0/testing/asserts.ts";
+import { assertEquals } from "asserts";
 import { toFileUrl } from "https://deno.land/std@0.119.0/path/mod.ts";
 import { dirname, join } from "https://deno.land/std@0.119.0/path/mod.ts";
 

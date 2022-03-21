@@ -1,4 +1,4 @@
-import { assertThrows } from "https://deno.land/std@0.100.0/testing/asserts.ts";
+import { assertThrows } from "asserts";
 import { CollectedImport } from "../../../src/CollectedImport.js";
 
 Deno.test({
