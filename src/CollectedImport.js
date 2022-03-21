@@ -75,7 +75,9 @@ export class CollectedImport {
       const resolveData = this.handleResolveImport(resolvedUrl.href);
       const collectedImport = this.#resolver.createCollectedImport(
         resolveData.url,
-        resolveData.allowFakes ?? true,
+        {
+          allowFakes: resolveData.allowFakes,
+        },
       );
       blobUrlPromises.push(collectedImport.getBlobUrl());
     }

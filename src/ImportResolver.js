@@ -212,9 +212,10 @@ export class ImportResolver {
    * The created collected import will call this function as well, this way
    * all modules are recursively collected.
    * @param {string} url The full (non relative) url to fetch.
-   * @param {boolean} allowFakes If true, the real module will be loaded instead of the fake one.
+   * @param {Object} [options]
+   * @param {boolean} [options.allowFakes] If true, the real module will be loaded instead of the fake one.
    */
-  createCollectedImport(url, allowFakes = true) {
+  createCollectedImport(url, { allowFakes = true } = {}) {
     let collectedImportKey = "";
     collectedImportKey += allowFakes ? "1" : "0";
     collectedImportKey += url;
