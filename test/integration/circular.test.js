@@ -216,3 +216,36 @@ Deno.test({
     await cleanup();
   },
 });
+
+Deno.test({
+  name: "file that imports itself",
+  permissions: {
+    net: true,
+  },
+  fn: async () => {
+    //   +----+
+    //   |    |
+    //   v    |
+    //        |
+    //   A    |
+    //   |    |
+    //   +----+
+
+    const { cleanup, basePath } = await setupScriptTempDir({
+      "A.js": `
+        import "./A.js";
+      `,
+    });
+
+    const importer = new Importer(basePath);
+    await assertRejects(
+      async () => {
+        await importer.import("./A.js");
+      },
+      Error,
+      `Circular imports are not supported. "${basePath}A.js" imports itself.`,
+    );
+
+    await cleanup();
+  },
+});
