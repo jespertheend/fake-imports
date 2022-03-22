@@ -226,6 +226,9 @@ export class ImportResolver {
 
     const existing = this.#collectedImports.get(collectedImportKey);
     if (existing) {
+      if (parentImporter) {
+        existing.addParentCollectedImport(parentImporter);
+      }
       if (existing == parentImporter) {
         throw new Error(
           `Circular imports are not supported. "${url}" imports itself.`,

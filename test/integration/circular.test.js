@@ -158,7 +158,6 @@ Deno.test({
 
 Deno.test({
   name: "circular import to diverging imports",
-  ignore: true,
   fn: async () => {
     //   A
     //   |
