@@ -4,9 +4,6 @@ import { Importer } from "../../mod.js";
 
 Deno.test({
   name: "Simple",
-  permissions: {
-    net: true,
-  },
   fn: async () => {
     const { cleanup, basePath } = await simpleReplacementDir();
 
@@ -22,9 +19,6 @@ Deno.test({
 
 Deno.test({
   name: "URL Object as argument",
-  permissions: {
-    net: true,
-  },
   fn: async () => {
     const { cleanup, basePath } = await simpleReplacementDir();
 
@@ -41,9 +35,6 @@ Deno.test({
 
 Deno.test({
   name: "Multiple imports from the same file",
-  permissions: {
-    net: true,
-  },
   fn: async () => {
     const { cleanup, basePath } = await setupScriptTempDir({
       "main.js": `

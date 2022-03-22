@@ -4,9 +4,6 @@ import { Importer } from "../../mod.js";
 
 Deno.test({
   name: "Import twice",
-  permissions: {
-    net: true,
-  },
   fn: async () => {
     const { cleanup, basePath } = await setupScriptTempDir({
       "main.js": `

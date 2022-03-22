@@ -4,9 +4,6 @@ import { Importer } from "../../mod.js";
 
 Deno.test({
   name: "No arguments",
-  permissions: {
-    net: true,
-  },
   fn: async () => {
     const { cleanup, basePath } = await simpleReplacementDir();
 
@@ -25,9 +22,6 @@ Deno.test({
 
 Deno.test({
   name: "Take fullContent",
-  permissions: {
-    net: true,
-  },
   fn: async () => {
     const { cleanup, basePath } = await simpleReplacementDir();
 

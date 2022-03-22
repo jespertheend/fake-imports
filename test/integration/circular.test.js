@@ -4,9 +4,6 @@ import { Importer } from "../../mod.js";
 
 Deno.test({
   name: "Basic circular import",
-  permissions: {
-    net: true,
-  },
   fn: async () => {
     //    A  <-+
     //    |    |
@@ -40,9 +37,6 @@ Deno.test({
 
 Deno.test({
   name: "Circular import with multiple modules",
-  permissions: {
-    net: true,
-  },
   fn: async () => {
     //    A  <-+
     //    |    |
@@ -82,9 +76,6 @@ Deno.test({
 
 Deno.test({
   name: "non-circular import that diverges and then joins again",
-  permissions: {
-    net: true,
-  },
   fn: async () => {
     //      A
     //     / \
@@ -126,9 +117,6 @@ Deno.test({
 
 Deno.test({
   name: "seemingly circular import but actually not",
-  permissions: {
-    net: true,
-  },
   fn: async () => {
     //     A
     //    / \
@@ -171,9 +159,6 @@ Deno.test({
 Deno.test({
   name: "circular import to diverging imports",
   ignore: true,
-  permissions: {
-    net: true,
-  },
   fn: async () => {
     //   A
     //   |
@@ -219,9 +204,6 @@ Deno.test({
 
 Deno.test({
   name: "file that imports itself",
-  permissions: {
-    net: true,
-  },
   fn: async () => {
     //   +----+
     //   |    |
