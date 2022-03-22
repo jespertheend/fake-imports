@@ -142,7 +142,9 @@ export class CollectedImport {
   hasParentCollectedImport(collectedImport) {
     for (const parent of this.#parentCollectedImports) {
       if (parent == collectedImport) return true;
-      return parent.hasParentCollectedImport(collectedImport);
+      if (parent.hasParentCollectedImport(collectedImport)) {
+        return true;
+      }
     }
     return false;
   }

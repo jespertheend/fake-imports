@@ -100,6 +100,19 @@ Deno.test({
 });
 
 Deno.test({
+  name: "hasParentCollectedImport() returns true if",
+  fn() {
+    const importA = new CollectedImport(FAKE_URL, basicMockResolver);
+    const importB = new CollectedImport(FAKE_URL, basicMockResolver);
+    const importC = new CollectedImport(FAKE_URL, basicMockResolver);
+    importC.addParentCollectedImport(importA);
+    importC.addParentCollectedImport(importB);
+
+    assertEquals(importC.hasParentCollectedImport(importB), true);
+  },
+});
+
+Deno.test({
   name:
     "init() triggers onCreatedBlobUrl callbacks with error when the resolver errors",
   async fn() {
