@@ -234,10 +234,20 @@ export class ImportResolver {
           `Circular imports are not supported. "${url}" imports itself.`,
         );
       }
-      if (parentImporter && parentImporter.hasParentCollectedImport(existing)) {
-        throw new Error(
-          `Circular imports are not supported.`,
+      if (parentImporter) {
+        const circularImportPath = parentImporter.findClosestCircularImportPath(
+          existing,
         );
+        if (circularImportPath) {
+          circularImportPath.push(parentImporter);
+          circularImportPath.push(existing);
+          const importPath = circularImportPath.map((item) =>
+            item.getFileName()
+          ).join(" -> ");
+          throw new Error(
+            `Circular imports are not supported:\n${importPath}`,
+          );
+        }
       }
       return existing;
     }

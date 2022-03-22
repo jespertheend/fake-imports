@@ -1,6 +1,6 @@
 import { assertEquals } from "asserts";
 import { toFileUrl } from "https://deno.land/std@0.119.0/path/mod.ts";
-import { dirname, join } from "https://deno.land/std@0.119.0/path/mod.ts";
+import { dirname, resolve } from "https://deno.land/std@0.119.0/path/mod.ts";
 
 /**
  * @typedef {Object} SetupScriptTempDirResult
@@ -28,7 +28,7 @@ export async function setupScriptTempDir(scriptFiles, {
   const dirPath = await Deno.makeTempDir({ prefix, suffix });
   const promises = [];
   for (const [fileName, scriptContent] of Object.entries(scriptFiles)) {
-    const filePath = join(dirPath, fileName);
+    const filePath = resolve(dirPath, fileName);
     const promise = (async () => {
       await Deno.mkdir(dirname(filePath), { recursive: true });
       await Deno.writeTextFile(filePath, scriptContent);

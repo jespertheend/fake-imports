@@ -28,7 +28,7 @@ Deno.test({
         await importer.import("./A.js");
       },
       Error,
-      "Circular imports are not supported.",
+      "Circular imports are not supported:\nA.js -> B.js -> A.js",
     );
 
     await cleanup();
@@ -52,10 +52,10 @@ Deno.test({
         export class A {}
       `,
       "B.js": `
-        import {Foo} from "./scriptC.js";
+        import {Foo} from "./C.js";
         export class B {}
       `,
-      "scriptC.js": `
+      "C.js": `
         import {Foo} from "./A.js";
         export class ScriptC {}
       `,
@@ -67,7 +67,46 @@ Deno.test({
         await importer.import("./A.js");
       },
       Error,
-      "Circular imports are not supported.",
+      "Circular imports are not supported:\nA.js -> B.js -> C.js -> A.js",
+    );
+
+    await cleanup();
+  },
+});
+
+Deno.test({
+  name: "circular import with import from parent directory",
+  fn: async () => {
+    //  root/A  <-------+
+    //    |             |
+    //  root/scripts/B  |
+    //    |             |
+    //  root/C          |
+    //    |             |
+    //    +-------------+
+
+    const { cleanup, basePath } = await setupScriptTempDir({
+      "root/A.js": `
+        import {Bar} from "./scripts/B.js";
+        export class A {}
+      `,
+      "root/scripts/B.js": `
+        import {Foo} from "../C.js";
+        export class B {}
+      `,
+      "root/C.js": `
+        import {Foo} from "./A.js";
+        export class ScriptC {}
+      `,
+    });
+
+    const importer = new Importer(basePath);
+    await assertRejects(
+      async () => {
+        await importer.import("./root/A.js");
+      },
+      Error,
+      "Circular imports are not supported:\nA.js -> B.js -> C.js -> A.js",
     );
 
     await cleanup();
@@ -194,7 +233,7 @@ Deno.test({
         await importer.import("./A.js");
       },
       Error,
-      "Circular imports are not supported.",
+      "Circular imports are not supported:\nD.js -> F.js -> D.js",
     );
 
     await cleanup();

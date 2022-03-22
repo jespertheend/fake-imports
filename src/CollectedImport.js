@@ -136,17 +136,37 @@ export class CollectedImport {
   }
 
   /**
-   * @param {CollectedImport} collectedImport
-   * @returns {boolean}
+   * If this collected import has `parentCollectedImport` as parent, an array
+   * is returned that represents the chain of imports. If the import is not
+   * currently found in any of the parents, null is returned.
+   *
+   * @param {CollectedImport} parentCollectedImport
+   * @returns {CollectedImport[]?}
    */
-  hasParentCollectedImport(collectedImport) {
+  findClosestCircularImportPath(parentCollectedImport) {
     for (const parent of this.#parentCollectedImports) {
-      if (parent == collectedImport) return true;
-      if (parent.hasParentCollectedImport(collectedImport)) {
-        return true;
+      if (parent == parentCollectedImport) return [parent];
+
+      const pathFromParent = parent.findClosestCircularImportPath(
+        parentCollectedImport,
+      );
+      if (pathFromParent) {
+        return [...pathFromParent, parent];
       }
     }
-    return false;
+    return null;
+  }
+
+  getFileName() {
+    const url = new URL(this.url);
+    const splitPath = url.pathname.split("/");
+    if (splitPath.length > 0) {
+      const lastItem = splitPath[splitPath.length - 1];
+      if (lastItem.length > 0) {
+        return lastItem;
+      }
+    }
+    return this.url;
   }
 
   /**
