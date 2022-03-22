@@ -214,14 +214,25 @@ export class ImportResolver {
    * @param {string} url The full (non relative) url to fetch.
    * @param {Object} [options]
    * @param {boolean} [options.allowFakes] If true, the real module will be loaded instead of the fake one.
+   * @param {CollectedImport?} [options.parentImporter] The parent collected import, used for circular import detection.
    */
-  createCollectedImport(url, { allowFakes = true } = {}) {
+  createCollectedImport(url, {
+    allowFakes = true,
+    parentImporter = null,
+  } = {}) {
     let collectedImportKey = "";
     collectedImportKey += allowFakes ? "1" : "0";
     collectedImportKey += url;
 
     const existing = this.#collectedImports.get(collectedImportKey);
-    if (existing) return existing;
+    if (existing) {
+      if (parentImporter && parentImporter.hasParentCollectedImport(existing)) {
+        throw new Error(
+          `Circular imports are not supported.`,
+        );
+      }
+      return existing;
+    }
 
     let collectedImport;
     if (this.#fakedModules.has(url) && allowFakes) {
@@ -246,6 +257,7 @@ export class ImportResolver {
         this.#coverageMapWritePromises.push(promise);
       });
     }
+    if (parentImporter) collectedImport.addParentCollectdImport(parentImporter);
     collectedImport.init();
     this.#collectedImports.set(collectedImportKey, collectedImport);
     return collectedImport;

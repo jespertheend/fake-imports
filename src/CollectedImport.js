@@ -9,6 +9,22 @@ import { replaceImports } from "./replaceImports.js";
  */
 
 /**
+ * @typedef BlobUrlReadySuccessData
+ * @property {true} success
+ * @property {string} blobUrl
+ */
+
+/**
+ * @typedef BlobUrlReadyErrorData
+ * @property {false} success
+ * @property {unknown} error
+ */
+
+/** @typedef {BlobUrlReadySuccessData | BlobUrlReadyErrorData} BlobUrlReadyData */
+
+/** @typedef {(data: BlobUrlReadyData) => void} BlobUrlReadyCallback */
+
+/**
  * A single imported module. This class is responsible for loading the contents
  * of the module and generating a blob url for it. This class only provides
  * logic for getting module content is handled in CollectedImportFake and
@@ -19,11 +35,16 @@ export class CollectedImport {
 
   /** @type {string?} */
   #createdBlobUrl = null;
-  /** @type {Set<(blobUrl: string) => any>} */
+  /** @type {Set<BlobUrlReadyCallback>} */
   #onBlobUrlReadyCbs = new Set();
+  /** @type {BlobUrlReadyData?} */
+  #onBlobUrlReadyResult = null;
 
   /** @type {import("./computeDiffOffsets.js").DiffOffsets?} */
   #diffOffsets = null;
+
+  /** @type {Set<CollectedImport>} */
+  #parentCollectedImports = new Set();
 
   /**
    * @param {string} url The full (non relative) url to fetch.
@@ -71,18 +92,28 @@ export class CollectedImport {
     const imports = parseImports(scriptContent);
     const blobUrlPromises = [];
     for (const importData of imports) {
-      const resolvedUrl = new URL(importData.url, this.url);
-      const resolveData = this.handleResolveImport(resolvedUrl.href);
-      const collectedImport = this.#resolver.createCollectedImport(
-        resolveData.url,
-        {
-          allowFakes: resolveData.allowFakes,
-        },
-      );
-      blobUrlPromises.push(collectedImport.getBlobUrl());
+      const promise = (async () => {
+        const resolvedUrl = new URL(importData.url, this.url);
+        const resolveData = this.handleResolveImport(resolvedUrl.href);
+        const collectedImport = this.#resolver.createCollectedImport(
+          resolveData.url,
+          {
+            allowFakes: resolveData.allowFakes,
+            parentImporter: this,
+          },
+        );
+        return await collectedImport.getBlobUrl();
+      })();
+      blobUrlPromises.push(promise);
     }
 
-    const blobUrls = await Promise.all(blobUrlPromises);
+    let blobUrls;
+    try {
+      blobUrls = await Promise.all(blobUrlPromises);
+    } catch (e) {
+      this.triggerCreatedBlobUrlCallbacks({ success: false, error: e });
+      return;
+    }
 
     const newScriptContent = replaceImports(imports, blobUrls, scriptContent);
 
@@ -94,16 +125,48 @@ export class CollectedImport {
       new Blob([newScriptContent], { type: "text/javascript" }),
     );
     this.#createdBlobUrl = blobUrl;
-    this.#onBlobUrlReadyCbs.forEach((cb) => cb(blobUrl));
-    this.#onBlobUrlReadyCbs.clear();
+    this.triggerCreatedBlobUrlCallbacks({ success: true, blobUrl });
+  }
+
+  /**
+   * @param {CollectedImport} collectedImport
+   */
+  addParentCollectdImport(collectedImport) {
+    this.#parentCollectedImports.add(collectedImport);
+  }
+
+  /**
+   * @param {CollectedImport} collectedImport
+   * @returns {boolean}
+   */
+  hasParentCollectedImport(collectedImport) {
+    for (const parent of this.#parentCollectedImports) {
+      if (parent == collectedImport) return true;
+      return parent.hasParentCollectedImport(collectedImport);
+    }
+    return false;
   }
 
   /**
    * @returns {Promise<string>}
    */
   async getBlobUrl() {
-    if (this.#createdBlobUrl) return this.#createdBlobUrl;
-    return await new Promise((r) => this.#onBlobUrlReadyCbs.add(r));
+    if (this.#onBlobUrlReadyResult) {
+      if (this.#onBlobUrlReadyResult.success) {
+        return this.#onBlobUrlReadyResult.blobUrl;
+      } else {
+        throw this.#onBlobUrlReadyResult.error;
+      }
+    }
+    return await new Promise((resolve, reject) => {
+      this.onCreatedBlobUrl((data) => {
+        if (data.success) {
+          resolve(data.blobUrl);
+        } else {
+          reject(data.error);
+        }
+      });
+    });
   }
 
   getCoverageMapEntry() {
@@ -123,9 +186,20 @@ export class CollectedImport {
   }
 
   /**
-   * @param {(blobUrl: string) => void} cb
+   * @param {BlobUrlReadyCallback} cb
    */
   onCreatedBlobUrl(cb) {
     this.#onBlobUrlReadyCbs.add(cb);
+  }
+
+  /**
+   * @private
+   * @param {BlobUrlReadyData} data
+   */
+  triggerCreatedBlobUrlCallbacks(data) {
+    if (this.#onBlobUrlReadyResult) return;
+    this.#onBlobUrlReadyResult = data;
+    this.#onBlobUrlReadyCbs.forEach((cb) => cb(data));
+    this.#onBlobUrlReadyCbs.clear();
   }
 }
