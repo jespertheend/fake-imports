@@ -262,7 +262,9 @@ export class ImportResolver {
         this.#coverageMapWritePromises.push(promise);
       });
     }
-    if (parentImporter) collectedImport.addParentCollectdImport(parentImporter);
+    if (parentImporter) {
+      collectedImport.addParentCollectedImport(parentImporter);
+    }
     collectedImport.init();
     this.#collectedImports.set(collectedImportKey, collectedImport);
     return collectedImport;

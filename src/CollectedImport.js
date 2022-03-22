@@ -131,7 +131,7 @@ export class CollectedImport {
   /**
    * @param {CollectedImport} collectedImport
    */
-  addParentCollectdImport(collectedImport) {
+  addParentCollectedImport(collectedImport) {
     this.#parentCollectedImports.add(collectedImport);
   }
 

@@ -58,7 +58,7 @@ Deno.test({
     const parent = new CollectedImport(FAKE_URL, basicMockResolver);
     const collectedImport = new CollectedImport(FAKE_URL, basicMockResolver);
 
-    collectedImport.addParentCollectdImport(parent);
+    collectedImport.addParentCollectedImport(parent);
 
     assertEquals(collectedImport.hasParentCollectedImport(parent), true);
   },
@@ -71,10 +71,10 @@ Deno.test({
     const importA = new CollectedImport(FAKE_URL, basicMockResolver);
 
     const importB = new CollectedImport(FAKE_URL, basicMockResolver);
-    importB.addParentCollectdImport(importA);
+    importB.addParentCollectedImport(importA);
 
     const importC = new CollectedImport(FAKE_URL, basicMockResolver);
-    importC.addParentCollectdImport(importB);
+    importC.addParentCollectedImport(importB);
 
     assertEquals(importC.hasParentCollectedImport(importA), true);
   },
@@ -87,13 +87,13 @@ Deno.test({
     const importA = new CollectedImport(FAKE_URL, basicMockResolver);
 
     const importB = new CollectedImport(FAKE_URL, basicMockResolver);
-    importB.addParentCollectdImport(importA);
+    importB.addParentCollectedImport(importA);
 
     const importC = new CollectedImport(FAKE_URL, basicMockResolver);
-    importC.addParentCollectdImport(importB);
+    importC.addParentCollectedImport(importB);
 
     const importD = new CollectedImport(FAKE_URL, basicMockResolver);
-    importD.addParentCollectdImport(importC);
+    importD.addParentCollectedImport(importC);
 
     assertEquals(importD.hasParentCollectedImport(importA), true);
   },
