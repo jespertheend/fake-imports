@@ -139,7 +139,7 @@ Deno.test({
 
 Deno.test({
   name:
-    "init() triggers onCreatedBlobUrl callbacks with error when the resolver errors",
+    "initWithErrorHandling() triggers onCreatedBlobUrl callbacks with error when the resolver errors",
   async fn() {
     const collectedImport = new ExtendecCollectedImport(
       FAKE_URL,
@@ -152,7 +152,7 @@ Deno.test({
       triggerResults.push(data);
     });
 
-    await collectedImport.init();
+    await collectedImport.initWithErrorHandling();
 
     assertEquals(triggerResults.length, 1);
     assertEquals(triggerResults[0].success, false);
@@ -160,14 +160,14 @@ Deno.test({
 });
 
 Deno.test({
-  name: "getBlobUrl() rejects when init() had an error",
+  name: "getBlobUrl() rejects when initWithErrorHandling() had an error",
   async fn() {
     const collectedImport = new ExtendecCollectedImport(
       FAKE_URL,
       erroringResolver,
     );
 
-    await collectedImport.init();
+    await collectedImport.initWithErrorHandling();
 
     await assertRejects(async () => {
       await collectedImport.getBlobUrl();
@@ -176,14 +176,15 @@ Deno.test({
 });
 
 Deno.test({
-  name: "init() rejects current getBlobUrl() promises once the resolver errors",
+  name:
+    "initWithErrorHandling() rejects current getBlobUrl() promises once the resolver errors",
   async fn() {
     const collectedImport = new ExtendecCollectedImport(
       FAKE_URL,
       erroringResolver,
     );
 
-    const initPromise = collectedImport.init();
+    const initPromise = collectedImport.initWithErrorHandling();
     const getBlobUrlPromise = collectedImport.getBlobUrl();
 
     await initPromise;

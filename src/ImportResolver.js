@@ -278,7 +278,7 @@ export class ImportResolver {
     if (parentImporter) {
       collectedImport.addParentCollectedImport(parentImporter);
     }
-    collectedImport.init();
+    collectedImport.initWithErrorHandling();
     this.#collectedImports.set(collectedImportKey, collectedImport);
     return collectedImport;
   }

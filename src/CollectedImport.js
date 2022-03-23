@@ -82,6 +82,17 @@ export class CollectedImport {
     return { url };
   }
 
+  async initWithErrorHandling() {
+    try {
+      await this.init();
+    } catch (e) {
+      this.triggerCreatedBlobUrlCallbacks({ success: false, error: e });
+    }
+  }
+
+  /**
+   * @private
+   */
   async init() {
     let originalContent = await this.handleGetOriginalContent();
     const scriptContent = await this.handleGetContent();

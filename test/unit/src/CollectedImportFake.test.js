@@ -1,37 +1,6 @@
 import { assertEquals } from "asserts";
 import { CollectedImportFake } from "../../../src/CollectedImportFake.js";
-
-const originalFetch = globalThis.fetch;
-
-function installMockFetch({
-  responseText = "",
-  triggerNetworkError = false,
-} = {}) {
-  const mockFetchData = {
-    calls:
-      /** @type {{url: RequestInfo, init: RequestInit | undefined}[]} */ ([]),
-  };
-  /**
-   * @param {RequestInfo} url
-   * @param {RequestInit} [init]
-   */
-  const mockFetch = async (url, init) => {
-    await new Promise((r) => r(null));
-    mockFetchData.calls.push({ url, init });
-    if (triggerNetworkError) {
-      throw new TypeError("NetworkError when attempting to fetch resource.");
-    }
-    return /** @type {Response} */ ({
-      text: () => new Promise((r) => r(responseText)),
-    });
-  };
-  globalThis.fetch = /** @type {typeof fetch} */ (mockFetch);
-  return mockFetchData;
-}
-
-function uninstallMockFetch() {
-  globalThis.fetch = originalFetch;
-}
+import { installMockFetch, uninstallMockFetch } from "../shared/mockFetch.js";
 
 /**
  * @param {import("../../../mod.js").ModuleImplementation} fakeModuleImplementation
@@ -39,8 +8,6 @@ function uninstallMockFetch() {
  */
 function createCollectedImport(fakeModuleImplementation = () => "") {
   const stubResolver = {};
-  // fake the init method
-  CollectedImportFake.prototype.init = async () => {};
 
   const scriptUrl = "file:///fake.js";
 
