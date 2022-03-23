@@ -6,7 +6,7 @@
     // run the tests
     "test": "deno test --no-check=remote --allow-read --allow-write",
     // performs all tasks that are generally required for ci to pass
-    "check": "deno task test & deno fmt & deno lint"
+    "check": "deno lint && deno fmt && deno task test"
   },
   "importMap": "importmap.json"
 }
