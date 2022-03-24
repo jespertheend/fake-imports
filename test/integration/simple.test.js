@@ -18,6 +18,22 @@ Deno.test({
 });
 
 Deno.test({
+  name: "fakeModule() with a URL object",
+  async fn() {
+    const { cleanup, basePath } = await simpleReplacementDir();
+
+    const importer = new Importer(basePath);
+    const url = new URL("./replaced.js", basePath);
+    importer.fakeModule(url, `export const replaced = "replaced";`);
+    const main = await importer.import("./main.js");
+
+    assertEquals(main.replaced, "replaced");
+
+    await cleanup();
+  },
+});
+
+Deno.test({
   name: "URL Object as argument",
   fn: async () => {
     const { cleanup, basePath } = await simpleReplacementDir();
