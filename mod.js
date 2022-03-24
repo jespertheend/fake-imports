@@ -126,6 +126,47 @@ export class Importer {
   }
 
   /**
+   * Fakes a module with the content of another file. This is almost the same as fetching content
+   * from a file and passing it to {@link fakeModule}, except that relative imports of the new
+   * file are maintained.
+   *
+   * ## Usage
+   * Say you have the following files:
+   *
+   * ```js
+   * // /foo.js
+   * import {bar} from "./bar.js";
+   *
+   * // /long/path/to/fakeFoo.js
+   * import {fakeBar} from "./fakeBar.js";
+   * ```
+   *
+   * You can point `/foo.js` to the new path using
+   * ```
+   * importer.redirectModule("/foo.js", "/long/path/to/fakeFoo.js");
+   * ```
+   *
+   * This will ensure that `fakeBar.js` is imported from `/long/path/to/fakeBar.js`.
+   *
+   * #### Using fakeModule()
+   *
+   * If you were to try this with `fakeModule` like so
+   * ```js
+   * const fakeFoo = await fetch("/long/path/to/fakeFoo.js");
+   * importer.fakeModule("/foo.js", await fakeFoo.text());
+   * ```
+   *
+   * You would run into errors, because like this `fakeBar.js` would be imported from `/fakeBar.js`,
+   * which doesn't exist.
+   *
+   * @param {string | URL} url
+   * @param {string | URL} newUrl
+   */
+  redirectModule(url, newUrl) {
+    this.#resolver.registerRedirectModule(url, newUrl);
+  }
+
+  /**
    * Gets all coverage map data from all modules imported by this importer.
    *
    * [more info about coverage maps](https://github.com/jespertheend/fake-imports#coverage)

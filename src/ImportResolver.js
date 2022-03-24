@@ -52,6 +52,9 @@ export class ImportResolver {
   /** @type {Map<string, import("../mod.js").ModuleImplementation>} */
   #fakedModules = new Map();
 
+  /** @type {Map<string, string>} */
+  #redirectedModules = new Map();
+
   /** @type {Promise<void>?} */
   #makeCoverageDirPromise = null;
 
@@ -191,6 +194,21 @@ export class ImportResolver {
   }
 
   /**
+   * @param {string | URL} url
+   * @param {string | URL} newUrl
+   */
+  registerRedirectModule(url, newUrl) {
+    if (typeof url === "string") {
+      url = new URL(url, this.#importMeta);
+    }
+    if (typeof newUrl === "string") {
+      newUrl = new URL(newUrl, this.#importMeta);
+    }
+
+    this.#redirectedModules.set(url.href, newUrl.href);
+  }
+
+  /**
    * Before a module is imported, all the imports are first recursively
    * collected and and placed in the #collectedImports map.
    * Once every file has loaded and its import urls replaced with blobs,
@@ -252,18 +270,36 @@ export class ImportResolver {
       return existing;
     }
 
+    const seenRedirects = new Set();
+    let redirectedUrl = url;
+    while (true) {
+      if (seenRedirects.has(redirectedUrl)) {
+        const redirects = Array.from(seenRedirects);
+        redirects.push(redirects[0]);
+        const redirectsStr = redirects.map((r) => `"${r}"`).join(" -> ");
+        throw new Error(`Circular redirects detected.\n${redirectsStr}`);
+      }
+      seenRedirects.add(redirectedUrl);
+      const result = this.#redirectedModules.get(redirectedUrl);
+      if (result) {
+        redirectedUrl = result;
+      } else {
+        break;
+      }
+    }
+
     let collectedImport;
-    if (this.#fakedModules.has(url) && allowFakes) {
+    if (this.#fakedModules.has(redirectedUrl) && allowFakes) {
       const moduleImplementation =
         /** @type {import("../mod.js").ModuleImplementation} */ (this
-          .#fakedModules.get(url));
+          .#fakedModules.get(redirectedUrl));
       collectedImport = new CollectedImportFake(
         moduleImplementation,
-        url,
+        redirectedUrl,
         this,
       );
     } else {
-      collectedImport = new CollectedImportFetch(url, this);
+      collectedImport = new CollectedImportFetch(redirectedUrl, this);
     }
     if (this.generateCoverageMap) {
       const collectedImport2 = collectedImport;
