@@ -117,8 +117,7 @@ export class Importer {
    *  return original.fullContent.replace("foo", "bar");
    * });
    * ```
-   * @param {string | URL} url should be relative to the `importMeta` argument
-   * provided in the {@link constructor}.
+   * @param {string | URL} url should be relative to the `importMeta` argument provided in the {@link constructor}.
    * @param {string | ModuleImplementation} moduleImplementation The code to replace the imported content with.
    */
   fakeModule(url, moduleImplementation) {
@@ -159,8 +158,9 @@ export class Importer {
    * You would run into errors, because like this `fakeBar.js` would be imported from `/fakeBar.js`,
    * which doesn't exist.
    *
-   * @param {string | URL} url
-   * @param {string | URL} newUrl
+   * @param {string | URL} url The old url you wish to replace.
+   * Should be relative to the `importMeta` argument provided in the {@link constructor}.
+   * @param {string | URL} newUrl The new url relative to the `importMeta` argument provided in the {@link constructor}.
    */
   redirectModule(url, newUrl) {
     this.#resolver.registerRedirectModule(url, newUrl);
