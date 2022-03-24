@@ -12,14 +12,22 @@ cd fake-imports
 ## Running tests
 
 ```
-deno test -A --no-check=remote
+deno task test
+```
+
+Or if you wish to only run a specific test:
+
+```
+deno task test test/unit/src/ImportResolver.test.js
 ```
 
 ## Code style
 
-Before submitting a PR, make sure to run
+When submitting a PR, you can run
 
 ```
-deno fmt
-deno lint
+deno task check
 ```
+
+This runs the linter, formatter and finally all the tests. This is generally
+required to pass in order for ci to pass.
