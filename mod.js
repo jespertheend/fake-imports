@@ -56,6 +56,7 @@ export class Importer {
    * const result1 = await importer1.import("./foo.js");
    * console.log(result1.modified); // true
    *
+   * // Creating a second importer will make seperate instances of all the scripts.
    * const importer2 = new Importer(import.meta.url);
    * const result2 = await importer2.import("./foo.js");
    * console.log(result2.modified); // false
@@ -149,7 +150,7 @@ export class Importer {
    *
    * #### Using fakeModule()
    *
-   * If you were to try this with `fakeModule` like so
+   * If you were to try this with `fakeModule()` like so:
    * ```js
    * const fakeFoo = await fetch("/long/path/to/fakeFoo.js");
    * importer.fakeModule("/foo.js", await fakeFoo.text());
