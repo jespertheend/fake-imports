@@ -19,7 +19,7 @@ Deno.test({
   name: "Addition at the start",
   fn: () => {
     const from = "000";
-    const to = "addition 000";
+    const to = "addition\n000";
 
     const result = computeDiffOffsets(from, to);
 
@@ -32,14 +32,14 @@ Deno.test({
 Deno.test({
   name: "Addition in the middle",
   fn: () => {
-    const from = "000000";
-    const to = "000 addition 000";
+    const from = "000\n000";
+    const to = "000\naddition\n000";
 
     const result = computeDiffOffsets(from, to);
 
     assertEquals(result, [
       [0, 0],
-      [3, 10],
+      [4, 9],
     ]);
   },
 });
@@ -47,8 +47,8 @@ Deno.test({
 Deno.test({
   name: "Addition at the end",
   fn: () => {
-    const from = "000";
-    const to = "000 addition";
+    const from = "000\n";
+    const to = "000\naddition";
 
     const result = computeDiffOffsets(from, to);
 
@@ -61,7 +61,7 @@ Deno.test({
 Deno.test({
   name: "Removal at the start",
   fn: () => {
-    const from = "removal 000";
+    const from = "removal\n000";
     const to = "000";
 
     const result = computeDiffOffsets(from, to);
@@ -76,15 +76,15 @@ Deno.test({
 Deno.test({
   name: "Removal in the middle",
   fn: () => {
-    const from = "000 removal 000";
-    const to = "000000";
+    const from = "000\nremoval\n000";
+    const to = "000\n000";
 
     const result = computeDiffOffsets(from, to);
 
     assertEquals(result, [
       [0, 0],
-      [3, null],
-      [12, -9],
+      [4, null],
+      [12, -8],
     ]);
   },
 });
@@ -92,14 +92,14 @@ Deno.test({
 Deno.test({
   name: "Removal at the end",
   fn: () => {
-    const from = "000 removal";
-    const to = "000";
+    const from = "000\nremoval";
+    const to = "000\n";
 
     const result = computeDiffOffsets(from, to);
 
     assertEquals(result, [
       [0, 0],
-      [3, null],
+      [4, null],
     ]);
   },
 });
@@ -107,15 +107,15 @@ Deno.test({
 Deno.test({
   name: "Replacement",
   fn: () => {
-    const from = "000 old 000";
-    const to = "000 new 000";
+    const from = "000\nold\n000";
+    const to = "000\nnew\n000";
 
     const result = computeDiffOffsets(from, to);
 
     assertEquals(result, [
       [0, 0],
       [4, null],
-      [7, 0],
+      [8, 0],
     ]);
   },
 });
