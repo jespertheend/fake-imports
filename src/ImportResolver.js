@@ -27,14 +27,11 @@ import { CollectedImportFetch } from "./CollectedImportFetch.js";
  */
 
 const COVERAGE_MAP_ARG = "--fi-coverage-map=";
-const FORCE_COVERAGE_ARG_WRITE_TIMEOUT_ARG =
-  "--fi-force-coverage-map-write-timeout=";
 
 export class ImportResolver {
   #importMeta = "";
   #generateCoverageMap = false;
   #coverageMapOutPath = "";
-  #forceCoverageMapWriteTimeout = 0;
 
   #env = "browser";
   /** @type {Deno?} */
@@ -71,7 +68,6 @@ export class ImportResolver {
     {
       generateCoverageMap = "auto",
       coverageMapOutPath = "",
-      forceCoverageMapWriteTimeout = 0,
     },
     {
       env = "browser",
@@ -81,7 +77,6 @@ export class ImportResolver {
   ) {
     this.#env = env;
     this.#deno = deno;
-    this.#forceCoverageMapWriteTimeout = forceCoverageMapWriteTimeout;
 
     if (env == "browser" && coverageMapOutPath != "") {
       throw new Error(
@@ -128,38 +123,6 @@ export class ImportResolver {
         });
       }
     }
-
-    for (const arg of args) {
-      if (arg.startsWith(FORCE_COVERAGE_ARG_WRITE_TIMEOUT_ARG)) {
-        const strValue = arg.substring(
-          FORCE_COVERAGE_ARG_WRITE_TIMEOUT_ARG.length,
-        );
-        const numValue = parseInt(strValue);
-        if (isNaN(numValue)) {
-          throw new Error(
-            `Invalid value for ${FORCE_COVERAGE_ARG_WRITE_TIMEOUT_ARG}`,
-          );
-        } else {
-          this.#forceCoverageMapWriteTimeout = numValue;
-        }
-        this.#assertCoverageMapWriteTimeoutArg(
-          `${FORCE_COVERAGE_ARG_WRITE_TIMEOUT_ARG} requires ${COVERAGE_MAP_ARG}`,
-        );
-      }
-    }
-
-    this.#assertCoverageMapWriteTimeoutArg(
-      `forceCoverageMapWriteTimeout requires generateCoverageMap to be true or "auto" with ${COVERAGE_MAP_ARG}`,
-    );
-  }
-
-  /**
-   * @param {string} message
-   */
-  #assertCoverageMapWriteTimeoutArg(message) {
-    if (this.forceCoverageMapWriteTimeout > 0 && !this.coverageMapOutPath) {
-      throw new Error(message);
-    }
   }
 
   get generateCoverageMap() {
@@ -168,10 +131,6 @@ export class ImportResolver {
 
   get coverageMapOutPath() {
     return this.#coverageMapOutPath;
-  }
-
-  get forceCoverageMapWriteTimeout() {
-    return this.#forceCoverageMapWriteTimeout;
   }
 
   /**
@@ -222,7 +181,11 @@ export class ImportResolver {
       url = new URL(url, this.#importMeta);
     }
     const collectedImport = this.createCollectedImport(url.href);
-    return await import(await collectedImport.getBlobUrl());
+    const module = await import(await collectedImport.getBlobUrl());
+    if (this.#coverageMapWritePromises.length > 0) {
+      await Promise.all(this.#coverageMapWritePromises);
+    }
+    return module;
   }
 
   /**
@@ -358,21 +321,11 @@ export class ImportResolver {
       if (!this.#makeCoverageDirPromise) return;
       await this.#makeCoverageDirPromise;
 
-      if (this.forceCoverageMapWriteTimeout > 0) {
-        await new Promise((resolve) => {
-          setTimeout(resolve, this.forceCoverageMapWriteTimeout);
-        });
-      }
-
       const str = JSON.stringify(entry, null, 2);
       const uuid = crypto.randomUUID();
       const fileName = `${uuid}.json`;
       const writePath = resolve(this.#coverageMapOutPath, fileName);
       await this.#deno.writeTextFile(writePath, str);
     }
-  }
-
-  async finishCoverageMapWrites() {
-    await Promise.all(this.#coverageMapWritePromises);
   }
 }

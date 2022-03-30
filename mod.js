@@ -15,8 +15,6 @@ import { ImportResolver } from "./src/ImportResolver.js";
  * @property {"auto" | boolean} [generateCoverageMap] `"auto"` to look at command line flags for this option, or `true|false` to force enable or disable coverage map generation. Defaults to `"auto"`.
  * @property {string} [coverageMapOutPath] When set, writes coverage map data to this directory.
  * [more info about coverage maps](https://github.com/jespertheend/fake-imports#coverage)
- * @property {number} [forceCoverageMapWriteTimeout] Forces coverage map data to wait for this amount
- * of milliseconds before writing to disk. Useful for finding flaky tests. [more info](https://github.com/jespertheend/fake-imports#waiting-for-writes-to-finish)
  */
 
 /**
@@ -192,14 +190,5 @@ export class Importer {
    */
   removeOnCoverageMapEntryAdded(cb) {
     this.#resolver.removeOnCoverageMapEntryAdded(cb);
-  }
-
-  /**
-   * Resolves when all coverage map data has been written to disk.
-   *
-   * [more info](https://github.com/jespertheend/fake-imports#waiting-for-writes-to-finish)
-   */
-  async finishCoverageMapWrites() {
-    await this.#resolver.finishCoverageMapWrites();
   }
 }

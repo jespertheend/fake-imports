@@ -194,31 +194,6 @@ importer.onCoverageMapEntryAdded((entry) => {
 const coverageMap = importer.getCoverageMap();
 ```
 
-### Waiting for writes to finish
-
-When using `--fi-coverage-map` with `deno test`, you might end up finishing your
-test before the coverage map has finished writing to disk. In that case Deno
-will fail the test with `AssertionError: Test case is leaking async ops.` To fix
-this issue, you could set `sanitizeOps` and `sanitizeResources` to false on your
-test, but it would be better to wait for the writes to finish:
-
-```js
-const importer = new Importer(import.meta.url);
-
-// do your test
-
-await importer.finishCoverageMapWrites();
-```
-
-Though with tests commonly being async already, and coverage map writes being
-pretty fast in most cases, it might happen that your test passes even without
-using `finishCoverageMapWrites`. This would cause your test to get flaky though.
-To ensure you didn't accidentally forget to wait for the writes, you can force
-writes to take a little longer with
-`--fi-force-coverage-map-write-timeout=1000`. This will make all writes take one
-second to finish. That way you can easily verify which of your tests would fail
-in case writes take longer.
-
 ## How it works internally
 
 When you import via `importer.import()`, the resource is first downloaded using

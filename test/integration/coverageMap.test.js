@@ -170,3 +170,51 @@ Deno.test({
     await cleanup();
   },
 });
+
+Deno.test({
+  name:
+    "importing with coverage enabled waits for all coverage map writes to finish",
+  async fn() {
+    const { cleanup, basePath } = await simpleReplacementDir();
+    const importer = new Importer(basePath, {
+      coverageMapOutPath: "./coverage",
+    });
+    const originalWriteTextFile = Deno.writeTextFile;
+
+    let writeTextFileCallsCount = 0;
+    /** @type {Set<() => void>} */
+    const writeTextPromiseCallbacks = new Set();
+    Deno.writeTextFile = async (_path, _data) => {
+      writeTextFileCallsCount++;
+      /** @type {Promise<void>} */
+      const promise = new Promise((r) => {
+        writeTextPromiseCallbacks.add(r);
+      });
+      await promise;
+    };
+
+    const importPromise = importer.import("./main.js");
+
+    // poll until writeTextFile is called twice
+    while (writeTextFileCallsCount < 2) {
+      await new Promise((r) => setTimeout(r, 0));
+    }
+
+    let importPromiseResolved = false;
+    importPromise.then(() => {
+      importPromiseResolved = true;
+    });
+    await new Promise((r) => setTimeout(r, 0));
+    assertEquals(importPromiseResolved, false);
+
+    writeTextPromiseCallbacks.forEach((cb) => cb());
+
+    await importPromise;
+
+    await cleanup();
+    Deno.writeTextFile = originalWriteTextFile;
+
+    // double check if a new writeTextFile call wasn't made while we were cleaning up
+    assertEquals(writeTextFileCallsCount, 2);
+  },
+});
