@@ -101,3 +101,31 @@ Deno.test({
     uninstallMockFetch();
   },
 });
+
+Deno.test({
+  name: "handleGetContent() with 500 status code and parent importer",
+  async fn() {
+    installMockFetch({
+      responseText: "// script",
+      responseCode: 500,
+    });
+
+    const { collectedImport, scriptUrl } = createCollectedImport();
+    const mockParent = /** @type {CollectedImportFetch} */ ({
+      url: "file:///path/to/parent.js",
+    });
+    collectedImport.addParentCollectedImport(mockParent);
+
+    await assertRejects(
+      async () => {
+        {
+          await collectedImport.handleGetContent();
+        }
+      },
+      TypeError,
+      `Failed to import "${scriptUrl}" from "file:///path/to/parent.js". The resource did not respond with an ok status code (500).`,
+    );
+
+    uninstallMockFetch();
+  },
+});

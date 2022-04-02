@@ -147,6 +147,18 @@ export class CollectedImport {
   }
 
   /**
+   * If this module was imported by one or multiple another modules, this method
+   * will return the first module that imported this module.
+   * If the module was imported by the user directly, null is returned.
+   */
+  getFirstParentCollectedImport() {
+    for (const parent of this.#parentCollectedImports) {
+      return parent;
+    }
+    return null;
+  }
+
+  /**
    * If this collected import has `parentCollectedImport` as parent, an array
    * is returned that represents the chain of imports. If the import is not
    * currently found in any of the parents, null is returned.

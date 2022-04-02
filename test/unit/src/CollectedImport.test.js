@@ -138,6 +138,28 @@ Deno.test({
 });
 
 Deno.test({
+  name: "getFirstParentCollectedImport() returns the first parent",
+  fn() {
+    const importA = new CollectedImport("a.js", basicMockResolver);
+    const importB = new CollectedImport("b.js", basicMockResolver);
+    const importC = new CollectedImport("c.js", basicMockResolver);
+    importC.addParentCollectedImport(importA);
+    importC.addParentCollectedImport(importB);
+
+    assertStrictEquals(importC.getFirstParentCollectedImport(), importA);
+  },
+});
+
+Deno.test({
+  name: "getFirstParentCollectedImport() returns null if there are no parents",
+  fn() {
+    const collectedImport = new CollectedImport("c.js", basicMockResolver);
+
+    assertEquals(collectedImport.getFirstParentCollectedImport(), null);
+  },
+});
+
+Deno.test({
   name:
     "initWithErrorHandling() triggers onCreatedBlobUrl callbacks with error when the resolver errors",
   async fn() {

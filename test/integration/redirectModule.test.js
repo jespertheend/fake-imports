@@ -140,7 +140,7 @@ Deno.test({
     await assertRejects(
       async () => await importer.import("./main.js"),
       TypeError,
-      `Failed to import "${basePath}does/not/exist.js". A network error occurred while fetching the module.`,
+      `Failed to import "${basePath}does/not/exist.js" from "${basePath}main.js". A network error occurred while fetching the module.`,
     );
 
     await cleanup();
