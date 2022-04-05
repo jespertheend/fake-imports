@@ -36,6 +36,11 @@ export function parseImports(scriptSource) {
   for (const match of scriptSource.matchAll(staticImportRegex)) {
     parseMatch(match, imports);
   }
+  const staticReExportRegex =
+    /(?:^|;)\s*export[\s\S]+?from\s+["'](?<url>.+?)["']/gmd;
+  for (const match of scriptSource.matchAll(staticReExportRegex)) {
+    parseMatch(match, imports);
+  }
   const dynamicImportRegex = /import\s*?\(\s*?["'](?<url>.+)["']\s*?\)/gmd;
   for (const match of scriptSource.matchAll(dynamicImportRegex)) {
     parseMatch(match, imports);

@@ -81,3 +81,24 @@ Deno.test({
     await cleanup();
   },
 });
+
+Deno.test({
+  name: "Module that re-exports a module",
+  async fn() {
+    const { cleanup, basePath } = await setupScriptTempDir({
+      "main.js": `
+        export {foo} from "./foo.js";
+      `,
+      "foo.js": `
+        export const foo = "foo";
+      `,
+    }, { prefix: "module_that_reexports_a_module" });
+
+    const importer = new Importer(basePath);
+    const { foo } = await importer.import("./main.js");
+
+    assertEquals(foo, "foo");
+
+    await cleanup();
+  },
+});

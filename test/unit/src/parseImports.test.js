@@ -110,7 +110,7 @@ Deno.test("With line break", () => {
 });
 
 Deno.test({
-  name: "wildcard",
+  name: "import * from",
   fn() {
     const script = `
       import * from "./script.js";
@@ -140,6 +140,101 @@ Deno.test({
     assertEquals(imports, [
       {
         start: 29,
+        length: 11,
+        url: "./script.js",
+      },
+    ]);
+  },
+});
+
+Deno.test({
+  name: "export {named} from",
+  fn() {
+    const script = `
+      export {named} from "./script.js";
+    `;
+
+    const imports = parseImports(script);
+
+    assertEquals(imports, [
+      {
+        start: 28,
+        length: 11,
+        url: "./script.js",
+      },
+    ]);
+  },
+});
+
+Deno.test({
+  name: "export * from",
+  fn() {
+    const script = `
+      export * from "./script.js";
+    `;
+
+    const imports = parseImports(script);
+
+    assertEquals(imports, [
+      {
+        start: 22,
+        length: 11,
+        url: "./script.js",
+      },
+    ]);
+  },
+});
+
+Deno.test({
+  name: "export * as named from",
+  fn() {
+    const script = `
+      export * as foo from "./script.js";
+    `;
+
+    const imports = parseImports(script);
+
+    assertEquals(imports, [
+      {
+        start: 29,
+        length: 11,
+        url: "./script.js",
+      },
+    ]);
+  },
+});
+
+Deno.test({
+  name: "export {named1 as named2} from",
+  fn() {
+    const script = `
+      export {named1 as named2} from "./script.js";
+    `;
+
+    const imports = parseImports(script);
+
+    assertEquals(imports, [
+      {
+        start: 39,
+        length: 11,
+        url: "./script.js",
+      },
+    ]);
+  },
+});
+
+Deno.test({
+  name: "export {default, name1} from",
+  fn() {
+    const script = `
+      export {default, name1} from "./script.js";
+    `;
+
+    const imports = parseImports(script);
+
+    assertEquals(imports, [
+      {
+        start: 37,
         length: 11,
         url: "./script.js",
       },
@@ -213,6 +308,40 @@ Deno.test({
     /*
      * import("./script.js")
     */
+    `,
+    ];
+
+    for (const source of scriptSources) {
+      const imports = parseImports(source);
+
+      assertEquals(
+        imports,
+        [],
+        `The following should not have imports: ${source}`,
+      );
+    }
+  },
+});
+
+Deno.test({
+  name: "Doesn't import ",
+  fn() {
+    const scriptSources = [
+      `
+		export const foo = "foo";
+	  `,
+      `
+    export function foo() { return "foo" };
+    `,
+      `
+    export default function foo() { return "foo" };
+    `,
+      `
+    export class Foo {
+      constructor() {
+        this.x = "foo";
+      }
+    }
     `,
     ];
 
