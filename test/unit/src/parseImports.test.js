@@ -109,6 +109,44 @@ Deno.test("With line break", () => {
   ]);
 });
 
+Deno.test({
+  name: "wildcard",
+  fn() {
+    const script = `
+      import * from "./script.js";
+    `;
+
+    const imports = parseImports(script);
+
+    assertEquals(imports, [
+      {
+        start: 22,
+        length: 11,
+        url: "./script.js",
+      },
+    ]);
+  },
+});
+
+Deno.test({
+  name: "wildcard with 'as'",
+  fn() {
+    const script = `
+      import * as foo from "./script.js";
+    `;
+
+    const imports = parseImports(script);
+
+    assertEquals(imports, [
+      {
+        start: 29,
+        length: 11,
+        url: "./script.js",
+      },
+    ]);
+  },
+});
+
 Deno.test("Dynamic", () => {
   const script = `
 		import {staticImport} from "./script.js";
