@@ -145,3 +145,12 @@ Deno.test({
     assertThrows(() => resolver2.getCoverageMap());
   },
 });
+
+Deno.test({
+  name: "calling setImportMap() twice throws",
+  fn() {
+    const resolver = new ImportResolver("/basepath", {});
+    resolver.setImportMap({});
+    assertThrows(() => resolver.setImportMap({}));
+  },
+});

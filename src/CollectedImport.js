@@ -4,7 +4,7 @@ import { replaceImports } from "./replaceImports.js";
 
 /**
  * @typedef {Object} ResolveImportData
- * @property {string} url
+ * @property {string} url The relative url to replace the import with.
  * @property {boolean} [allowFakes = true]
  */
 
@@ -75,7 +75,7 @@ export class CollectedImport {
   }
 
   /**
-   * @param {string} url The full (non-relative) url to resolve.
+   * @param {string} url The relative url to resolve, this is essentially the raw string from the import statement.
    * @returns {ResolveImportData}
    */
   handleResolveImport(url) {
@@ -104,8 +104,7 @@ export class CollectedImport {
     const blobUrlPromises = [];
     for (const importData of imports) {
       const promise = (async () => {
-        const resolvedUrl = new URL(importData.url, this.url);
-        const resolveData = this.handleResolveImport(resolvedUrl.href);
+        const resolveData = this.handleResolveImport(importData.url);
         const collectedImport = this.#resolver.createCollectedImport(
           resolveData.url,
           {

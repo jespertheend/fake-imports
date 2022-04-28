@@ -16,6 +16,7 @@ import {
 } from "https://deno.land/std@0.121.0/path/mod.ts";
 import { CollectedImportFake } from "./CollectedImportFake.js";
 import { CollectedImportFetch } from "./CollectedImportFetch.js";
+import { parseImportMap, resolveModuleSpecifier } from "./importMapParser.js";
 
 /** @typedef {"browser" | "deno"} Environment */
 
@@ -36,6 +37,22 @@ export class ImportResolver {
   #env = "browser";
   /** @type {Deno?} */
   #deno = null;
+
+  /** @type {string | URL | import("./importMapParser.js").ImportMapData | null} */
+  #providedImportMap = null;
+
+  #hasParsedImportMap = false;
+
+  /** @type {import("./importMapParser.js").ParsedImportMap} */
+  #parsedImportMap = {
+    imports: {},
+  };
+
+  /**
+   * Used for tracking if a call to import() has been made. If so, the
+   * `setImportMap()` call will throw.
+   */
+  #hasMadeImportCall = false;
 
   /** @typedef {import("../mod.js").CoverageMapEntry} CoverageMapEntry */
   /** @typedef {import("./CollectedImport.js").CollectedImport} CollectedImport */
@@ -168,6 +185,52 @@ export class ImportResolver {
   }
 
   /**
+   * @param {string | URL | import("./importMapParser.js").ImportMapData} importMap
+   */
+  setImportMap(importMap) {
+    if (this.#hasMadeImportCall) {
+      throw new Error(
+        "You have already made a call to import(), import maps can only be set *before* importing modules.",
+      );
+    }
+    if (this.#providedImportMap) {
+      throw new Error("You have already set an import map.");
+    }
+    this.#providedImportMap = importMap;
+  }
+
+  /**
+   * @private
+   */
+  async loadImportMap() {
+    if (!this.#providedImportMap) return;
+    if (this.#hasParsedImportMap) return;
+
+    /** @type {import("./importMapParser.js").ImportMapData} */
+    let importMapData;
+    if (
+      typeof this.#providedImportMap === "string" ||
+      this.#providedImportMap instanceof URL
+    ) {
+      let resourceUrl;
+      if (typeof this.#providedImportMap === "string") {
+        resourceUrl = new URL(this.#providedImportMap, this.#importMeta);
+      } else {
+        resourceUrl = this.#providedImportMap;
+      }
+      const request = await fetch(resourceUrl.href);
+      importMapData = await request.json();
+    } else {
+      importMapData = this.#providedImportMap;
+    }
+    this.#parsedImportMap = parseImportMap(
+      importMapData,
+      new URL(this.#importMeta),
+    );
+    this.#hasParsedImportMap = true;
+  }
+
+  /**
    * Before a module is imported, all the imports are first recursively
    * collected and and placed in the #collectedImports map.
    * Once every file has loaded and its import urls replaced with blobs,
@@ -177,9 +240,11 @@ export class ImportResolver {
    * @returns {Promise<T>}
    */
   async import(url) {
+    this.#hasMadeImportCall = true;
     if (typeof url === "string") {
       url = new URL(url, this.#importMeta);
     }
+    await this.loadImportMap();
     const collectedImport = this.createCollectedImport(url.href);
     const module = await import(await collectedImport.getBlobUrl());
     if (this.#coverageMapWritePromises.length > 0) {
@@ -192,7 +257,7 @@ export class ImportResolver {
    * Creates a new CollectedImport instance and adds it to the collectedImports map.
    * The created collected import will call this function as well, this way
    * all modules are recursively collected.
-   * @param {string} url The full (non relative) url to fetch.
+   * @param {string} url The relative url specifier to collect, this is essentially the raw import string from scripts.
    * @param {Object} [options]
    * @param {boolean} [options.allowFakes] If true, the real module will be loaded instead of the fake one.
    * @param {CollectedImport?} [options.parentImporter] The parent collected import, used for circular import detection.
@@ -201,6 +266,14 @@ export class ImportResolver {
     allowFakes = true,
     parentImporter = null,
   } = {}) {
+    const baseUrl = parentImporter ? parentImporter.url : this.#importMeta;
+    const newUrl = resolveModuleSpecifier(
+      this.#parsedImportMap,
+      new URL(baseUrl),
+      url,
+    );
+    url = newUrl.href;
+
     let collectedImportKey = "";
     collectedImportKey += allowFakes ? "1" : "0";
     collectedImportKey += url;

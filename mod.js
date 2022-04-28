@@ -166,6 +166,13 @@ export class Importer {
   }
 
   /**
+   * @param {string | URL | import("./src/importMapParser.js").ImportMapData} importMap
+   */
+  setImportMap(importMap) {
+    this.#resolver.setImportMap(importMap);
+  }
+
+  /**
    * Gets all coverage map data from all modules imported by this importer.
    *
    * [more info about coverage maps](https://github.com/jespertheend/fake-imports#coverage)
