@@ -85,7 +85,7 @@ export class Importer {
    * [dynamic `import()` statement](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#dynamic_imports).
    * Except with the faked modules applied.
    * @template T
-   * @param {string | URL} url
+   * @param {string} url
    * @returns {Promise<T>}
    */
   async import(url) {

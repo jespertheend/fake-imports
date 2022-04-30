@@ -29,7 +29,7 @@ Deno.test({
         },
       });
 
-      const module = await importer.import("main.js");
+      const module = await importer.import("./main.js");
       assertEquals(module.foo, "foo");
     } finally {
       await cleanup();
@@ -83,7 +83,7 @@ Deno.test({
       const importer = new Importer(basePath);
       importer.setImportMap("./importmap.json");
 
-      const module = await importer.import("main.js");
+      const module = await importer.import("./main.js");
       assertEquals(module.foo, "foo");
     } finally {
       await cleanup();
@@ -114,7 +114,7 @@ Deno.test({
         },
       });
 
-      const module = await importer.import("main.js");
+      const module = await importer.import("./main.js");
       assertEquals(module.foo, "foo");
     } finally {
       await cleanup();
@@ -146,7 +146,7 @@ Deno.test({
         },
       });
 
-      const module = await importer.import("main.js");
+      const module = await importer.import("./main.js");
       assertEquals(module.foo, "foo");
     } finally {
       await cleanup();
@@ -156,7 +156,6 @@ Deno.test({
 
 Deno.test({
   name: "importing a bare specifier directly without an import map",
-  ignore: true,
   async fn() {
     const { cleanup, basePath } = await simpleReplacementDir();
 
@@ -191,7 +190,7 @@ Deno.test({
       const importer = new Importer(basePath);
       await assertRejects(
         async () => {
-          await importer.import("main.js");
+          await importer.import("./main.js");
         },
         TypeError,
         `Relative import path "bare" not prefixed with / or ./ or ../`,
@@ -204,7 +203,6 @@ Deno.test({
 
 Deno.test({
   name: "importing a bare specifier directly that is not in the import map",
-  ignore: true,
   async fn() {
     const { cleanup, basePath } = await simpleReplacementDir();
 
@@ -249,7 +247,7 @@ Deno.test({
       });
       await assertRejects(
         async () => {
-          await importer.import("main.js");
+          await importer.import("./main.js");
         },
         TypeError,
         `Relative import path "bare" not prefixed with / or ./ or ../`,
@@ -272,7 +270,7 @@ Deno.test({
       const fullImportPath = new URL(importMapFileName, basePath);
       await assertRejects(
         async () => {
-          await importer.import("main.js");
+          await importer.import("./main.js");
         },
         TypeError,
         `Failed install import map from "${fullImportPath}". A network error occurred while fetching the module.`,
@@ -300,7 +298,7 @@ Deno.test({
       const fullImportPath = new URL(importMapFileName, basePath);
       await assertRejects(
         async () => {
-          await importer.import("main.js");
+          await importer.import("./main.js");
         },
         TypeError,
         `Failed install import map from "${fullImportPath}". The resource did not respond with an ok status code (404).`,

@@ -240,16 +240,18 @@ export class ImportResolver {
    * Once every file has loaded and its import urls replaced with blobs,
    * the entry point is imported with a regular async import call.
    * @template T
-   * @param {string | URL} url
+   * @param {string} url
    * @returns {Promise<T>}
    */
   async import(url) {
     this.#hasMadeImportCall = true;
-    if (typeof url === "string") {
-      url = new URL(url, this.#importMeta);
-    }
+    const newUrl = resolveModuleSpecifier(
+      this.#parsedImportMap,
+      new URL(this.#importMeta),
+      url,
+    );
     await this.loadImportMap();
-    const collectedImport = this.createCollectedImport(url.href);
+    const collectedImport = this.createCollectedImport(newUrl.href);
     let module;
     try {
       module = await import(await collectedImport.getBlobUrl());
