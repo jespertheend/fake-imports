@@ -166,6 +166,27 @@ export class Importer {
   }
 
   /**
+   * Use this to set the import map of the importer.
+   * You may only call this once, and only before making any imports.
+   * You can either pass a string that points to the import map (remote or on disk),
+   * or you can pass an import map object directly.
+   *
+   * ## Usage
+   * ```js
+   * const importer1 = new Importer(import.meta.url);
+   * importer1.setImportMap("../import-map.json"); // import relatively to the current file
+   *
+   * const importer2 = new Importer(import.meta.url);
+   * importer2.setImportMap("https://example.com/import-map.json"); // import from a remote location
+   *
+   * const importer3 = new Importer(import.meta.url);
+   * importer3.setImportMap({
+   *  "imports": {
+   *    "./foo.js": "https://example.com/foo.js",
+   *    "./bar.js": "https://example.com/bar.js",
+   *  },
+   * });
+   * ```
    * @param {string | URL | import("./src/importMapParser.js").ImportMapData} importMap
    */
   setImportMap(importMap) {
