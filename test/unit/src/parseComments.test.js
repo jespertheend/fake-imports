@@ -165,3 +165,21 @@ Deno.test({
     ]);
   },
 });
+
+Deno.test({
+  name: "non comment between two block comments",
+  fn() {
+    const source = `
+      /* comment */
+      not a comment
+      /* comment */
+    `;
+
+    const result = getCommentLocations(source);
+
+    assertEquals(result, [
+      { start: 7, end: 20 },
+      { start: 47, end: 60 },
+    ]);
+  },
+});

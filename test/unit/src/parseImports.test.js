@@ -324,6 +324,27 @@ Deno.test({
 });
 
 Deno.test({
+  name: "Import wrapped in between two block comments.",
+  fn() {
+    const scriptSource = `
+/** comment. */
+import {foo} from "./script.js";
+/** other comment. */
+    `;
+
+    const result = parseImports(scriptSource);
+
+    assertEquals(result, [
+      {
+        start: 36,
+        length: 11,
+        url: "./script.js",
+      },
+    ]);
+  },
+});
+
+Deno.test({
   name: "Doesn't import ",
   fn() {
     const scriptSources = [

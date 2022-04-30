@@ -22,7 +22,7 @@ export function getCommentLocations(scriptSource) {
     totalIndex += line.length + "\n".length;
   }
 
-  const blockCommentRegex = /\/\*[\s\S]*\*\//g;
+  const blockCommentRegex = /\/\*[\s\S]*?\*\//g;
   for (const match of scriptSource.matchAll(blockCommentRegex)) {
     if (match.index == undefined) continue;
     commentLocations.push({
