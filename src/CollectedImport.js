@@ -192,6 +192,14 @@ export class CollectedImport {
   }
 
   /**
+   * The blob url that was created for this module, returns null if the blob
+   * url was not created yet.
+   */
+  get createdBlobUrl() {
+    return this.#createdBlobUrl;
+  }
+
+  /**
    * @returns {Promise<string>}
    */
   async getBlobUrl() {

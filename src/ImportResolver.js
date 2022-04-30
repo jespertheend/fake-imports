@@ -250,7 +250,18 @@ export class ImportResolver {
     }
     await this.loadImportMap();
     const collectedImport = this.createCollectedImport(url.href);
-    const module = await import(await collectedImport.getBlobUrl());
+    let module;
+    try {
+      module = await import(await collectedImport.getBlobUrl());
+    } catch (e) {
+      if (e instanceof Error) {
+        e.message = this.replaceBlobUrls(e.message);
+        if (e.stack) {
+          e.stack = this.replaceBlobUrls(e.stack);
+        }
+      }
+      throw e;
+    }
     if (this.#coverageMapWritePromises.length > 0) {
       await Promise.all(this.#coverageMapWritePromises);
     }
@@ -357,6 +368,19 @@ export class ImportResolver {
     collectedImport.initWithErrorHandling();
     this.#collectedImports.set(collectedImportKey, collectedImport);
     return collectedImport;
+  }
+
+  /**
+   * Replaces all occurrences of known blob urls in the given string with the
+   * correct file path. Useful for fixing up error messages.
+   * @param {string} str
+   */
+  replaceBlobUrls(str) {
+    for (const collectedImport of this.#collectedImports.values()) {
+      if (!collectedImport.createdBlobUrl) continue;
+      str = str.replace(collectedImport.createdBlobUrl, collectedImport.url);
+    }
+    return str;
   }
 
   getCoverageMap() {

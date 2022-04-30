@@ -1,4 +1,4 @@
-import { assertEquals } from "asserts";
+import { assert, assertEquals, assertInstanceOf, assertRejects } from "asserts";
 import { setupScriptTempDir, simpleReplacementDir } from "./shared.js";
 import { Importer } from "../../mod.js";
 
@@ -100,5 +100,91 @@ Deno.test({
     assertEquals(foo, "foo");
 
     await cleanup();
+  },
+});
+
+Deno.test({
+  name:
+    "Syntax errors during import have their blob urls replaced with the original urls",
+  async fn() {
+    const { cleanup, basePath } = await setupScriptTempDir({
+      "main.js": `
+        export {foo} from "./foo.js";
+      `,
+      "foo.js": `
+        export const foo = "foo;
+      `,
+    }, { prefix: "syntax_error_test" });
+
+    try {
+      const importer = new Importer(basePath);
+      const fooUrl = new URL("./foo.js", basePath);
+      /**
+       * @param {unknown} e
+       */
+      const errorCb = (e) => {
+        assertInstanceOf(e, TypeError);
+        if (e.stack) {
+          // If checkjs is enabled, (which it is when using deno task test),
+          // the import will error with a type error from TypeScript rather
+          // than a runtime error. If this is the case, blob urls are not
+          // replaced, see https://github.com/denoland/deno/issues/14443
+          if (!e.stack.includes("TS1002")) {
+            assert(
+              e.stack.includes(fooUrl.href),
+              "Expected the stack trace to include the url to 'foo.js' at least once.",
+            );
+          }
+        }
+      };
+      await assertRejects(
+        async () => {
+          await importer.import("./main.js");
+        },
+        errorCb,
+      );
+    } finally {
+      await cleanup();
+    }
+  },
+});
+
+Deno.test({
+  name:
+    "Runtime errors during import have their blob urls replaced with the original urls",
+  async fn() {
+    const { cleanup, basePath } = await setupScriptTempDir({
+      "main.js": `
+        export {foo} from "./foo.js";
+      `,
+      "foo.js": `
+        const foo = "foo";
+        // @ts-ignore
+        foo.nonExistentFunction();
+        export {foo};
+      `,
+    }, { prefix: "syntax_error_test" });
+
+    try {
+      const importer = new Importer(basePath);
+      const fooUrl = new URL("./foo.js", basePath);
+      /**
+       * @param {unknown} e
+       */
+      const errorCb = (e) => {
+        assertInstanceOf(e, TypeError);
+        if (e.stack) {
+          assert(
+            e.stack.includes(fooUrl.href),
+            "Expected the stack trace to include the url to 'foo.js' at least once.",
+          );
+        }
+      };
+      await assertRejects(async () => {
+        await importer.import("./main.js");
+      }, errorCb);
+    } finally {
+      await cleanup();
+    }
   },
 });
