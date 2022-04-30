@@ -17,6 +17,14 @@ export class CollectedImportFetch extends CollectedImport {
       errorMessagePrefix: failedToImportMessage,
       fetchArgs: [this.url],
     });
-    return await response.text();
+    let mimeType = null;
+    if (response.headers.has("content-type")) {
+      mimeType = response.headers.get("content-type");
+    }
+    const script = await response.text();
+    return {
+      script,
+      mimeType,
+    };
   }
 }

@@ -40,7 +40,10 @@ export class CollectedImportFake extends CollectedImport {
     if (this.fakeModuleImplementation.length <= 0) {
       const castFn =
         /** @type {() => string} */ (this.fakeModuleImplementation);
-      return castFn();
+      return {
+        script: castFn(),
+        mimeType: null,
+      };
     } else {
       const fullContent = await this.getOriginalContentPromise();
       /** @type {import("../mod.js").OriginalModuleData} */
@@ -48,7 +51,11 @@ export class CollectedImportFake extends CollectedImport {
         url: this.url,
         fullContent,
       };
-      return this.fakeModuleImplementation(originalData);
+      const script = this.fakeModuleImplementation(originalData);
+      return {
+        script,
+        mimeType: null,
+      };
     }
   }
 

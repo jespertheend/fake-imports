@@ -69,8 +69,11 @@ Deno.test("handleGetContent no args", async () => {
   const fakeContent = "new fake content";
   const { collectedImport } = createCollectedImport(() => fakeContent);
 
-  const getContentResult = await collectedImport.handleGetContent();
-  assertEquals(getContentResult, fakeContent);
+  const scriptContent = await collectedImport.handleGetContent();
+  assertEquals(scriptContent, {
+    script: fakeContent,
+    mimeType: null,
+  });
 
   uninstallMockFetch();
 });
@@ -89,7 +92,10 @@ Deno.test("handleGetContent with args", async () => {
   );
 
   const getContentResult = await collectedImport.handleGetContent();
-  assertEquals(getContentResult, fakeContent);
+  assertEquals(getContentResult, {
+    script: fakeContent,
+    mimeType: null,
+  });
 
   assertEquals(receivedOriginalData, {
     url: scriptUrl,

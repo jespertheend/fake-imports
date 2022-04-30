@@ -24,9 +24,12 @@ const erroringResolver =
 
 class ExtendecCollectedImport extends CollectedImport {
   handleGetContent() {
-    return Promise.resolve(`
-          import "./someUrl.js";
-        `);
+    return Promise.resolve({
+      script: `
+        import "./someUrl.js";
+      `,
+      mimeType: "text/javascript",
+    });
   }
 }
 

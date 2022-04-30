@@ -9,6 +9,12 @@ import { replaceImports } from "./replaceImports.js";
  */
 
 /**
+ * @typedef {Object} ScriptContent
+ * @property {string} script
+ * @property {string?} mimeType
+ */
+
+/**
  * @typedef BlobUrlReadySuccessData
  * @property {true} success
  * @property {string} blobUrl
@@ -68,10 +74,15 @@ export class CollectedImport {
 
   /**
    * @abstract
-   * @returns {Promise<string>}
+   * @returns {Promise<ScriptContent>}
    */
   async handleGetContent() {
-    return await new Promise((r) => r(""));
+    return await new Promise((r) =>
+      r({
+        script: "",
+        mimeType: null,
+      })
+    );
   }
 
   /**
@@ -97,10 +108,10 @@ export class CollectedImport {
     let originalContent = await this.handleGetOriginalContent();
     const scriptContent = await this.handleGetContent();
     if (originalContent === null) {
-      originalContent = scriptContent;
+      originalContent = scriptContent.script;
     }
 
-    const imports = parseImports(scriptContent);
+    const imports = parseImports(scriptContent.script);
     const blobUrlPromises = [];
     for (const importData of imports) {
       const promise = (async () => {
@@ -125,14 +136,27 @@ export class CollectedImport {
       return;
     }
 
-    const newScriptContent = replaceImports(imports, blobUrls, scriptContent);
+    const newScriptContent = replaceImports(
+      imports,
+      blobUrls,
+      scriptContent.script,
+    );
 
     if (this.#resolver.generateCoverageMap) {
       this.#diffOffsets = computeDiffOffsets(newScriptContent, originalContent);
     }
 
+    let mimeType = scriptContent.mimeType;
+    if (mimeType === null) {
+      if (this.url.endsWith(".ts")) {
+        mimeType = "text/typescript";
+      } else {
+        mimeType = "text/javascript";
+      }
+    }
+
     const blobUrl = URL.createObjectURL(
-      new Blob([newScriptContent], { type: "text/javascript" }),
+      new Blob([newScriptContent], { type: mimeType }),
     );
     this.#createdBlobUrl = blobUrl;
     this.triggerCreatedBlobUrlCallbacks({ success: true, blobUrl });

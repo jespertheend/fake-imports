@@ -20,9 +20,12 @@ Deno.test({
     const mockFetch = installMockFetch({ responseText: "// script" });
     const { collectedImport, scriptUrl } = createCollectedImport();
 
-    const content = await collectedImport.handleGetContent();
+    const scriptContent = await collectedImport.handleGetContent();
 
-    assertEquals(content, "// script");
+    assertEquals(scriptContent, {
+      script: "// script",
+      mimeType: "text/javascript",
+    });
 
     assertEquals(mockFetch.calls, [{ url: scriptUrl, init: undefined }]);
 

@@ -188,3 +188,30 @@ Deno.test({
     }
   },
 });
+
+Deno.test({
+  name: "Importing a typescript file from a javascript file",
+  async fn() {
+    const { cleanup, basePath } = await setupScriptTempDir({
+      "main.js": `
+        import {getTypedFunction} from "./typescriptFile.ts";
+        const result = getTypedFunction("foo");
+        export {result};
+      `,
+      "typescriptFile.ts": `
+        export function getTypedFunction(x: string) : string {
+          return x;
+        }
+      `,
+    }, { prefix: "typescript_imports_test" });
+
+    try {
+      const importer = new Importer(basePath);
+      const main = await importer.import("./main.js");
+
+      assertEquals(main.result, "foo");
+    } finally {
+      await cleanup();
+    }
+  },
+});

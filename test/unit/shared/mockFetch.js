@@ -2,6 +2,7 @@ const originalFetch = globalThis.fetch;
 
 export function installMockFetch({
   responseText = "",
+  contentType = "text/javascript",
   triggerNetworkError = false,
   responseCode = 200,
 } = {}) {
@@ -21,6 +22,9 @@ export function installMockFetch({
     }
     return new Response(responseText, {
       status: responseCode,
+      headers: {
+        "content-type": contentType,
+      },
     });
   };
   globalThis.fetch = /** @type {typeof fetch} */ (mockFetch);
