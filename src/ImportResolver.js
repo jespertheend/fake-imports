@@ -17,6 +17,7 @@ import {
 import { CollectedImportFake } from "./CollectedImportFake.js";
 import { CollectedImportFetch } from "./CollectedImportFetch.js";
 import { parseImportMap, resolveModuleSpecifier } from "./importMapParser.js";
+import { fetchWithErrorHandling } from "./shared.js";
 
 /** @typedef {"browser" | "deno"} Environment */
 
@@ -218,7 +219,10 @@ export class ImportResolver {
       } else {
         resourceUrl = this.#providedImportMap;
       }
-      const request = await fetch(resourceUrl.href);
+      const request = await fetchWithErrorHandling({
+        errorMessagePrefix: `Failed install import map from "${resourceUrl}".`,
+        fetchArgs: [resourceUrl.href],
+      });
       importMapData = await request.json();
     } else {
       importMapData = this.#providedImportMap;

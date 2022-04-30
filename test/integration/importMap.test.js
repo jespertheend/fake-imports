@@ -1,6 +1,10 @@
 import { assertEquals, assertRejects, assertThrows } from "asserts";
 import { setupScriptTempDir, simpleReplacementDir } from "./shared.js";
 import { Importer } from "../../mod.js";
+import {
+  installMockFetch,
+  uninstallMockFetch,
+} from "../unit/shared/mockFetch.js";
 
 Deno.test({
   name: "basic import map",
@@ -233,7 +237,7 @@ Deno.test({
         export {foo};
       `,
     }, {
-      prefix: "bare_specifier_without_import_map",
+      prefix: "bare_specifier_not_in_import_map",
     });
 
     try {
@@ -252,6 +256,58 @@ Deno.test({
       );
     } finally {
       await cleanup();
+    }
+  },
+});
+
+Deno.test({
+  name: "providing a non-existent import map path",
+  async fn() {
+    const { cleanup, basePath } = await simpleReplacementDir();
+
+    try {
+      const importer = new Importer(basePath);
+      const importMapFileName = "nonexistent.json";
+      importer.setImportMap(importMapFileName);
+      const fullImportPath = new URL(importMapFileName, basePath);
+      await assertRejects(
+        async () => {
+          await importer.import("main.js");
+        },
+        TypeError,
+        `Failed install import map from "${fullImportPath}". A network error occurred while fetching the module.`,
+      );
+    } finally {
+      await cleanup();
+    }
+  },
+});
+
+Deno.test({
+  name: "fetching online import path with 404 status code",
+  async fn() {
+    const { cleanup, basePath } = await simpleReplacementDir();
+
+    installMockFetch({
+      responseText: "// script",
+      responseCode: 404,
+    });
+
+    try {
+      const importer = new Importer(basePath);
+      const importMapFileName = "nonexistent.json";
+      importer.setImportMap(importMapFileName);
+      const fullImportPath = new URL(importMapFileName, basePath);
+      await assertRejects(
+        async () => {
+          await importer.import("main.js");
+        },
+        TypeError,
+        `Failed install import map from "${fullImportPath}". The resource did not respond with an ok status code (404).`,
+      );
+    } finally {
+      await cleanup();
+      uninstallMockFetch();
     }
   },
 });
