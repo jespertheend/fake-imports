@@ -159,8 +159,20 @@ Deno.test({
       `,
       "foo.js": `
         const foo = "foo";
-        // @ts-ignore
-        foo.nonExistentFunction();
+
+        a();
+        function a() {
+          b();
+        }
+
+        function b() {
+          c();
+        }
+
+        function c() {
+          // @ts-ignore
+          foo.nonExistentFunction();
+        }
         export {foo};
       `,
     }, { prefix: "syntax_error_test" });
@@ -174,9 +186,17 @@ Deno.test({
       const errorCb = (e) => {
         assertInstanceOf(e, TypeError);
         if (e.stack) {
-          assert(
-            e.stack.includes(fooUrl.href),
-            "Expected the stack trace to include the url to 'foo.js' at least once.",
+          // If this fails, it could be that type checking is disabled in Deno.
+          // There's currently a bug where the line numbers in stack traces are
+          // incorrect when type checking is enabled.
+          // See https://github.com/denoland/deno/issues/12126
+          assertEquals(
+            e.stack,
+            `TypeError: foo.nonExistentFunction is not a function
+    at c (${fooUrl}:17:22)
+    at b (${fooUrl}:15:15)
+    at a (${fooUrl}:9:19)
+    at ${fooUrl}:6:15`,
           );
         }
       };

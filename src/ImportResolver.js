@@ -378,7 +378,7 @@ export class ImportResolver {
   replaceBlobUrls(str) {
     for (const collectedImport of this.#collectedImports.values()) {
       if (!collectedImport.createdBlobUrl) continue;
-      str = str.replace(collectedImport.createdBlobUrl, collectedImport.url);
+      str = str.replaceAll(collectedImport.createdBlobUrl, collectedImport.url);
     }
     return str;
   }
