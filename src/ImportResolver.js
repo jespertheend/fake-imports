@@ -191,14 +191,7 @@ export class ImportResolver {
    * @param {string} url
    */
   makeReal(url) {
-    const newUrl = resolveModuleSpecifier(
-      this.#parsedImportMap,
-      new URL(this.#importMeta),
-      url,
-    );
-    const newUrlSerialized = newUrl.href;
-
-    this.#forcedRealModules.add(newUrlSerialized);
+    this.#forcedRealModules.add(url);
   }
 
   /**
@@ -275,6 +268,9 @@ export class ImportResolver {
    * @param {string} baseUrl
    */
   getRealUrl(url, baseUrl) {
+    if (this.#providedImportMap && !this.#hasParsedImportMap) {
+      throw new Error("Assertion failed, import map hasn't been parsed yet.");
+    }
     const newUrl = resolveModuleSpecifier(
       this.#parsedImportMap,
       new URL(baseUrl),
@@ -282,9 +278,17 @@ export class ImportResolver {
     );
     const newUrlSerialized = newUrl.href;
 
-    if (this.#forcedRealModules.has(newUrlSerialized)) {
-      return newUrlSerialized;
+    for (const forcedModule of this.#forcedRealModules) {
+      const newForcedModule = resolveModuleSpecifier(
+        this.#parsedImportMap,
+        new URL(this.#importMeta),
+        forcedModule,
+      );
+      if (newUrlSerialized == newForcedModule.href) {
+        return newUrlSerialized;
+      }
     }
+
     return null;
   }
 

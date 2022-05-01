@@ -59,3 +59,83 @@ Deno.test({
     }
   },
 });
+
+Deno.test({
+  name: "making an import map resolved entry real",
+  async fn() {
+    const { cleanup, basePath } = await setupScriptTempDir({
+      "main.js": `
+        import {Foo} from "barespecifier";
+        const instance = new Foo();
+        export {instance};
+      `,
+      "notabarespecifier.js": `
+        export class Foo {}
+      `,
+      "importmap.json": `
+        {
+          "imports": {
+            "barespecifier": "./notabarespecifier.js"
+          }
+        }
+      `,
+    }, {
+      prefix: "makereal_resolved_import_map_entry_test",
+    });
+
+    try {
+      const importer = new Importer(basePath, {
+        importMap: "./importmap.json",
+      });
+      importer.makeReal("./notabarespecifier.js");
+
+      const { instance } = await importer.import("./main.js");
+      const { Foo } = await import(
+        new URL("./notabarespecifier.js", basePath).href
+      );
+      assertInstanceOf(instance, Foo);
+    } finally {
+      await cleanup();
+    }
+  },
+});
+
+Deno.test({
+  name: "making an import map bare specfier entry real",
+  async fn() {
+    const { cleanup, basePath } = await setupScriptTempDir({
+      "main.js": `
+        import {Foo} from "barespecifier";
+        const instance = new Foo();
+        export {instance};
+      `,
+      "notabarespecifier.js": `
+        export class Foo {}
+      `,
+      "importmap.json": `
+        {
+          "imports": {
+            "barespecifier": "./notabarespecifier.js"
+          }
+        }
+      `,
+    }, {
+      prefix: "makereal_bare_specifier_entry_test",
+    });
+
+    try {
+      const importer = new Importer(basePath, {
+        importMap: "./importmap.json",
+      });
+      importer.makeReal("barespecifier");
+
+      const { instance } = await importer.import("./main.js");
+      const { Foo } = await import(
+        new URL("./notabarespecifier.js", basePath).href
+      );
+      assertInstanceOf(instance, Foo);
+    } finally {
+      await cleanup();
+    }
+  },
+});
