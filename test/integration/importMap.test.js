@@ -28,6 +28,7 @@ Deno.test({
             "barespecifier": "./notabarespecifier.js",
           },
         },
+        makeImportMapEntriesReal: false,
       });
 
       const module = await importer.import("./main.js");
@@ -63,6 +64,7 @@ Deno.test({
     try {
       const importer = new Importer(basePath, {
         importMap: "./importmap.json",
+        makeImportMapEntriesReal: false,
       });
 
       const module = await importer.import("./main.js");
@@ -291,6 +293,41 @@ Deno.test({
         TypeError,
         `Failed install import map from "${fullImportPath}". The resource did not respond with an ok status code (404).`,
       );
+    } finally {
+      await cleanup();
+      uninstallMockFetch();
+    }
+  },
+});
+
+Deno.test({
+  name:
+    "import map entries are automatically marked as real with useUnresolved: true",
+  async fn() {
+    const { cleanup, basePath } = await setupScriptTempDir({
+      "main.js": `
+        import { assert } from "asserts";
+        assert(true);
+      `,
+    }, {
+      prefix: "makereal_bare_specifier_entry_with_useunresolved_test",
+    });
+
+    try {
+      const importer = new Importer(basePath, {
+        importMap: {
+          imports: {
+            // the fact that this is not the real location of "asserts" doesn't
+            // really matter, since our actual import map does have the correct
+            // entry for "asserts".
+            "asserts": "./does/not/exist.js",
+          },
+        },
+      });
+
+      // We don't expect the import to reject because our test suite does have
+      // "asserts" in the import map.
+      await importer.import("./main.js");
     } finally {
       await cleanup();
       uninstallMockFetch();

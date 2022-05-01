@@ -86,6 +86,7 @@ Deno.test({
     try {
       const importer = new Importer(basePath, {
         importMap: "./importmap.json",
+        makeImportMapEntriesReal: false,
       });
       importer.makeReal("./notabarespecifier.js");
 
@@ -126,6 +127,7 @@ Deno.test({
     try {
       const importer = new Importer(basePath, {
         importMap: "./importmap.json",
+        makeImportMapEntriesReal: false,
       });
       importer.makeReal("barespecifier");
 

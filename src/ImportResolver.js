@@ -46,7 +46,7 @@ export class ImportResolver {
 
   /** @type {string | URL | import("./importMapParser.js").ImportMapData | null} */
   #providedImportMap = null;
-
+  #makeImportMapEntriesReal = true;
   #hasParsedImportMap = false;
 
   /** @type {import("./importMapParser.js").ParsedImportMap} */
@@ -89,6 +89,7 @@ export class ImportResolver {
       generateCoverageMap = "auto",
       coverageMapOutPath = "",
       importMap = undefined,
+      makeImportMapEntriesReal = true,
     },
     {
       env = "browser",
@@ -130,6 +131,7 @@ export class ImportResolver {
     if (importMap != undefined) {
       this.#providedImportMap = importMap;
     }
+    this.#makeImportMapEntriesReal = makeImportMapEntriesReal;
 
     if (importMeta instanceof URL) {
       this.#importMeta = importMeta.href;
@@ -236,6 +238,14 @@ export class ImportResolver {
       new URL(this.#importMeta),
     );
     this.#hasParsedImportMap = true;
+
+    if (this.#makeImportMapEntriesReal) {
+      for (const entry of Object.keys(this.#parsedImportMap.imports)) {
+        this.makeReal(entry, {
+          useUnresolved: true,
+        });
+      }
+    }
   }
 
   /**
