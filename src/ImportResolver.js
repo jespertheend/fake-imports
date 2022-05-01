@@ -274,6 +274,9 @@ export class ImportResolver {
   }
 
   /**
+   * Checks if a module has been marked as real, and if so, returns the url
+   * that should be used for importing it instead of creating a collected import.
+   * Returns null if the module is not marked as real.
    * @param {string} url
    * @param {string} baseUrl
    */

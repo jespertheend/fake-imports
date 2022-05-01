@@ -211,6 +211,49 @@ export class Importer {
   }
 
   /**
+   * Marks a specific module as needing to be imported by the real url, rather
+   * than a generated blob url. Though keep in mind that this will prevent
+   * `fakeModule` or `redirectModule` calls from having any effect on the module.
+   *
+   * This is useful if the module imports a lot of dependencies, as this
+   * prevents lots of blob urls from being created, which could potentially
+   * be very slow.
+   * This is also useful when your module creates instances that you want to
+   * test for using `instanceof`. For example, say you have a module that
+   * exports an instance of `Foo` like so:
+   *
+   * ```js
+   * import {Foo} from "./Foo.js";
+   * export const instance = new Foo();
+   * ```
+   *
+   * If you then import this module via a `new Importer()`, but import `Foo` via
+   * regular imports:
+   *
+   * ```js
+   * import {Foo} from "./Foo.js";
+   * const importer = new Importer(import.meta.url);
+   * const {instance} = await importer.import("./instance.js");
+   * ```
+   *
+   * and then test if `instance` is an instance of `Foo`:
+   *
+   * ```js
+   * assert(instance instanceof Foo);
+   * ```
+   *
+   * You'll get an error, because the two instances were actually created from
+   * a different class.
+   *
+   * To work around this, mark the module as real, so that internally no blob
+   * url is created for it:
+   *
+   * ```js
+   * importer.makeReal("./Foo.js");
+   * ```
+   *
+   * This way `instance.js` is still replaced with a blob url, but `Foo.js` is
+   * not.
    * @param {string} url
    * @param {MakeRealOptions} [options]
    */
