@@ -49,12 +49,6 @@ export class ImportResolver {
     imports: {},
   };
 
-  /**
-   * Used for tracking if a call to import() has been made. If so, the
-   * `setImportMap()` call will throw.
-   */
-  #hasMadeImportCall = false;
-
   /** @typedef {import("../mod.js").CoverageMapEntry} CoverageMapEntry */
   /** @typedef {import("./CollectedImport.js").CollectedImport} CollectedImport */
 
@@ -89,6 +83,7 @@ export class ImportResolver {
     {
       generateCoverageMap = "auto",
       coverageMapOutPath = "",
+      importMap = undefined,
     },
     {
       env = "browser",
@@ -125,6 +120,10 @@ export class ImportResolver {
       throw new Error(
         "coverageMapOutPath is only allowed when generateCoverageMap is true.",
       );
+    }
+
+    if (importMap != undefined) {
+      this.#providedImportMap = importMap;
     }
 
     if (importMeta instanceof URL) {
@@ -203,21 +202,6 @@ export class ImportResolver {
   }
 
   /**
-   * @param {string | URL | import("./importMapParser.js").ImportMapData} importMap
-   */
-  setImportMap(importMap) {
-    if (this.#hasMadeImportCall) {
-      throw new Error(
-        "You have already made a call to import(), import maps can only be set *before* importing modules.",
-      );
-    }
-    if (this.#providedImportMap) {
-      throw new Error("You have already set an import map.");
-    }
-    this.#providedImportMap = importMap;
-  }
-
-  /**
    * @private
    */
   async loadImportMap() {
@@ -261,7 +245,6 @@ export class ImportResolver {
    * @returns {Promise<T>}
    */
   async import(url) {
-    this.#hasMadeImportCall = true;
     const newUrl = resolveModuleSpecifier(
       this.#parsedImportMap,
       new URL(this.#importMeta),

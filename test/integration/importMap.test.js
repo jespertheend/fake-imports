@@ -1,4 +1,4 @@
-import { assertEquals, assertRejects, assertThrows } from "asserts";
+import { assertEquals, assertRejects } from "asserts";
 import { setupScriptTempDir, simpleReplacementDir } from "./shared.js";
 import { Importer } from "../../mod.js";
 import {
@@ -22,35 +22,16 @@ Deno.test({
     });
 
     try {
-      const importer = new Importer(basePath);
-      importer.setImportMap({
-        imports: {
-          "barespecifier": "./notabarespecifier.js",
+      const importer = new Importer(basePath, {
+        importMap: {
+          imports: {
+            "barespecifier": "./notabarespecifier.js",
+          },
         },
       });
 
       const module = await importer.import("./main.js");
       assertEquals(module.foo, "foo");
-    } finally {
-      await cleanup();
-    }
-  },
-});
-
-Deno.test({
-  name: "calling setImportMap() after having already imported something throws",
-  async fn() {
-    const { cleanup, basePath } = await simpleReplacementDir();
-
-    try {
-      const importer = new Importer(basePath);
-      const importPromise = importer.import("./main.js");
-
-      assertThrows(() => {
-        importer.setImportMap({});
-      });
-
-      await importPromise;
     } finally {
       await cleanup();
     }
@@ -80,8 +61,9 @@ Deno.test({
     });
 
     try {
-      const importer = new Importer(basePath);
-      importer.setImportMap("./importmap.json");
+      const importer = new Importer(basePath, {
+        importMap: "./importmap.json",
+      });
 
       const module = await importer.import("./main.js");
       assertEquals(module.foo, "foo");
@@ -107,10 +89,11 @@ Deno.test({
     });
 
     try {
-      const importer = new Importer(basePath);
-      importer.setImportMap({
-        imports: {
-          "lib/": "./path/to/lib/",
+      const importer = new Importer(basePath, {
+        importMap: {
+          imports: {
+            "lib/": "./path/to/lib/",
+          },
         },
       });
 
@@ -139,10 +122,11 @@ Deno.test({
     });
 
     try {
-      const importer = new Importer(basePath);
-      importer.setImportMap({
-        imports: {
-          "https://example.com/mapped.js": "./mapped.js",
+      const importer = new Importer(basePath, {
+        importMap: {
+          imports: {
+            "https://example.com/mapped.js": "./mapped.js",
+          },
         },
       });
 
@@ -207,10 +191,11 @@ Deno.test({
     const { cleanup, basePath } = await simpleReplacementDir();
 
     try {
-      const importer = new Importer(basePath);
-      importer.setImportMap({
-        imports: {
-          "somespecifier": "./somefile.js",
+      const importer = new Importer(basePath, {
+        importMap: {
+          imports: {
+            "somespecifier": "./somefile.js",
+          },
         },
       });
       await assertRejects(
@@ -239,10 +224,11 @@ Deno.test({
     });
 
     try {
-      const importer = new Importer(basePath);
-      importer.setImportMap({
-        imports: {
-          "somespecifier": "./somefile.js",
+      const importer = new Importer(basePath, {
+        importMap: {
+          imports: {
+            "somespecifier": "./somefile.js",
+          },
         },
       });
       await assertRejects(
@@ -264,9 +250,10 @@ Deno.test({
     const { cleanup, basePath } = await simpleReplacementDir();
 
     try {
-      const importer = new Importer(basePath);
       const importMapFileName = "nonexistent.json";
-      importer.setImportMap(importMapFileName);
+      const importer = new Importer(basePath, {
+        importMap: importMapFileName,
+      });
       const fullImportPath = new URL(importMapFileName, basePath);
       await assertRejects(
         async () => {
@@ -292,9 +279,10 @@ Deno.test({
     });
 
     try {
-      const importer = new Importer(basePath);
       const importMapFileName = "nonexistent.json";
-      importer.setImportMap(importMapFileName);
+      const importer = new Importer(basePath, {
+        importMap: importMapFileName,
+      });
       const fullImportPath = new URL(importMapFileName, basePath);
       await assertRejects(
         async () => {
