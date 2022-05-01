@@ -125,7 +125,6 @@ Deno.test({
       assert(exists, "basePath/coverage should exist");
 
       assertFileCount(fullOutputPath, 2);
-      console.log(fullOutputPath);
 
       await Deno.remove(fullOutputPath, { recursive: true });
     } finally {
