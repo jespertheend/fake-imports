@@ -1,4 +1,4 @@
-import { assert, assertInstanceOf } from "asserts";
+import { assert, assertInstanceOf, assertRejects } from "asserts";
 import { setupScriptTempDir } from "./shared.js";
 import { Importer } from "../../mod.js";
 
@@ -134,6 +134,76 @@ Deno.test({
         new URL("./notabarespecifier.js", basePath).href
       );
       assertInstanceOf(instance, Foo);
+    } finally {
+      await cleanup();
+    }
+  },
+});
+
+Deno.test({
+  name: "making an import map bare specfier entry real with useUnresolved true",
+  async fn() {
+    const { cleanup, basePath } = await setupScriptTempDir({
+      "main.js": `
+        import {Foo} from "barespecifier";
+        const instance = new Foo();
+        export {instance};
+      `,
+      "notabarespecifier.js": `
+        export class Foo {}
+      `,
+      "importmap.json": `
+        {
+          "imports": {
+            "barespecifier": "./notabarespecifier.js"
+          }
+        }
+      `,
+    }, {
+      prefix: "makereal_bare_specifier_entry_with_useunresolved_test",
+    });
+
+    try {
+      const importer = new Importer(basePath, {
+        importMap: "./importmap.json",
+      });
+      importer.makeReal("barespecifier", { useUnresolved: true });
+
+      // We expect the import to reject because our test suite doesn't have the
+      // same import map set as used for the `new Importer` above.
+      await assertRejects(
+        async () => {
+          await importer.import("./main.js");
+        },
+        TypeError,
+        `Relative import path "barespecifier" not prefixed with`,
+      );
+    } finally {
+      await cleanup();
+    }
+  },
+});
+
+Deno.test({
+  name:
+    "making a bare specfier real with useUnresolved true without an entry in the import map",
+  async fn() {
+    const { cleanup, basePath } = await setupScriptTempDir({
+      "main.js": `
+        import { assert } from "asserts";
+        assert(true);
+      `,
+    }, {
+      prefix: "makereal_bare_specifier_entry_with_useunresolved_test",
+    });
+
+    try {
+      const importer = new Importer(basePath);
+      importer.makeReal("asserts", { useUnresolved: true });
+
+      // We don't expect the import to reject because our test suite does have
+      // "asserts" in the import map.
+      await importer.import("./main.js");
     } finally {
       await cleanup();
     }

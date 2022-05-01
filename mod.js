@@ -42,6 +42,27 @@ import { ImportResolver } from "./src/ImportResolver.js";
  */
 
 /**
+ * @typedef MakeRealOptions
+ * @property {boolean} [useUnresolved] If set to true (default is false), import
+ * statement is left as is when they exactly match the provided url.
+ * This causes the module to be loaded from the original URL.
+ * Otherwise the import statements will be resolved and replaced according to the
+ * import map provided in the `Importer` constructor.
+ *
+ * This is useful if you have an import map set up outside of the importer, e.g.
+ * through Deno's `--import-map` argument, or using <script type="importmap"> in
+ * browsers. If your environment doesn't support import maps, or you simply
+ * haven't set one, you will probably have to set this to false. Otherwise you
+ * will likely get an error when trying to load the module as a bare specifier.
+ *
+ * Note that for this to work you have to provide the exact same url as imported
+ * by any parent modules. So providing a path relative to your `import.meta.url`
+ * won't work. But you generally only want to use this for bare specifiers, such
+ * as `"lodash"` or `"moment"`, since all faked modules are impored as blob urls.
+ * Meaning imports such as `"./relative/path/to/file.js"` will not work.
+ */
+
+/**
  * @typedef CoverageMapEntry
  * @property {string} replacedUrl
  * @property {string} originalUrl
@@ -191,9 +212,10 @@ export class Importer {
 
   /**
    * @param {string} url
+   * @param {MakeRealOptions} [options]
    */
-  makeReal(url) {
-    this.#resolver.makeReal(url);
+  makeReal(url, options) {
+    this.#resolver.makeReal(url, options);
   }
 
   /**

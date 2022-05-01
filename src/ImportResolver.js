@@ -28,6 +28,11 @@ import { fetchWithErrorHandling } from "./shared.js";
  * @property {Deno?} [deno]
  */
 
+/**
+ * @typedef ForcedRealData
+ * @property {boolean} useUnresolved
+ */
+
 const COVERAGE_MAP_ARG = "--fi-coverage-map=";
 
 export class ImportResolver {
@@ -64,8 +69,8 @@ export class ImportResolver {
   /** @type {Map<string, string>} */
   #redirectedModules = new Map();
 
-  /** @type {Set<string>} */
-  #forcedRealModules = new Set();
+  /** @type {Map<string, ForcedRealData>} */
+  #forcedRealModules = new Map();
 
   /** @type {Promise<void>?} */
   #makeCoverageDirPromise = null;
@@ -189,9 +194,14 @@ export class ImportResolver {
 
   /**
    * @param {string} url
+   * @param {import("../mod.js").MakeRealOptions} [options]
    */
-  makeReal(url) {
-    this.#forcedRealModules.add(url);
+  makeReal(url, {
+    useUnresolved = false,
+  } = {}) {
+    this.#forcedRealModules.set(url, {
+      useUnresolved,
+    });
   }
 
   /**
@@ -271,6 +281,12 @@ export class ImportResolver {
     if (this.#providedImportMap && !this.#hasParsedImportMap) {
       throw new Error("Assertion failed, import map hasn't been parsed yet.");
     }
+
+    const exactMatch = this.#forcedRealModules.get(url);
+    if (exactMatch && exactMatch.useUnresolved) {
+      return url;
+    }
+
     const newUrl = resolveModuleSpecifier(
       this.#parsedImportMap,
       new URL(baseUrl),
@@ -278,7 +294,7 @@ export class ImportResolver {
     );
     const newUrlSerialized = newUrl.href;
 
-    for (const forcedModule of this.#forcedRealModules) {
+    for (const forcedModule of this.#forcedRealModules.keys()) {
       const newForcedModule = resolveModuleSpecifier(
         this.#parsedImportMap,
         new URL(this.#importMeta),
