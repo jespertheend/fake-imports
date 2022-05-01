@@ -21,6 +21,12 @@ Or if you wish to only run a specific test:
 deno task test test/unit/src/ImportResolver.test.js
 ```
 
+To debug tests:
+
+```
+deno task test test/unit/src/ImportResolver.test.js --inspect-brk
+```
+
 ## Code style
 
 When submitting a PR, you can run
