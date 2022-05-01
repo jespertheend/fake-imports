@@ -19,13 +19,15 @@ Deno.test({
   async fn() {
     const { cleanup, basePath } = await simpleRedirectionDir();
 
-    const importer = new Importer(basePath);
-    importer.redirectModule("./a.js", "./b.js");
-    const main = await importer.import("./main.js");
+    try {
+      const importer = new Importer(basePath);
+      importer.redirectModule("./a.js", "./b.js");
+      const main = await importer.import("./main.js");
 
-    assertEquals(main.value, "b");
-
-    await cleanup();
+      assertEquals(main.value, "b");
+    } finally {
+      await cleanup();
+    }
   },
 });
 
@@ -34,15 +36,17 @@ Deno.test({
   fn: async () => {
     const { cleanup, basePath } = await simpleRedirectionDir();
 
-    const importer = new Importer(basePath);
-    const a = new URL("./a.js", basePath);
-    const b = new URL("./b.js", basePath);
-    importer.redirectModule(a, b);
-    const main = await importer.import("./main.js");
+    try {
+      const importer = new Importer(basePath);
+      const a = new URL("./a.js", basePath);
+      const b = new URL("./b.js", basePath);
+      importer.redirectModule(a, b);
+      const main = await importer.import("./main.js");
 
-    assertEquals(main.value, "b");
-
-    await cleanup();
+      assertEquals(main.value, "b");
+    } finally {
+      await cleanup();
+    }
   },
 });
 
@@ -62,13 +66,15 @@ Deno.test({
       `,
     });
 
-    const importer = new Importer(basePath);
-    importer.redirectModule("./a.js", "./subdir/b.js");
-    const main = await importer.import("./main.js");
+    try {
+      const importer = new Importer(basePath);
+      importer.redirectModule("./a.js", "./subdir/b.js");
+      const main = await importer.import("./main.js");
 
-    assertEquals(main.value, "b");
-
-    await cleanup();
+      assertEquals(main.value, "b");
+    } finally {
+      await cleanup();
+    }
   },
 });
 
@@ -88,13 +94,15 @@ Deno.test({
       `,
     });
 
-    const importer = new Importer(basePath);
-    importer.redirectModule("./a.js", "./subdir/b.js");
-    const main = await importer.import("./main.js");
+    try {
+      const importer = new Importer(basePath);
+      importer.redirectModule("./a.js", "./subdir/b.js");
+      const main = await importer.import("./main.js");
 
-    assertEquals(main.value, "b");
-
-    await cleanup();
+      assertEquals(main.value, "b");
+    } finally {
+      await cleanup();
+    }
   },
 });
 
@@ -103,14 +111,16 @@ Deno.test({
   async fn() {
     const { cleanup, basePath } = await simpleRedirectionDir();
 
-    const importer = new Importer(basePath);
-    importer.redirectModule("./a.js", "./b.js");
-    importer.redirectModule("./b.js", "./c.js");
-    const main = await importer.import("./main.js");
+    try {
+      const importer = new Importer(basePath);
+      importer.redirectModule("./a.js", "./b.js");
+      importer.redirectModule("./b.js", "./c.js");
+      const main = await importer.import("./main.js");
 
-    assertEquals(main.value, "c");
-
-    await cleanup();
+      assertEquals(main.value, "c");
+    } finally {
+      await cleanup();
+    }
   },
 });
 
@@ -119,13 +129,15 @@ Deno.test({
   async fn() {
     const { cleanup, basePath } = await simpleRedirectionDir();
 
-    const importer = new Importer(basePath);
-    importer.redirectModule("./a.js", "./b.js");
-    const a = await importer.import("./a.js");
+    try {
+      const importer = new Importer(basePath);
+      importer.redirectModule("./a.js", "./b.js");
+      const a = await importer.import("./a.js");
 
-    assertEquals(a.value, "b");
-
-    await cleanup();
+      assertEquals(a.value, "b");
+    } finally {
+      await cleanup();
+    }
   },
 });
 
@@ -134,16 +146,18 @@ Deno.test({
   async fn() {
     const { cleanup, basePath } = await simpleRedirectionDir();
 
-    const importer = new Importer(basePath);
-    importer.redirectModule("./a.js", "./does/not/exist.js");
+    try {
+      const importer = new Importer(basePath);
+      importer.redirectModule("./a.js", "./does/not/exist.js");
 
-    await assertRejects(
-      async () => await importer.import("./main.js"),
-      TypeError,
-      `Failed to import "${basePath}does/not/exist.js" from "${basePath}main.js". A network error occurred while fetching the module.`,
-    );
-
-    await cleanup();
+      await assertRejects(
+        async () => await importer.import("./main.js"),
+        TypeError,
+        `Failed to import "${basePath}does/not/exist.js" from "${basePath}main.js". A network error occurred while fetching the module.`,
+      );
+    } finally {
+      await cleanup();
+    }
   },
 });
 
@@ -152,16 +166,18 @@ Deno.test({
   async fn() {
     const { cleanup, basePath } = await simpleRedirectionDir();
 
-    const importer = new Importer(basePath);
-    importer.redirectModule("./a.js", "./b.js");
-    importer.redirectModule("./b.js", "./a.js");
+    try {
+      const importer = new Importer(basePath);
+      importer.redirectModule("./a.js", "./b.js");
+      importer.redirectModule("./b.js", "./a.js");
 
-    await assertRejects(
-      async () => await importer.import("./main.js"),
-      Error,
-      `Circular redirects detected.\n"${basePath}a.js" -> "${basePath}b.js" -> "${basePath}a.js"`,
-    );
-
-    await cleanup();
+      await assertRejects(
+        async () => await importer.import("./main.js"),
+        Error,
+        `Circular redirects detected.\n"${basePath}a.js" -> "${basePath}b.js" -> "${basePath}a.js"`,
+      );
+    } finally {
+      await cleanup();
+    }
   },
 });

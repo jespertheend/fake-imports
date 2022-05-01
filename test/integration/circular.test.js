@@ -22,16 +22,18 @@ Deno.test({
       `,
     });
 
-    const importer = new Importer(basePath);
-    await assertRejects(
-      async () => {
-        await importer.import("./A.js");
-      },
-      Error,
-      "Circular imports are not supported:\nA.js -> B.js -> A.js",
-    );
-
-    await cleanup();
+    try {
+      const importer = new Importer(basePath);
+      await assertRejects(
+        async () => {
+          await importer.import("./A.js");
+        },
+        Error,
+        "Circular imports are not supported:\nA.js -> B.js -> A.js",
+      );
+    } finally {
+      await cleanup();
+    }
   },
 });
 
@@ -61,16 +63,18 @@ Deno.test({
       `,
     });
 
-    const importer = new Importer(basePath);
-    await assertRejects(
-      async () => {
-        await importer.import("./A.js");
-      },
-      Error,
-      "Circular imports are not supported:\nA.js -> B.js -> C.js -> A.js",
-    );
-
-    await cleanup();
+    try {
+      const importer = new Importer(basePath);
+      await assertRejects(
+        async () => {
+          await importer.import("./A.js");
+        },
+        Error,
+        "Circular imports are not supported:\nA.js -> B.js -> C.js -> A.js",
+      );
+    } finally {
+      await cleanup();
+    }
   },
 });
 
@@ -100,16 +104,18 @@ Deno.test({
       `,
     });
 
-    const importer = new Importer(basePath);
-    await assertRejects(
-      async () => {
-        await importer.import("./root/A.js");
-      },
-      Error,
-      "Circular imports are not supported:\nA.js -> B.js -> C.js -> A.js",
-    );
-
-    await cleanup();
+    try {
+      const importer = new Importer(basePath);
+      await assertRejects(
+        async () => {
+          await importer.import("./root/A.js");
+        },
+        Error,
+        "Circular imports are not supported:\nA.js -> B.js -> C.js -> A.js",
+      );
+    } finally {
+      await cleanup();
+    }
   },
 });
 
@@ -147,10 +153,12 @@ Deno.test({
       "H.js": "//empty",
     });
 
-    const importer = new Importer(basePath);
-    await importer.import("./A.js");
-
-    await cleanup();
+    try {
+      const importer = new Importer(basePath);
+      await importer.import("./A.js");
+    } finally {
+      await cleanup();
+    }
   },
 });
 
@@ -188,10 +196,12 @@ Deno.test({
       "E.js": "//empty",
     });
 
-    const importer = new Importer(basePath);
-    await importer.import("./A.js");
-
-    await cleanup();
+    try {
+      const importer = new Importer(basePath);
+      await importer.import("./A.js");
+    } finally {
+      await cleanup();
+    }
   },
 });
 
@@ -227,16 +237,18 @@ Deno.test({
       `,
     });
 
-    const importer = new Importer(basePath);
-    await assertRejects(
-      async () => {
-        await importer.import("./A.js");
-      },
-      Error,
-      "Circular imports are not supported:\nD.js -> F.js -> D.js",
-    );
-
-    await cleanup();
+    try {
+      const importer = new Importer(basePath);
+      await assertRejects(
+        async () => {
+          await importer.import("./A.js");
+        },
+        Error,
+        "Circular imports are not supported:\nD.js -> F.js -> D.js",
+      );
+    } finally {
+      await cleanup();
+    }
   },
 });
 
@@ -257,15 +269,17 @@ Deno.test({
       `,
     });
 
-    const importer = new Importer(basePath);
-    await assertRejects(
-      async () => {
-        await importer.import("./A.js");
-      },
-      Error,
-      `Circular imports are not supported. "${basePath}A.js" imports itself.`,
-    );
-
-    await cleanup();
+    try {
+      const importer = new Importer(basePath);
+      await assertRejects(
+        async () => {
+          await importer.import("./A.js");
+        },
+        Error,
+        `Circular imports are not supported. "${basePath}A.js" imports itself.`,
+      );
+    } finally {
+      await cleanup();
+    }
   },
 });

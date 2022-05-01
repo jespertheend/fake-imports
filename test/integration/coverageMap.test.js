@@ -8,30 +8,32 @@ Deno.test({
   fn: async () => {
     const { cleanup, basePath } = await simpleReplacementDir();
 
-    const importer = new Importer(basePath, {
-      generateCoverageMap: true,
-    });
-    await importer.import("./main.js");
+    try {
+      const importer = new Importer(basePath, {
+        generateCoverageMap: true,
+      });
+      await importer.import("./main.js");
 
-    const coverageMap = importer.getCoverageMap();
-    assertEquals(Array.from(Object.entries(coverageMap)).length, 2);
+      const coverageMap = importer.getCoverageMap();
+      assertEquals(Array.from(Object.entries(coverageMap)).length, 2);
 
-    const mappedUrls = [];
-    for (const [key, entry] of Object.entries(coverageMap)) {
-      assert(
-        key.startsWith("blob:"),
-        "Coverage map keys should always start with blob:",
-      );
-      mappedUrls.push(entry.originalUrl);
+      const mappedUrls = [];
+      for (const [key, entry] of Object.entries(coverageMap)) {
+        assert(
+          key.startsWith("blob:"),
+          "Coverage map keys should always start with blob:",
+        );
+        mappedUrls.push(entry.originalUrl);
+      }
+      mappedUrls.sort();
+
+      assertEquals(mappedUrls, [
+        `${basePath}main.js`,
+        `${basePath}replaced.js`,
+      ]);
+    } finally {
+      await cleanup();
     }
-    mappedUrls.sort();
-
-    assertEquals(mappedUrls, [
-      `${basePath}main.js`,
-      `${basePath}replaced.js`,
-    ]);
-
-    await cleanup();
   },
 });
 
@@ -39,27 +41,30 @@ Deno.test({
   name: "Via api callback",
   fn: async () => {
     const { cleanup, basePath } = await simpleReplacementDir();
-    const importer = new Importer(basePath, {
-      generateCoverageMap: true,
-    });
-    /** @type {import("../../mod.js").CoverageMapEntry[]} */
-    const firedEvents = [];
 
-    importer.onCoverageMapEntryAdded((entry) => {
-      firedEvents.push(entry);
-    });
+    try {
+      const importer = new Importer(basePath, {
+        generateCoverageMap: true,
+      });
+      /** @type {import("../../mod.js").CoverageMapEntry[]} */
+      const firedEvents = [];
 
-    await importer.import("./main.js");
+      importer.onCoverageMapEntryAdded((entry) => {
+        firedEvents.push(entry);
+      });
 
-    assertEquals(firedEvents.length, 2);
-    const mappedUrls = firedEvents.map((e) => e.originalUrl);
-    mappedUrls.sort();
-    assertEquals(mappedUrls, [
-      `${basePath}main.js`,
-      `${basePath}replaced.js`,
-    ]);
+      await importer.import("./main.js");
 
-    await cleanup();
+      assertEquals(firedEvents.length, 2);
+      const mappedUrls = firedEvents.map((e) => e.originalUrl);
+      mappedUrls.sort();
+      assertEquals(mappedUrls, [
+        `${basePath}main.js`,
+        `${basePath}replaced.js`,
+      ]);
+    } finally {
+      await cleanup();
+    }
   },
 });
 
@@ -67,19 +72,22 @@ Deno.test({
   name: "Removing api callback",
   fn: async () => {
     const { cleanup, basePath } = await simpleReplacementDir();
-    const importer = new Importer(basePath);
-    let callCount = 0;
-    const callback = () => {
-      callCount++;
-    };
 
-    importer.onCoverageMapEntryAdded(callback);
-    importer.removeOnCoverageMapEntryAdded(callback);
-    await importer.import("./main.js");
+    try {
+      const importer = new Importer(basePath);
+      let callCount = 0;
+      const callback = () => {
+        callCount++;
+      };
 
-    assertEquals(callCount, 0);
+      importer.onCoverageMapEntryAdded(callback);
+      importer.removeOnCoverageMapEntryAdded(callback);
+      await importer.import("./main.js");
 
-    await cleanup();
+      assertEquals(callCount, 0);
+    } finally {
+      await cleanup();
+    }
   },
 });
 
@@ -105,19 +113,24 @@ Deno.test({
   name: "Via api with relative output path",
   fn: async () => {
     const { cleanup, basePath, dirPath } = await simpleReplacementDir();
-    const importer = new Importer(basePath, {
-      coverageMapOutPath: "./coverage",
-    });
-    await importer.import("./main.js");
 
-    const fullOutputPath = join(dirPath, "coverage");
-    const exists = await pathExists(fullOutputPath);
-    assert(exists, "basePath/coverage should exist");
+    try {
+      const importer = new Importer(basePath, {
+        coverageMapOutPath: "./coverage",
+      });
+      await importer.import("./main.js");
 
-    assertFileCount(fullOutputPath, 2);
+      const fullOutputPath = join(dirPath, "coverage");
+      const exists = await pathExists(fullOutputPath);
+      assert(exists, "basePath/coverage should exist");
 
-    await Deno.remove(fullOutputPath, { recursive: true });
-    await cleanup();
+      assertFileCount(fullOutputPath, 2);
+      console.log(fullOutputPath);
+
+      await Deno.remove(fullOutputPath, { recursive: true });
+    } finally {
+      await cleanup();
+    }
   },
 });
 
@@ -125,20 +138,24 @@ Deno.test({
   name: "Via api with absolute output path",
   fn: async () => {
     const { cleanup, basePath } = await simpleReplacementDir();
-    const tempDir = await Deno.makeTempDir();
-    const fullOutputPath = join(tempDir, "coverage");
-    const importer = new Importer(basePath, {
-      coverageMapOutPath: fullOutputPath,
-    });
-    await importer.import("./main.js");
 
-    const exists = await pathExists(fullOutputPath);
-    assert(exists, "coverage dir should exist");
+    try {
+      const tempDir = await Deno.makeTempDir();
+      const fullOutputPath = join(tempDir, "coverage");
+      const importer = new Importer(basePath, {
+        coverageMapOutPath: fullOutputPath,
+      });
+      await importer.import("./main.js");
 
-    assertFileCount(fullOutputPath, 2);
+      const exists = await pathExists(fullOutputPath);
+      assert(exists, "coverage dir should exist");
 
-    await Deno.remove(tempDir, { recursive: true });
-    await cleanup();
+      assertFileCount(fullOutputPath, 2);
+
+      await Deno.remove(tempDir, { recursive: true });
+    } finally {
+      await cleanup();
+    }
   },
 });
 
@@ -146,28 +163,33 @@ Deno.test({
   name: "Coverage map contents",
   fn: async () => {
     const { cleanup, basePath, dirPath } = await simpleReplacementDir();
-    const importer = new Importer(basePath, {
-      coverageMapOutPath: "./coverage",
-    });
-    await importer.import("./main.js");
 
-    const fullOutputPath = join(dirPath, "coverage");
+    try {
+      const importer = new Importer(basePath, {
+        coverageMapOutPath: "./coverage",
+      });
+      await importer.import("./main.js");
 
-    const fileContents = [];
-    for await (const file of Deno.readDir(fullOutputPath)) {
-      if (!file.isFile) continue;
-      const content = await Deno.readTextFile(join(fullOutputPath, file.name));
-      fileContents.push(JSON.parse(content));
+      const fullOutputPath = join(dirPath, "coverage");
+
+      const fileContents = [];
+      for await (const file of Deno.readDir(fullOutputPath)) {
+        if (!file.isFile) continue;
+        const content = await Deno.readTextFile(
+          join(fullOutputPath, file.name),
+        );
+        fileContents.push(JSON.parse(content));
+      }
+
+      const mappedUrls = fileContents.map((e) => e.originalUrl);
+      mappedUrls.sort();
+      assertEquals(mappedUrls, [
+        `${basePath}main.js`,
+        `${basePath}replaced.js`,
+      ]);
+    } finally {
+      await cleanup();
     }
-
-    const mappedUrls = fileContents.map((e) => e.originalUrl);
-    mappedUrls.sort();
-    assertEquals(mappedUrls, [
-      `${basePath}main.js`,
-      `${basePath}replaced.js`,
-    ]);
-
-    await cleanup();
   },
 });
 
@@ -176,43 +198,46 @@ Deno.test({
     "importing with coverage enabled waits for all coverage map writes to finish",
   async fn() {
     const { cleanup, basePath } = await simpleReplacementDir();
-    const importer = new Importer(basePath, {
-      coverageMapOutPath: "./coverage",
-    });
-    const originalWriteTextFile = Deno.writeTextFile;
 
     let writeTextFileCallsCount = 0;
-    /** @type {Set<() => void>} */
-    const writeTextPromiseCallbacks = new Set();
-    Deno.writeTextFile = async (_path, _data) => {
-      writeTextFileCallsCount++;
-      /** @type {Promise<void>} */
-      const promise = new Promise((r) => {
-        writeTextPromiseCallbacks.add(r);
+    const originalWriteTextFile = Deno.writeTextFile;
+    try {
+      const importer = new Importer(basePath, {
+        coverageMapOutPath: "./coverage",
       });
-      await promise;
-    };
 
-    const importPromise = importer.import("./main.js");
+      /** @type {Set<() => void>} */
+      const writeTextPromiseCallbacks = new Set();
+      Deno.writeTextFile = async (_path, _data) => {
+        writeTextFileCallsCount++;
+        /** @type {Promise<void>} */
+        const promise = new Promise((r) => {
+          writeTextPromiseCallbacks.add(r);
+        });
+        await promise;
+      };
 
-    // poll until writeTextFile is called twice
-    while (writeTextFileCallsCount < 2) {
+      const importPromise = importer.import("./main.js");
+
+      // poll until writeTextFile is called twice
+      while (writeTextFileCallsCount < 2) {
+        await new Promise((r) => setTimeout(r, 0));
+      }
+
+      let importPromiseResolved = false;
+      importPromise.then(() => {
+        importPromiseResolved = true;
+      });
       await new Promise((r) => setTimeout(r, 0));
+      assertEquals(importPromiseResolved, false);
+
+      writeTextPromiseCallbacks.forEach((cb) => cb());
+
+      await importPromise;
+    } finally {
+      await cleanup();
+      Deno.writeTextFile = originalWriteTextFile;
     }
-
-    let importPromiseResolved = false;
-    importPromise.then(() => {
-      importPromiseResolved = true;
-    });
-    await new Promise((r) => setTimeout(r, 0));
-    assertEquals(importPromiseResolved, false);
-
-    writeTextPromiseCallbacks.forEach((cb) => cb());
-
-    await importPromise;
-
-    await cleanup();
-    Deno.writeTextFile = originalWriteTextFile;
 
     // double check if a new writeTextFile call wasn't made while we were cleaning up
     assertEquals(writeTextFileCallsCount, 2);

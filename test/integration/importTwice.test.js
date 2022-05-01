@@ -17,18 +17,20 @@ Deno.test({
       prefix: "import_twice_test",
     });
 
-    const importer = new Importer(basePath);
-    importer.fakeModule(
-      "./replaced.js",
-      `export const mutable = {changedBy: "fake"};`,
-    );
+    try {
+      const importer = new Importer(basePath);
+      importer.fakeModule(
+        "./replaced.js",
+        `export const mutable = {changedBy: "fake"};`,
+      );
 
-    const firstModule = await importer.import("./main.js");
-    firstModule.mutable.changedBy = "first import";
-    const secondModule = await importer.import("./main.js");
+      const firstModule = await importer.import("./main.js");
+      firstModule.mutable.changedBy = "first import";
+      const secondModule = await importer.import("./main.js");
 
-    assertEquals(secondModule.mutable.changedBy, "first import");
-
-    await cleanup();
+      assertEquals(secondModule.mutable.changedBy, "first import");
+    } finally {
+      await cleanup();
+    }
   },
 });

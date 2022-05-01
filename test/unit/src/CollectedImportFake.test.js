@@ -23,15 +23,20 @@ Deno.test({
   name: "handleGetOriginalContent",
   async fn() {
     const mockFetch = installMockFetch({ responseText: "original" });
-    const { collectedImport, scriptUrl } = createCollectedImport(() => "fake");
 
-    const originalContent = await collectedImport.handleGetOriginalContent();
+    try {
+      const { collectedImport, scriptUrl } = createCollectedImport(() =>
+        "fake"
+      );
 
-    assertEquals(originalContent, "original");
+      const originalContent = await collectedImport.handleGetOriginalContent();
 
-    assertEquals(mockFetch.calls, [{ url: scriptUrl, init: undefined }]);
+      assertEquals(originalContent, "original");
 
-    uninstallMockFetch();
+      assertEquals(mockFetch.calls, [{ url: scriptUrl, init: undefined }]);
+    } finally {
+      uninstallMockFetch();
+    }
   },
 });
 
@@ -42,15 +47,20 @@ Deno.test({
       responseText: "original",
       triggerNetworkError: true,
     });
-    const { collectedImport, scriptUrl } = createCollectedImport(() => "fake");
 
-    const originalContent = await collectedImport.handleGetOriginalContent();
+    try {
+      const { collectedImport, scriptUrl } = createCollectedImport(() =>
+        "fake"
+      );
 
-    assertEquals(originalContent, "");
+      const originalContent = await collectedImport.handleGetOriginalContent();
 
-    assertEquals(mockFetch.calls, [{ url: scriptUrl, init: undefined }]);
+      assertEquals(originalContent, "");
 
-    uninstallMockFetch();
+      assertEquals(mockFetch.calls, [{ url: scriptUrl, init: undefined }]);
+    } finally {
+      uninstallMockFetch();
+    }
   },
 });
 
@@ -66,16 +76,19 @@ Deno.test("handleResolveImport", () => {
 
 Deno.test("handleGetContent no args", async () => {
   installMockFetch();
-  const fakeContent = "new fake content";
-  const { collectedImport } = createCollectedImport(() => fakeContent);
 
-  const scriptContent = await collectedImport.handleGetContent();
-  assertEquals(scriptContent, {
-    script: fakeContent,
-    mimeType: null,
-  });
+  try {
+    const fakeContent = "new fake content";
+    const { collectedImport } = createCollectedImport(() => fakeContent);
 
-  uninstallMockFetch();
+    const scriptContent = await collectedImport.handleGetContent();
+    assertEquals(scriptContent, {
+      script: fakeContent,
+      mimeType: null,
+    });
+  } finally {
+    uninstallMockFetch();
+  }
 });
 
 Deno.test("handleGetContent with args", async () => {
@@ -83,41 +96,48 @@ Deno.test("handleGetContent with args", async () => {
   const fakeContent = "new fake content";
   const mockFetch = installMockFetch({ responseText: originalContent });
 
-  let receivedOriginalData = null;
-  const { collectedImport, scriptUrl } = createCollectedImport(
-    (originalData) => {
-      receivedOriginalData = originalData;
-      return fakeContent;
-    },
-  );
+  try {
+    let receivedOriginalData = null;
+    const { collectedImport, scriptUrl } = createCollectedImport(
+      (originalData) => {
+        receivedOriginalData = originalData;
+        return fakeContent;
+      },
+    );
 
-  const getContentResult = await collectedImport.handleGetContent();
-  assertEquals(getContentResult, {
-    script: fakeContent,
-    mimeType: null,
-  });
+    const getContentResult = await collectedImport.handleGetContent();
+    assertEquals(getContentResult, {
+      script: fakeContent,
+      mimeType: null,
+    });
 
-  assertEquals(receivedOriginalData, {
-    url: scriptUrl,
-    fullContent: originalContent,
-  });
+    assertEquals(receivedOriginalData, {
+      url: scriptUrl,
+      fullContent: originalContent,
+    });
 
-  assertEquals(mockFetch.calls, [{ url: scriptUrl, init: undefined }]);
-
-  uninstallMockFetch();
+    assertEquals(mockFetch.calls, [{ url: scriptUrl, init: undefined }]);
+  } finally {
+    uninstallMockFetch();
+  }
 });
 
 Deno.test({
   name: "Fetch is only called once",
   async fn() {
     const mockFetch = installMockFetch({ responseText: "original" });
-    const { collectedImport, scriptUrl } = createCollectedImport(() => "fake");
 
-    collectedImport.handleGetOriginalContent();
-    await collectedImport.handleGetContent();
+    try {
+      const { collectedImport, scriptUrl } = createCollectedImport(() =>
+        "fake"
+      );
 
-    assertEquals(mockFetch.calls, [{ url: scriptUrl, init: undefined }]);
+      collectedImport.handleGetOriginalContent();
+      await collectedImport.handleGetContent();
 
-    uninstallMockFetch();
+      assertEquals(mockFetch.calls, [{ url: scriptUrl, init: undefined }]);
+    } finally {
+      uninstallMockFetch();
+    }
   },
 });

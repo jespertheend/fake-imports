@@ -18,18 +18,21 @@ Deno.test({
   name: "handleGetContent() returns the fetch result",
   async fn() {
     const mockFetch = installMockFetch({ responseText: "// script" });
-    const { collectedImport, scriptUrl } = createCollectedImport();
 
-    const scriptContent = await collectedImport.handleGetContent();
+    try {
+      const { collectedImport, scriptUrl } = createCollectedImport();
 
-    assertEquals(scriptContent, {
-      script: "// script",
-      mimeType: "text/javascript",
-    });
+      const scriptContent = await collectedImport.handleGetContent();
 
-    assertEquals(mockFetch.calls, [{ url: scriptUrl, init: undefined }]);
+      assertEquals(scriptContent, {
+        script: "// script",
+        mimeType: "text/javascript",
+      });
 
-    uninstallMockFetch();
+      assertEquals(mockFetch.calls, [{ url: scriptUrl, init: undefined }]);
+    } finally {
+      uninstallMockFetch();
+    }
   },
 });
 
@@ -41,19 +44,21 @@ Deno.test({
       triggerNetworkError: true,
     });
 
-    const { collectedImport, scriptUrl } = createCollectedImport();
+    try {
+      const { collectedImport, scriptUrl } = createCollectedImport();
 
-    await assertRejects(
-      async () => {
-        {
-          await collectedImport.handleGetContent();
-        }
-      },
-      TypeError,
-      `Failed to import "${scriptUrl}". A network error occurred while fetching the module.`,
-    );
-
-    uninstallMockFetch();
+      await assertRejects(
+        async () => {
+          {
+            await collectedImport.handleGetContent();
+          }
+        },
+        TypeError,
+        `Failed to import "${scriptUrl}". A network error occurred while fetching the module.`,
+      );
+    } finally {
+      uninstallMockFetch();
+    }
   },
 });
 
@@ -65,19 +70,21 @@ Deno.test({
       responseCode: 404,
     });
 
-    const { collectedImport, scriptUrl } = createCollectedImport();
+    try {
+      const { collectedImport, scriptUrl } = createCollectedImport();
 
-    await assertRejects(
-      async () => {
-        {
-          await collectedImport.handleGetContent();
-        }
-      },
-      TypeError,
-      `Failed to import "${scriptUrl}". The resource did not respond with an ok status code (404).`,
-    );
-
-    uninstallMockFetch();
+      await assertRejects(
+        async () => {
+          {
+            await collectedImport.handleGetContent();
+          }
+        },
+        TypeError,
+        `Failed to import "${scriptUrl}". The resource did not respond with an ok status code (404).`,
+      );
+    } finally {
+      uninstallMockFetch();
+    }
   },
 });
 
@@ -89,19 +96,21 @@ Deno.test({
       responseCode: 500,
     });
 
-    const { collectedImport, scriptUrl } = createCollectedImport();
+    try {
+      const { collectedImport, scriptUrl } = createCollectedImport();
 
-    await assertRejects(
-      async () => {
-        {
-          await collectedImport.handleGetContent();
-        }
-      },
-      TypeError,
-      `Failed to import "${scriptUrl}". The resource did not respond with an ok status code (500).`,
-    );
-
-    uninstallMockFetch();
+      await assertRejects(
+        async () => {
+          {
+            await collectedImport.handleGetContent();
+          }
+        },
+        TypeError,
+        `Failed to import "${scriptUrl}". The resource did not respond with an ok status code (500).`,
+      );
+    } finally {
+      uninstallMockFetch();
+    }
   },
 });
 
@@ -113,22 +122,24 @@ Deno.test({
       responseCode: 500,
     });
 
-    const { collectedImport, scriptUrl } = createCollectedImport();
-    const mockParent = /** @type {CollectedImportFetch} */ ({
-      url: "file:///path/to/parent.js",
-    });
-    collectedImport.addParentCollectedImport(mockParent);
+    try {
+      const { collectedImport, scriptUrl } = createCollectedImport();
+      const mockParent = /** @type {CollectedImportFetch} */ ({
+        url: "file:///path/to/parent.js",
+      });
+      collectedImport.addParentCollectedImport(mockParent);
 
-    await assertRejects(
-      async () => {
-        {
-          await collectedImport.handleGetContent();
-        }
-      },
-      TypeError,
-      `Failed to import "${scriptUrl}" from "file:///path/to/parent.js". The resource did not respond with an ok status code (500).`,
-    );
-
-    uninstallMockFetch();
+      await assertRejects(
+        async () => {
+          {
+            await collectedImport.handleGetContent();
+          }
+        },
+        TypeError,
+        `Failed to import "${scriptUrl}" from "file:///path/to/parent.js". The resource did not respond with an ok status code (500).`,
+      );
+    } finally {
+      uninstallMockFetch();
+    }
   },
 });

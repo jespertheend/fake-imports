@@ -16,22 +16,24 @@ Deno.test({
       }),
     });
 
-    const coverageMapPath = join(dirPath, "fakeImportsCoverage");
-    const denoCoveragePath = join(dirPath, "denoCoverage");
-    await applyCoverageMap(coverageMapPath, denoCoveragePath);
+    try {
+      const coverageMapPath = join(dirPath, "fakeImportsCoverage");
+      const denoCoveragePath = join(dirPath, "denoCoverage");
+      await applyCoverageMap(coverageMapPath, denoCoveragePath);
 
-    const denoCoverageFilePath = join(
-      denoCoveragePath,
-      "denoCoverageFile.json",
-    );
-    const newJsonContent = await Deno.readTextFile(denoCoverageFilePath);
-    const newJson = JSON.parse(newJsonContent);
+      const denoCoverageFilePath = join(
+        denoCoveragePath,
+        "denoCoverageFile.json",
+      );
+      const newJsonContent = await Deno.readTextFile(denoCoverageFilePath);
+      const newJson = JSON.parse(newJsonContent);
 
-    assertEquals(newJson, {
-      url: "file:///original/file.js",
-    });
-
-    await cleanup();
+      assertEquals(newJson, {
+        url: "file:///original/file.js",
+      });
+    } finally {
+      await cleanup();
+    }
   },
 });
 
@@ -71,37 +73,39 @@ Deno.test({
       }),
     });
 
-    const coverageMapPath = join(dirPath, "fakeImportsCoverage");
-    const denoCoveragePath = join(dirPath, "denoCoverage");
-    await applyCoverageMap(coverageMapPath, denoCoveragePath);
+    try {
+      const coverageMapPath = join(dirPath, "fakeImportsCoverage");
+      const denoCoveragePath = join(dirPath, "denoCoverage");
+      await applyCoverageMap(coverageMapPath, denoCoveragePath);
 
-    const denoCoverageFilePath = join(
-      denoCoveragePath,
-      "denoCoverageFile.json",
-    );
-    const newJsonContent = await Deno.readTextFile(denoCoverageFilePath);
-    const newJson = JSON.parse(newJsonContent);
+      const denoCoverageFilePath = join(
+        denoCoveragePath,
+        "denoCoverageFile.json",
+      );
+      const newJsonContent = await Deno.readTextFile(denoCoverageFilePath);
+      const newJson = JSON.parse(newJsonContent);
 
-    assertEquals(newJson, {
-      url: "file:///original/file.js",
-      functions: [{
-        functionName: "foo",
-        ranges: [
-          {
-            startOffset: 0,
-            endOffset: 5,
-            count: 1,
-          },
-          {
-            startOffset: 10,
-            endOffset: 15,
-            count: 1,
-          },
-        ],
-        isBlockCoverage: false,
-      }],
-    });
-
-    await cleanup();
+      assertEquals(newJson, {
+        url: "file:///original/file.js",
+        functions: [{
+          functionName: "foo",
+          ranges: [
+            {
+              startOffset: 0,
+              endOffset: 5,
+              count: 1,
+            },
+            {
+              startOffset: 10,
+              endOffset: 15,
+              count: 1,
+            },
+          ],
+          isBlockCoverage: false,
+        }],
+      });
+    } finally {
+      await cleanup();
+    }
   },
 });

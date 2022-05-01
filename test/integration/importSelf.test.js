@@ -17,19 +17,21 @@ Deno.test({
       prefix: "import_self_test",
     });
 
-    const importer = new Importer(basePath);
-    importer.fakeModule(
-      "./replaced.js",
-      `
-      import {mutable} from "./replaced.js";
-      mutable.changedBy = "fake";
-      export {mutable};
-    `,
-    );
+    try {
+      const importer = new Importer(basePath);
+      importer.fakeModule(
+        "./replaced.js",
+        `
+        import {mutable} from "./replaced.js";
+        mutable.changedBy = "fake";
+        export {mutable};
+      `,
+      );
 
-    const main = await importer.import("./main.js");
-    assertEquals(main.mutable.changedBy, "fake");
-
-    await cleanup();
+      const main = await importer.import("./main.js");
+      assertEquals(main.mutable.changedBy, "fake");
+    } finally {
+      await cleanup();
+    }
   },
 });
