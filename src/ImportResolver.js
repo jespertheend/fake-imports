@@ -70,6 +70,9 @@ export class ImportResolver {
   /** @type {Map<string, string>} */
   #redirectedModules = new Map();
 
+  /** @type {Set<string>} */
+  #forcedRealModules = new Set();
+
   /** @type {Promise<void>?} */
   #makeCoverageDirPromise = null;
 
@@ -186,6 +189,20 @@ export class ImportResolver {
   }
 
   /**
+   * @param {string} url
+   */
+  makeReal(url) {
+    const newUrl = resolveModuleSpecifier(
+      this.#parsedImportMap,
+      new URL(this.#importMeta),
+      url,
+    );
+    const newUrlSerialized = newUrl.href;
+
+    this.#forcedRealModules.add(newUrlSerialized);
+  }
+
+  /**
    * @param {string | URL | import("./importMapParser.js").ImportMapData} importMap
    */
   setImportMap(importMap) {
@@ -268,6 +285,24 @@ export class ImportResolver {
       await Promise.all(this.#coverageMapWritePromises);
     }
     return module;
+  }
+
+  /**
+   * @param {string} url
+   * @param {string} baseUrl
+   */
+  getRealUrl(url, baseUrl) {
+    const newUrl = resolveModuleSpecifier(
+      this.#parsedImportMap,
+      new URL(baseUrl),
+      url,
+    );
+    const newUrlSerialized = newUrl.href;
+
+    if (this.#forcedRealModules.has(newUrlSerialized)) {
+      return newUrlSerialized;
+    }
+    return null;
   }
 
   /**

@@ -115,6 +115,10 @@ export class CollectedImport {
     const blobUrlPromises = [];
     for (const importData of imports) {
       const promise = (async () => {
+        const realUrl = this.#resolver.getRealUrl(importData.url, this.url);
+        if (realUrl != null) {
+          return realUrl;
+        }
         const resolveData = this.handleResolveImport(importData.url);
         const collectedImport = this.#resolver.createCollectedImport(
           resolveData.url,

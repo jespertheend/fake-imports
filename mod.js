@@ -194,6 +194,13 @@ export class Importer {
   }
 
   /**
+   * @param {string} url
+   */
+  makeReal(url) {
+    this.#resolver.makeReal(url);
+  }
+
+  /**
    * Gets all coverage map data from all modules imported by this importer.
    *
    * [more info about coverage maps](https://github.com/jespertheend/fake-imports#coverage)
