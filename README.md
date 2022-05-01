@@ -143,6 +143,68 @@ importer.fakeModule("./original.js", (original) => {
 });
 ```
 
+## Excluding imports
+
+Internally, a blob url is created for every imported (sub)module, more about
+that in [How it works internally](#how-it-works-internally). But this means that
+if you are importing a lot of (sub)modules, this could potentially be a very
+slow operation.
+
+To work around this issue, it is possible to mark specific imports as real. This
+means that if the provided module is imported from anywhere, it won't be
+replaced with a blob url.
+
+You can mark modules as real like so:
+
+```js
+const importer = new Importer(import.meta.url);
+importer.makeReal("./Foo.js");
+```
+
+Like this, if any module imports `Foo.js`, it won't be replaced by blob urls.
+And as a result, any modules imported by `Foo.js` won't be replaced either.
+
+Another benefit of this, is that classes imported using both
+`await importer.import()` and actual `import` syntax are exactly the same. So if
+you want to use `instanceof` on an object imported using fake imports, this is
+still possible.
+
+## Import maps
+
+If you are using import maps, you have to let the importer know about them in
+order for modules to resolve correctly. This can be done with `importMap`
+option:
+
+```js
+const importer = new Importer(import.meta.url, {
+  importMap: "./path/to/importMap.json",
+});
+```
+
+You can provide a path to an import map, or provide an import map directly:
+
+```js
+const importer = new Importer(import.meta.url, {
+  importMap: {
+    imports: {
+      "lib": "./path/to/libary.js",
+    },
+  },
+});
+```
+
+Import maps are assumed to be used for large libraries and generally things that
+don't need to be faked. So by default, all entries from the provided import map
+are [marked as real](#excluding-imports). If you don't want this to happen you
+can set `makeImportMapEntriesReal` to false:
+
+```js
+const importer = new Importer(import.meta.url, {
+  importMap: "./path/to/importMap.json",
+  makeImportMapEntriesReal: false,
+});
+```
+
 ## Coverage
 
 When using Fake Imports, blob urls are created for every file you import. For
