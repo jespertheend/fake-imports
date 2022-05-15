@@ -265,6 +265,7 @@ export class ImportResolver {
     );
     await this.loadImportMap();
     const collectedImport = this.createCollectedImport(newUrl.href);
+    collectedImport.markAsRoot();
     let module;
     try {
       module = await import(await collectedImport.getBlobUrl());
@@ -357,17 +358,20 @@ export class ImportResolver {
         );
       }
       if (parentImporter) {
-        const circularImportPath = parentImporter.findClosestCircularImportPath(
-          existing,
-        );
+        const circularImportPath = parentImporter
+          .findShortestCircularImportPath(
+            existing,
+          );
         if (circularImportPath) {
+          const rootToParentPath = existing.getShortestPathToRoot();
+          rootToParentPath.pop();
           circularImportPath.push(parentImporter);
           circularImportPath.push(existing);
-          const importPath = circularImportPath.map((item) =>
-            item.getFileName()
-          ).join(" -> ");
+          const importPath = [...rootToParentPath, ...circularImportPath];
+          const importPathNames = importPath.map((item) => item.getFileName())
+            .join(" -> ");
           throw new Error(
-            `Circular imports are not supported:\n${importPath}`,
+            `Circular imports are not supported:\n${importPathNames}`,
           );
         }
       }

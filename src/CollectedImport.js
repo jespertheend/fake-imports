@@ -49,6 +49,7 @@ export class CollectedImport {
   /** @type {import("./computeDiffOffsets.js").DiffOffsets?} */
   #diffOffsets = null;
 
+  #isUsedAsRootImport = false;
   /** @type {Set<CollectedImport>} */
   #parentCollectedImports = new Set();
 
@@ -174,6 +175,15 @@ export class CollectedImport {
   }
 
   /**
+   * Marks this import as being imported as root at least once.
+   * This is used to determine if traversing up using `getAllPathsToRoot()`
+   * should stop at this import.
+   */
+  markAsRoot() {
+    this.#isUsedAsRootImport = true;
+  }
+
+  /**
    * If this module was imported by one or multiple another modules, this method
    * will return the first module that imported this module.
    * If the module was imported by the user directly, null is returned.
@@ -193,11 +203,11 @@ export class CollectedImport {
    * @param {CollectedImport} parentCollectedImport
    * @returns {CollectedImport[]?}
    */
-  findClosestCircularImportPath(parentCollectedImport) {
+  findShortestCircularImportPath(parentCollectedImport) {
     for (const parent of this.#parentCollectedImports) {
       if (parent == parentCollectedImport) return [parent];
 
-      const pathFromParent = parent.findClosestCircularImportPath(
+      const pathFromParent = parent.findShortestCircularImportPath(
         parentCollectedImport,
       );
       if (pathFromParent) {
@@ -205,6 +215,53 @@ export class CollectedImport {
       }
     }
     return null;
+  }
+
+  /**
+   * Recursively travels up the import chain and returns all the paths leading
+   * to a root.
+   * @param {Set<CollectedImport>} seenBeforeParents
+   * @returns {CollectedImport[][]}
+   */
+  getAllPathsToRoot(seenBeforeParents = new Set()) {
+    if (seenBeforeParents.has(this)) {
+      return [];
+    }
+    seenBeforeParents.add(this);
+    /** @type {CollectedImport[][]} */
+    const paths = [];
+    if (this.#isUsedAsRootImport) {
+      paths.push([this]);
+    }
+    for (const parent of this.#parentCollectedImports) {
+      for (const path of parent.getAllPathsToRoot(seenBeforeParents)) {
+        paths.push([...path, this]);
+      }
+    }
+    return paths;
+  }
+
+  /**
+   * Recursively travels up the chain of parents and returns the shortest
+   * chain of imports that leads to this module.
+   * Returns an array with as first item a root module and as last item this
+   * module.
+   *
+   * @returns {CollectedImport[]}
+   */
+  getShortestPathToRoot() {
+    let shortestLength = Infinity;
+    let shortestPath = null;
+    for (const path of this.getAllPathsToRoot()) {
+      if (path.length < shortestLength) {
+        shortestLength = path.length;
+        shortestPath = path;
+      }
+    }
+    if (!shortestPath) {
+      throw new Error("Assertion failed, no paths to root found.");
+    }
+    return shortestPath;
   }
 
   getFileName() {

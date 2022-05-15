@@ -51,18 +51,18 @@ Deno.test({
 
 Deno.test({
   name:
-    "findClosestCircularImportPath() returns null if the parent is not in the tree of parents",
+    "findShortestCircularImportPath() returns null if the parent is not in the tree of parents",
   fn() {
     const importA = new CollectedImport("a.js", basicMockResolver);
     const importB = new CollectedImport("b.js", basicMockResolver);
 
-    assertEquals(importA.findClosestCircularImportPath(importB), null);
+    assertEquals(importA.findShortestCircularImportPath(importB), null);
   },
 });
 
 Deno.test({
   name:
-    "findClosestCircularImportPath() returns the path if the parent is a direct parent",
+    "findShortestCircularImportPath() returns the path if the parent is a direct parent",
   fn() {
     const parent = new CollectedImport("parent.js", basicMockResolver);
     const collectedImport = new CollectedImport(
@@ -72,7 +72,7 @@ Deno.test({
 
     collectedImport.addParentCollectedImport(parent);
 
-    const result = collectedImport.findClosestCircularImportPath(parent);
+    const result = collectedImport.findShortestCircularImportPath(parent);
     assertExists(result);
     assertEquals(result.length, 1);
     assertStrictEquals(result[0], parent);
@@ -81,7 +81,7 @@ Deno.test({
 
 Deno.test({
   name:
-    "findClosestCircularImportPath() returns the path if the parent is a parent of a parent",
+    "findShortestCircularImportPath() returns the path if the parent is a parent of a parent",
   fn() {
     const importA = new CollectedImport("a.js", basicMockResolver);
 
@@ -91,7 +91,7 @@ Deno.test({
     const importC = new CollectedImport("c.js", basicMockResolver);
     importC.addParentCollectedImport(importB);
 
-    const result = importC.findClosestCircularImportPath(importA);
+    const result = importC.findShortestCircularImportPath(importA);
     assertExists(result);
     assertEquals(result.length, 2);
     assertStrictEquals(result[0], importA);
@@ -101,7 +101,7 @@ Deno.test({
 
 Deno.test({
   name:
-    "findClosestCircularImportPath() returns the path if the parent is a parent of a parent of a parent",
+    "findShortestCircularImportPath() returns the path if the parent is a parent of a parent of a parent",
   fn() {
     const importA = new CollectedImport("a.js", basicMockResolver);
 
@@ -114,7 +114,7 @@ Deno.test({
     const importD = new CollectedImport("d.js", basicMockResolver);
     importD.addParentCollectedImport(importC);
 
-    const result = importD.findClosestCircularImportPath(importA);
+    const result = importD.findShortestCircularImportPath(importA);
     assertExists(result);
     assertEquals(result.length, 3);
     assertStrictEquals(result[0], importA);
@@ -125,7 +125,7 @@ Deno.test({
 
 Deno.test({
   name:
-    "findClosestCircularImportPath() returns the path if its parent contains another parent",
+    "findShortestCircularImportPath() returns the path if its parent contains another parent",
   fn() {
     const importA = new CollectedImport("a.js", basicMockResolver);
     const importB = new CollectedImport("b.js", basicMockResolver);
@@ -133,10 +133,129 @@ Deno.test({
     importC.addParentCollectedImport(importA);
     importC.addParentCollectedImport(importB);
 
-    const result = importC.findClosestCircularImportPath(importB);
+    const result = importC.findShortestCircularImportPath(importB);
     assertExists(result);
     assertEquals(result.length, 1);
     assertStrictEquals(result[0], importB);
+  },
+});
+
+Deno.test({
+  name:
+    "getAllPathsToRoot() returns a single entry when the module is the root",
+  fn() {
+    const collectedImport = new CollectedImport("a.js", basicMockResolver);
+    collectedImport.markAsRoot();
+    assertEquals(collectedImport.getAllPathsToRoot(), [[collectedImport]]);
+  },
+});
+
+Deno.test({
+  name: "getAllPathsToRoot() with one parent",
+  fn() {
+    const collectedImport = new CollectedImport("a.js", basicMockResolver);
+    const parent = new CollectedImport("b.js", basicMockResolver);
+    collectedImport.addParentCollectedImport(parent);
+    parent.markAsRoot();
+
+    const result = collectedImport.getAllPathsToRoot();
+    assertEquals(result, [[parent, collectedImport]]);
+  },
+});
+
+Deno.test({
+  name: "getAllPathsToRoot() with two parents",
+  fn() {
+    // a   b
+    //  \ /
+    //   c
+    //   |
+    //   d
+    const importA = new CollectedImport("a.js", basicMockResolver);
+    const importB = new CollectedImport("b.js", basicMockResolver);
+    const importC = new CollectedImport("c.js", basicMockResolver);
+    const importD = new CollectedImport("d.js", basicMockResolver);
+    importA.markAsRoot();
+    importB.markAsRoot();
+    importC.addParentCollectedImport(importA);
+    importC.addParentCollectedImport(importB);
+    importD.addParentCollectedImport(importC);
+
+    const result = importD.getAllPathsToRoot();
+    assertEquals(result, [
+      [importA, importC, importD],
+      [importB, importC, importD],
+    ]);
+  },
+});
+
+Deno.test({
+  name: "getAllPathsToRoot() with circular references",
+  fn() {
+    // a
+    // |
+    // b <-+
+    // |   |
+    // c---+
+    const importA = new CollectedImport("a.js", basicMockResolver);
+    const importB = new CollectedImport("b.js", basicMockResolver);
+    const importC = new CollectedImport("c.js", basicMockResolver);
+    importA.markAsRoot();
+    importB.addParentCollectedImport(importA);
+    importC.addParentCollectedImport(importB);
+    importB.addParentCollectedImport(importC);
+
+    const result = importC.getAllPathsToRoot();
+    assertEquals(result, [
+      [importA, importB, importC],
+    ]);
+  },
+});
+
+Deno.test({
+  name:
+    "getAllPathsToRoot() with circular references, one of which marked as root",
+  fn() {
+    // a <-+
+    // |   |
+    // b---+
+    const importA = new CollectedImport("a.js", basicMockResolver);
+    const importB = new CollectedImport("b.js", basicMockResolver);
+    importA.markAsRoot();
+    importB.addParentCollectedImport(importA);
+    importA.addParentCollectedImport(importB);
+
+    const result = importB.getAllPathsToRoot();
+    assertEquals(result, [
+      [importA, importB],
+    ]);
+  },
+});
+
+Deno.test({
+  name: "getShortestPathToRoot() gets the shortest path",
+  fn() {
+    // a
+    // |
+    // b   c
+    //  \ /
+    //   d
+    //   |
+    //   e
+    const importA = new CollectedImport("a.js", basicMockResolver);
+    const importB = new CollectedImport("b.js", basicMockResolver);
+    const importC = new CollectedImport("c.js", basicMockResolver);
+    const importD = new CollectedImport("d.js", basicMockResolver);
+    const importE = new CollectedImport("e.js", basicMockResolver);
+    importA.markAsRoot();
+    importB.addParentCollectedImport(importA);
+    importD.addParentCollectedImport(importB);
+    importC.markAsRoot();
+    importD.addParentCollectedImport(importC);
+    importE.addParentCollectedImport(importD);
+
+    const result = importE.getShortestPathToRoot();
+    assertEquals(result, [importC, importD, importE]);
   },
 });
 
