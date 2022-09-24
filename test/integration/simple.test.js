@@ -205,17 +205,13 @@ Deno.test({
       const errorCb = (e) => {
         assertInstanceOf(e, TypeError);
         if (e.stack) {
-          // If this fails, it could be that type checking is disabled in Deno.
-          // There's currently a bug where the line numbers in stack traces are
-          // incorrect when type checking is enabled.
-          // See https://github.com/denoland/deno/issues/12126
           assertEquals(
             e.stack,
             `TypeError: foo.nonExistentFunction is not a function
-    at c (${fooUrl}:17:22)
-    at b (${fooUrl}:15:15)
-    at a (${fooUrl}:9:19)
-    at ${fooUrl}:6:15`,
+    at c (${fooUrl}:15:15)
+    at b (${fooUrl}:10:11)
+    at a (${fooUrl}:6:11)
+    at ${fooUrl}:4:9`,
           );
         }
       };

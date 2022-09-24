@@ -81,7 +81,7 @@ export class ImportResolver {
   /**
    * @param {string | URL} importMeta
    * @param {import("../mod.js").ImporterOptions} options
-   * @param {RuntimeData} [runtimeData]
+   * @param {RuntimeData} runtimeData
    */
   constructor(
     importMeta,
@@ -196,7 +196,7 @@ export class ImportResolver {
 
   /**
    * @param {string} url
-   * @param {import("../mod.js").MakeRealOptions} [options]
+   * @param {import("../mod.js").MakeRealOptions} options
    */
   makeReal(url, {
     useUnresolved = false,
@@ -327,7 +327,7 @@ export class ImportResolver {
    * The created collected import will call this function as well, this way
    * all modules are recursively collected.
    * @param {string} url The relative url specifier to collect, this is essentially the raw import string from scripts.
-   * @param {Object} [options]
+   * @param {Object} options
    * @param {boolean} [options.allowFakes] If true, the real module will be loaded instead of the fake one.
    * @param {CollectedImport?} [options.parentImporter] The parent collected import, used for circular import detection.
    */
