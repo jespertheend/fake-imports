@@ -61,6 +61,35 @@ Deno.test({
 });
 
 Deno.test({
+  name: "Making an invalid specifier real doesn't cause other imports to fail",
+  async fn() {
+    const { cleanup, basePath } = await setupScriptTempDir({
+      "main.js": `
+        import {Foo} from "./shouldBeReal.js";
+
+        const instance = new Foo();
+        export {instance};
+      `,
+      "shouldBeReal.js": `
+        export class Foo {}
+      `,
+    }, { prefix: "forced_real_test" });
+
+    try {
+      const importer = new Importer(basePath);
+      importer.makeReal("invalidEntry", { useUnresolved: true });
+      importer.makeReal("./shouldBeReal.js");
+      const { instance } = await importer.import("./main.js");
+      const { Foo } = await import(new URL("./shouldBeReal.js", basePath).href);
+
+      assertInstanceOf(instance, Foo);
+    } finally {
+      await cleanup();
+    }
+  },
+});
+
+Deno.test({
   name: "making an import map resolved entry real",
   async fn() {
     const { cleanup, basePath } = await setupScriptTempDir({

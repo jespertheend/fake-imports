@@ -309,11 +309,21 @@ export class ImportResolver {
     const newUrlSerialized = newUrl.href;
 
     for (const forcedModule of this.#forcedRealModules.keys()) {
-      const newForcedModule = resolveModuleSpecifier(
-        this.#parsedImportMap,
-        new URL(this.#importMeta),
-        forcedModule,
-      );
+      let newForcedModule;
+      try {
+        newForcedModule = resolveModuleSpecifier(
+          this.#parsedImportMap,
+          new URL(this.#importMeta),
+          forcedModule,
+        );
+      } catch {
+        // Resolving a specifier can fail for all sorts of reasons.
+        // However, we're iterating over all forced real modules, which
+        // might contain invalid values. We don't want this function to fail
+        // just because the forced real modules contains an invalid value.
+        // We'll just continue, since maybe the next forced module is a valid one.
+        continue;
+      }
       if (newUrlSerialized == newForcedModule.href) {
         return newUrlSerialized;
       }
