@@ -15,7 +15,7 @@ import { ImportResolver } from "./src/ImportResolver.js";
  * @property {"auto" | boolean} [generateCoverageMap] `"auto"` to look at command line flags for this option, or `true|false` to force enable or disable coverage map generation. Defaults to `"auto"`.
  * @property {string} [coverageMapOutPath] When set, writes coverage map data to this directory.
  * [more info about coverage maps](https://github.com/jespertheend/fake-imports#coverage)
- * @property {string | URL | import("./src/importMapParser.js").ImportMapData} [importMap] Use this to set the import map of the importer.
+ * @property {string | URL | import("https://deno.land/x/import_maps@v0.1.1/mod.js").ImportMapData} [importMap] Use this to set the import map of the importer.
  * You may only call this once, and only before making any imports.
  * You can either pass a string that points to the import map (remote or on disk),
  * or you can pass an import map object directly.

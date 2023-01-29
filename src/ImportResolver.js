@@ -16,7 +16,11 @@ import {
 } from "https://deno.land/std@0.121.0/path/mod.ts";
 import { CollectedImportFake } from "./CollectedImportFake.js";
 import { CollectedImportFetch } from "./CollectedImportFetch.js";
-import { parseImportMap, resolveModuleSpecifier } from "./importMapParser.js";
+import {
+  createEmptyImportMap,
+  parseImportMap,
+  resolveModuleSpecifier,
+} from "https://deno.land/x/import_maps@v0.1.1/mod.js";
 import { fetchWithErrorHandling } from "./shared.js";
 
 /** @typedef {"browser" | "deno"} Environment */
@@ -44,15 +48,13 @@ export class ImportResolver {
   /** @type {Deno?} */
   #deno = null;
 
-  /** @type {string | URL | import("./importMapParser.js").ImportMapData | null} */
+  /** @type {string | URL | import("https://deno.land/x/import_maps@v0.1.1/mod.js").ImportMapData | null} */
   #providedImportMap = null;
   #makeImportMapEntriesReal = true;
   #hasParsedImportMap = false;
 
-  /** @type {import("./importMapParser.js").ParsedImportMap} */
-  #parsedImportMap = {
-    imports: {},
-  };
+  /** @type {import("https://deno.land/x/import_maps@v0.1.1/mod.js").ParsedImportMap} */
+  #parsedImportMap = createEmptyImportMap();
 
   /** @typedef {import("../mod.js").CoverageMapEntry} CoverageMapEntry */
   /** @typedef {import("./CollectedImport.js").CollectedImport} CollectedImport */
@@ -213,7 +215,7 @@ export class ImportResolver {
     if (!this.#providedImportMap) return;
     if (this.#hasParsedImportMap) return;
 
-    /** @type {import("./importMapParser.js").ImportMapData} */
+    /** @type {import("https://deno.land/x/import_maps@v0.1.1/mod.js").ImportMapData} */
     let importMapData;
     if (
       typeof this.#providedImportMap === "string" ||
