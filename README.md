@@ -1,7 +1,7 @@
 # Fake Imports
 
 [![Github ci](https://github.com/jespertheend/fake-imports/actions/workflows/ci.yml/badge.svg)](https://github.com/jespertheend/fake-imports/actions/workflows/ci.yml)
-[![Deno version](https://shields.io/github/v/release/jespertheend/fake-imports?label=Deno.land/x&logo=deno)](https://deno.land/x/fake_imports)
+[![Deno version](https://shields.io/github/v/release/jespertheend/fake-imports?label=Deno.land/x&logo=deno&include_prereleases)](https://deno.land/x/fake_imports)
 [![deno doc](https://doc.deno.land/badge.svg)](https://doc.deno.land/https://deno.land/x/fake_imports/mod.js/~/Importer)
 [![license](https://img.shields.io/github/license/jespertheend/fake-imports)](https://github.com/jespertheend/fake-imports/blob/master/LICENSE)
 
