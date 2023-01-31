@@ -183,3 +183,83 @@ Deno.test({
     ]);
   },
 });
+
+Deno.test({
+  name: "line comment in a double quote string",
+  fn() {
+    const source = `
+      "not a // comment"
+    `;
+
+    const result = getCommentLocations(source);
+
+    assertEquals(result, []);
+  },
+});
+
+Deno.test({
+  name: "line comment in a single quote string",
+  fn() {
+    const source = `
+      'not a // comment'
+    `;
+
+    const result = getCommentLocations(source);
+
+    assertEquals(result, []);
+  },
+});
+
+Deno.test({
+  name: "line comment after a string",
+  fn() {
+    const source = `
+      "str" // comment"
+    `;
+
+    const result = getCommentLocations(source);
+
+    assertEquals(result, [
+      {
+        start: 13,
+        end: 24,
+      },
+    ]);
+  },
+});
+
+Deno.test({
+  name: "line comment after a double quote string with line comment",
+  fn() {
+    const source = `
+      "not // a // comment" // comment
+    `;
+
+    const result = getCommentLocations(source);
+
+    assertEquals(result, [
+      {
+        start: 29,
+        end: 39,
+      },
+    ]);
+  },
+});
+
+Deno.test({
+  name: "line comment after a single quote string with line comment",
+  fn() {
+    const source = `
+      'not // a // comment' // comment
+    `;
+
+    const result = getCommentLocations(source);
+
+    assertEquals(result, [
+      {
+        start: 29,
+        end: 39,
+      },
+    ]);
+  },
+});

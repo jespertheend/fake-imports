@@ -109,7 +109,6 @@ Deno.test({
 
 Deno.test({
   name: "full url remapping",
-  ignore: true,
   async fn() {
     const { cleanup, basePath } = await setupScriptTempDir({
       "main.js": `
@@ -130,6 +129,7 @@ Deno.test({
             "https://example.com/mapped.js": "./mapped.js",
           },
         },
+        makeImportMapEntriesReal: false,
       });
 
       const module = await importer.import("./main.js");

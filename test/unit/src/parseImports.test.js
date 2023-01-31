@@ -268,6 +268,25 @@ Deno.test("Dynamic", () => {
 });
 
 Deno.test({
+  name: "full url",
+  fn() {
+    const script = `
+    import {foo} from "https://example.com/mapped.js";
+  `;
+
+    const imports = parseImports(script);
+
+    assertEquals(imports, [
+      {
+        start: 24,
+        length: 29,
+        url: "https://example.com/mapped.js",
+      },
+    ]);
+  },
+});
+
+Deno.test({
   name: "Doesn't import inside comments",
   fn() {
     const scriptSources = [

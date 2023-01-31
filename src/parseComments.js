@@ -12,12 +12,40 @@ export function getCommentLocations(scriptSource) {
   const commentLocations = [];
   let totalIndex = 0;
   for (const line of scriptSource.split("\n")) {
-    const commentIndex = line.indexOf("//");
-    if (commentIndex >= 0) {
-      commentLocations.push({
-        start: totalIndex + commentIndex,
-        end: totalIndex + line.length,
-      });
+    let lineAfterStrings = line;
+    while (lineAfterStrings.length > 0) {
+      const commentIndex = lineAfterStrings.indexOf("//");
+      const contentBeforeComment = lineAfterStrings.slice(0, commentIndex);
+      const singleQuoteCount = (contentBeforeComment.match(/'/g) || []).length;
+      const doubleQuoteCount = (contentBeforeComment.match(/"/g) || []).length;
+
+      // If there is an uneven number of quotes,
+      // that means the comment is inside a string
+      if (singleQuoteCount % 2 == 1 || doubleQuoteCount % 2 == 1) {
+        const lastSingleQuoteIndex = contentBeforeComment.lastIndexOf(`'`);
+        const lastDoubleQuoteIndex = contentBeforeComment.lastIndexOf(`"`);
+        const lastQuoteIndex = Math.max(
+          lastSingleQuoteIndex,
+          lastDoubleQuoteIndex,
+        );
+        const contentAfterLastQuote = lineAfterStrings.slice(
+          lastQuoteIndex + 1,
+        );
+        const lastQuoteType = lastSingleQuoteIndex > lastDoubleQuoteIndex
+          ? `'`
+          : `"`;
+        const nextQuoteIndex = contentAfterLastQuote.indexOf(lastQuoteType);
+        lineAfterStrings = contentAfterLastQuote.slice(nextQuoteIndex + 1);
+      } else {
+        if (commentIndex >= 0) {
+          const charactersBeforeStrings = line.length - lineAfterStrings.length;
+          commentLocations.push({
+            start: totalIndex + charactersBeforeStrings + commentIndex,
+            end: totalIndex + line.length,
+          });
+        }
+        break;
+      }
     }
     totalIndex += line.length + "\n".length;
   }

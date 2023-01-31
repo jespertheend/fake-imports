@@ -260,13 +260,8 @@ export class ImportResolver {
    * @returns {Promise<T>}
    */
   async import(url) {
-    const newUrl = resolveModuleSpecifier(
-      this.#parsedImportMap,
-      new URL(this.#importMeta),
-      url,
-    );
     await this.loadImportMap();
-    const collectedImport = this.createCollectedImport(newUrl.href);
+    const collectedImport = this.createCollectedImport(url);
     collectedImport.markAsRoot();
     let module;
     try {
