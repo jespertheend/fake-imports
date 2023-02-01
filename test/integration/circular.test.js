@@ -29,7 +29,11 @@ Deno.test({
           await importer.import("./A.js");
         },
         Error,
-        "Circular imports are not supported:\nA.js -> B.js -> A.js",
+        `Circular imports are not supported:
+A.js -> B.js -> A.js
+Consider passing one of the following paths to \`importer.makeReal()\`:
+./A.js
+./B.js`,
       );
     } finally {
       await cleanup();
@@ -70,7 +74,12 @@ Deno.test({
           await importer.import("./A.js");
         },
         Error,
-        "Circular imports are not supported:\nA.js -> B.js -> C.js -> A.js",
+        `Circular imports are not supported:
+A.js -> B.js -> C.js -> A.js
+Consider passing one of the following paths to \`importer.makeReal()\`:
+./A.js
+./B.js
+./C.js`,
       );
     } finally {
       await cleanup();
@@ -115,7 +124,13 @@ Deno.test({
           await importer.import("./A.js");
         },
         Error,
-        "Circular imports are not supported:\nA.js -> B.js -> C.js -> D.js -> B.js",
+        `Circular imports are not supported:
+A.js -> B.js -> C.js -> D.js -> B.js
+Consider passing one of the following paths to \`importer.makeReal()\`:
+./A.js
+./B.js
+./C.js
+./D.js`,
       );
     } finally {
       await cleanup();
@@ -156,7 +171,12 @@ Deno.test({
           await importer.import("./root/A.js");
         },
         Error,
-        "Circular imports are not supported:\nA.js -> B.js -> C.js -> A.js",
+        `Circular imports are not supported:
+A.js -> B.js -> C.js -> A.js
+Consider passing one of the following paths to \`importer.makeReal()\`:
+./root/A.js
+./root/scripts/B.js
+./root/C.js`,
       );
     } finally {
       await cleanup();
@@ -289,7 +309,13 @@ Deno.test({
           await importer.import("./A.js");
         },
         Error,
-        "Circular imports are not supported:\nA.js -> B.js -> D.js -> F.js -> D.js",
+        `Circular imports are not supported:
+A.js -> B.js -> D.js -> F.js -> D.js
+Consider passing one of the following paths to \`importer.makeReal()\`:
+./A.js
+./B.js
+./D.js
+./F.js`,
       );
     } finally {
       await cleanup();
@@ -321,7 +347,50 @@ Deno.test({
           await importer.import("./A.js");
         },
         Error,
-        `Circular imports are not supported. "${basePath}A.js" imports itself.`,
+        `Circular imports are not supported. "${basePath}A.js" imports itself.
+Consider passing the following path to \`importer.makeReal()\`:
+./A.js`,
+      );
+    } finally {
+      await cleanup();
+    }
+  },
+});
+
+Deno.test({
+  name: "circular import with file above the base path",
+  async fn() {
+    //    A  <-+
+    //    |    |
+    //    B    |
+    //    |    |
+    //    +----+
+
+    const { cleanup, basePath: tmpDirBasePath } = await setupScriptTempDir({
+      "A/A.js": `
+        import {B} from "../B/B.js";
+        export class A {}
+      `,
+      "B/B.js": `
+        import {A} from "../A/A.js";
+        export class B {}
+      `,
+    });
+
+    const basePath = tmpDirBasePath + "A/";
+
+    try {
+      const importer = new Importer(basePath);
+      await assertRejects(
+        async () => {
+          await importer.import("./A.js");
+        },
+        Error,
+        `Circular imports are not supported:
+A.js -> B.js -> A.js
+Consider passing one of the following paths to \`importer.makeReal()\`:
+./A.js
+../B/B.js`,
       );
     } finally {
       await cleanup();

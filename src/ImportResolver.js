@@ -22,6 +22,7 @@ import {
   resolveModuleSpecifier,
 } from "https://deno.land/x/import_maps@v0.1.1/mod.js";
 import { fetchWithErrorHandling } from "./shared.js";
+import { getRelativePath } from "./getRelativePath.js";
 
 /** @typedef {"browser" | "deno"} Environment */
 
@@ -361,7 +362,10 @@ export class ImportResolver {
       }
       if (existing == parentImporter) {
         throw new Error(
-          `Circular imports are not supported. "${url}" imports itself.`,
+          `Circular imports are not supported. "${url}" imports itself.
+Consider passing the following path to \`importer.makeReal()\`:
+${getRelativePath(this.#importMeta, url)}
+`,
         );
       }
       if (parentImporter) {
@@ -375,10 +379,17 @@ export class ImportResolver {
           circularImportPath.push(parentImporter);
           circularImportPath.push(existing);
           const importPath = [...rootToParentPath, ...circularImportPath];
-          const importPathNames = importPath.map((item) => item.getFileName())
+          const importFileNames = importPath.map((item) => item.getFileName())
             .join(" -> ");
+          const importPaths = importPath.map((item) =>
+            getRelativePath(this.#importMeta, item.url)
+          );
+          const importPathsWithoutDuplicates = Array.from(new Set(importPaths));
           throw new Error(
-            `Circular imports are not supported:\n${importPathNames}`,
+            `Circular imports are not supported:
+${importFileNames}
+Consider passing one of the following paths to \`importer.makeReal()\`:
+${importPathsWithoutDuplicates.join("\n")}`,
           );
         }
       }
