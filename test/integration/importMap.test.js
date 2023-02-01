@@ -8,12 +8,12 @@ Deno.test({
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        import {foo} from "barespecifier";
-        export {foo};
-      `,
+				import {foo} from "barespecifier";
+				export {foo};
+			`,
 			"notabarespecifier.js": `
-        export const foo = "foo";
-      `,
+				export const foo = "foo";
+			`,
 		}, {
 			prefix: "basic_import_map_test",
 		});
@@ -41,19 +41,19 @@ Deno.test({
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        import {foo} from "barespecifier";
-        export {foo};
-      `,
+				import {foo} from "barespecifier";
+				export {foo};
+			`,
 			"notabarespecifier.js": `
-        export const foo = "foo";
-      `,
+				export const foo = "foo";
+			`,
 			"importmap.json": `
-        {
-          "imports": {
-            "barespecifier": "./notabarespecifier.js"
-          }
-        }
-      `,
+				{
+					"imports": {
+						"barespecifier": "./notabarespecifier.js"
+					}
+				}
+			`,
 		}, {
 			prefix: "json_file_as_import_map_test",
 		});
@@ -77,12 +77,12 @@ Deno.test({
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        import {foo} from "lib/mod.js";
-        export {foo};
-      `,
+				import {foo} from "lib/mod.js";
+				export {foo};
+			`,
 			"path/to/lib/mod.js": `
-        export const foo = "foo";
-      `,
+				export const foo = "foo";
+			`,
 		}, {
 			prefix: "specifier_ending_with_slash_import_map_test",
 		});
@@ -109,12 +109,12 @@ Deno.test({
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        import {foo} from "https://example.com/mapped.js";
-        export {foo};
-      `,
+				import {foo} from "https://example.com/mapped.js";
+				export {foo};
+			`,
 			"mapped.js": `
-        export const foo = "foo";
-      `,
+				export const foo = "foo";
+			`,
 		}, {
 			prefix: "import_map_full_url_remapping_test",
 		});
@@ -162,9 +162,9 @@ Deno.test({
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        import {foo} from "bare";
-        export {foo};
-      `,
+				import {foo} from "bare";
+				export {foo};
+			`,
 		}, {
 			prefix: "bare_specifier_without_import_map",
 		});
@@ -215,9 +215,9 @@ Deno.test({
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        import {foo} from "bare";
-        export {foo};
-      `,
+				import {foo} from "bare";
+				export {foo};
+			`,
 		}, {
 			prefix: "bare_specifier_not_in_import_map",
 		});
@@ -302,9 +302,9 @@ Deno.test({
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        import { assert } from "asserts";
-        assert(true);
-      `,
+				import { assert } from "asserts";
+				assert(true);
+			`,
 		}, {
 			prefix: "makereal_bare_specifier_entry_with_useunresolved_test",
 		});

@@ -66,22 +66,22 @@ Deno.test({
 	fn: async () => {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        import {replaced as a} from "./a.js";
-        import {replaced as b} from "./b.js";
+				import {replaced as a} from "./a.js";
+				import {replaced as b} from "./b.js";
 
-        export {a, b};
-      `,
+				export {a, b};
+			`,
 			"a.js": `
-        import {replaced} from "./replaced.js";
-        export {replaced};
-      `,
+				import {replaced} from "./replaced.js";
+				export {replaced};
+			`,
 			"b.js": `
-        import {replaced} from "./replaced.js";
-        export {replaced};
-      `,
+				import {replaced} from "./replaced.js";
+				export {replaced};
+			`,
 			"replaced.js": `
-        export const replaced = "not replaced";
-      `,
+				export const replaced = "not replaced";
+			`,
 		}, { prefix: "multiple_imports_from_same_file_test" });
 
 		try {
@@ -104,11 +104,11 @@ Deno.test({
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        export {foo} from "./foo.js";
-      `,
+				export {foo} from "./foo.js";
+			`,
 			"foo.js": `
-        export const foo = "foo";
-      `,
+				export const foo = "foo";
+			`,
 		}, { prefix: "module_that_reexports_a_module" });
 
 		try {
@@ -127,11 +127,11 @@ Deno.test({
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        export {foo} from "./foo.js";
-      `,
+				export {foo} from "./foo.js";
+			`,
 			"foo.js": `
-        export const foo = "foo;
-      `,
+				export const foo = "foo;
+			`,
 		}, { prefix: "syntax_error_test" });
 
 		try {
@@ -172,26 +172,26 @@ Deno.test({
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        export {foo} from "./foo.js";
-      `,
+				export {foo} from "./foo.js";
+			`,
 			"foo.js": `
-        const foo = "foo";
+				const foo = "foo";
 
-        a();
-        function a() {
-          b();
-        }
+				a();
+				function a() {
+				b();
+				}
 
-        function b() {
-          c();
-        }
+				function b() {
+				c();
+				}
 
-        function c() {
-          // @ts-ignore
-          foo.nonExistentFunction();
-        }
-        export {foo};
-      `,
+				function c() {
+				// @ts-ignore
+				foo.nonExistentFunction();
+				}
+				export {foo};
+			`,
 		}, { prefix: "syntax_error_test" });
 
 		try {
@@ -227,15 +227,15 @@ Deno.test({
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        import {getTypedFunction} from "./typescriptFile.ts";
-        const result = getTypedFunction("foo");
-        export {result};
-      `,
+				import {getTypedFunction} from "./typescriptFile.ts";
+				const result = getTypedFunction("foo");
+				export {result};
+			`,
 			"typescriptFile.ts": `
-        export function getTypedFunction(x: string) : string {
-          return x;
-        }
-      `,
+				export function getTypedFunction(x: string) : string {
+				return x;
+				}
+			`,
 		}, { prefix: "typescript_imports_test" });
 
 		try {

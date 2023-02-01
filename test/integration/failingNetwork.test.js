@@ -7,8 +7,8 @@ Deno.test({
 	fn: async () => {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        import "./does/not/exist.js";
-      `,
+				import "./does/not/exist.js";
+			`,
 		}, { prefix: "non_existent_file_via_file_test" });
 
 		try {
@@ -31,8 +31,8 @@ Deno.test({
 	fn: async () => {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"path/to/main.js": `
-        import "./does/not/exist.js";
-      `,
+				import "./does/not/exist.js";
+			`,
 		}, { prefix: "non_existent_file_via_file_test" });
 
 		try {
@@ -55,8 +55,8 @@ Deno.test({
 	fn: async () => {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        import "./does/not/exist.js";
-      `,
+				import "./does/not/exist.js";
+			`,
 		}, { prefix: "non_existent_file_via_direct_test" });
 
 		try {

@@ -8,9 +8,9 @@ async function simpleRedirectionDir() {
 		"b.js": `export const value = "b";`,
 		"c.js": `export const value = "c";`,
 		"main.js": `
-      import {value} from "./a.js";
-      export {value};
-    `,
+			import {value} from "./a.js";
+			export {value};
+		`,
 	});
 }
 
@@ -56,14 +56,14 @@ Deno.test({
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"a.js": `export const value = "a";`,
 			"subdir/b.js": `
-        import {value} from "./neighbor.js";
-        export {value};
-      `,
+				import {value} from "./neighbor.js";
+				export {value};
+			`,
 			"subdir/neighbor.js": `export const value = "b";`,
 			"main.js": `
-        import {value} from "./a.js";
-        export {value};
-      `,
+				import {value} from "./a.js";
+				export {value};
+			`,
 		});
 
 		try {
@@ -84,14 +84,14 @@ Deno.test({
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"a.js": `export const value = "a";`,
 			"subdir/b.js": `
-        import {value} from "../fileFromParentDir.js";
-        export {value};
-      `,
+				import {value} from "../fileFromParentDir.js";
+				export {value};
+			`,
 			"fileFromParentDir.js": `export const value = "b";`,
 			"main.js": `
-        import {value} from "./a.js";
-        export {value};
-      `,
+				import {value} from "./a.js";
+				export {value};
+			`,
 		});
 
 		try {

@@ -18,8 +18,8 @@ class ExtendecCollectedImport extends CollectedImport {
 	handleGetContent() {
 		return Promise.resolve({
 			script: `
-        import "./someUrl.js";
-      `,
+				import "./someUrl.js";
+			`,
 			mimeType: "text/javascript",
 		});
 	}

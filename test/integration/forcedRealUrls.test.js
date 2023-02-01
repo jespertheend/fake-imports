@@ -7,14 +7,14 @@ Deno.test({
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        import {Foo} from "./shouldBeBlob.js";
+				import {Foo} from "./shouldBeBlob.js";
 
-        const instance = new Foo();
-        export {instance};
-      `,
+				const instance = new Foo();
+				export {instance};
+			`,
 			"shouldBeBlob.js": `
-        export class Foo {}
-      `,
+				export class Foo {}
+			`,
 		}, { prefix: "not_forced_real_test" });
 
 		try {
@@ -37,14 +37,14 @@ Deno.test({
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        import {Foo} from "./shouldBeReal.js";
+				import {Foo} from "./shouldBeReal.js";
 
-        const instance = new Foo();
-        export {instance};
-      `,
+				const instance = new Foo();
+				export {instance};
+			`,
 			"shouldBeReal.js": `
-        export class Foo {}
-      `,
+				export class Foo {}
+			`,
 		}, { prefix: "forced_real_test" });
 
 		try {
@@ -65,14 +65,14 @@ Deno.test({
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        import {Foo} from "./shouldBeReal.js";
+				import {Foo} from "./shouldBeReal.js";
 
-        const instance = new Foo();
-        export {instance};
-      `,
+				const instance = new Foo();
+				export {instance};
+			`,
 			"shouldBeReal.js": `
-        export class Foo {}
-      `,
+				export class Foo {}
+			`,
 		}, { prefix: "forced_real_test" });
 
 		try {
@@ -94,20 +94,20 @@ Deno.test({
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        import {Foo} from "barespecifier";
-        const instance = new Foo();
-        export {instance};
-      `,
+				import {Foo} from "barespecifier";
+				const instance = new Foo();
+				export {instance};
+			`,
 			"notabarespecifier.js": `
-        export class Foo {}
-      `,
+				export class Foo {}
+			`,
 			"importmap.json": `
-        {
-          "imports": {
-            "barespecifier": "./notabarespecifier.js"
-          }
-        }
-      `,
+				{
+				"imports": {
+				"barespecifier": "./notabarespecifier.js"
+				}
+				}
+			`,
 		}, {
 			prefix: "makereal_resolved_import_map_entry_test",
 		});
@@ -135,20 +135,20 @@ Deno.test({
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        import {Foo} from "barespecifier";
-        const instance = new Foo();
-        export {instance};
-      `,
+				import {Foo} from "barespecifier";
+				const instance = new Foo();
+				export {instance};
+			`,
 			"notabarespecifier.js": `
-        export class Foo {}
-      `,
+				export class Foo {}
+			`,
 			"importmap.json": `
-        {
-          "imports": {
-            "barespecifier": "./notabarespecifier.js"
-          }
-        }
-      `,
+				{
+				"imports": {
+				"barespecifier": "./notabarespecifier.js"
+				}
+				}
+			`,
 		}, {
 			prefix: "makereal_bare_specifier_entry_test",
 		});
@@ -176,20 +176,20 @@ Deno.test({
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        import {Foo} from "barespecifier";
-        const instance = new Foo();
-        export {instance};
-      `,
+				import {Foo} from "barespecifier";
+				const instance = new Foo();
+				export {instance};
+			`,
 			"notabarespecifier.js": `
-        export class Foo {}
-      `,
+				export class Foo {}
+			`,
 			"importmap.json": `
-        {
-          "imports": {
-            "barespecifier": "./notabarespecifier.js"
-          }
-        }
-      `,
+				{
+				"imports": {
+				"barespecifier": "./notabarespecifier.js"
+				}
+				}
+			`,
 		}, {
 			prefix: "makereal_bare_specifier_entry_with_useunresolved_test",
 		});
@@ -220,9 +220,9 @@ Deno.test({
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        import { assert } from "asserts";
-        assert(true);
-      `,
+				import { assert } from "asserts";
+				assert(true);
+			`,
 		}, {
 			prefix: "makereal_bare_specifier_entry_with_useunresolved_test",
 		});

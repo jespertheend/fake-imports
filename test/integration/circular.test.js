@@ -13,13 +13,13 @@ Deno.test({
 
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"A.js": `
-        import {Bar} from "./B.js";
-        export class A {}
-      `,
+				import {Bar} from "./B.js";
+				export class A {}
+			`,
 			"B.js": `
-        import {Foo} from "./A.js";
-        export class B {}
-      `,
+				import {Foo} from "./A.js";
+				export class B {}
+			`,
 		});
 
 		try {
@@ -54,17 +54,17 @@ Deno.test({
 
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"A.js": `
-        import {Bar} from "./B.js";
-        export class A {}
-      `,
+				import {Bar} from "./B.js";
+				export class A {}
+			`,
 			"B.js": `
-        import {Foo} from "./C.js";
-        export class B {}
-      `,
+				import {Foo} from "./C.js";
+				export class B {}
+			`,
 			"C.js": `
-        import {Foo} from "./A.js";
-        export class ScriptC {}
-      `,
+				import {Foo} from "./A.js";
+				export class ScriptC {}
+			`,
 		});
 
 		try {
@@ -100,21 +100,21 @@ Deno.test({
 
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"A.js": `
-        import {Bar} from "./B.js";
-        export class A {}
-      `,
+				import {Bar} from "./B.js";
+				export class A {}
+			`,
 			"B.js": `
-        import {Foo} from "./C.js";
-        export class B {}
-      `,
+				import {Foo} from "./C.js";
+				export class B {}
+			`,
 			"C.js": `
-        import {Foo} from "./D.js";
-        export class ScriptC {}
-      `,
+				import {Foo} from "./D.js";
+				export class ScriptC {}
+			`,
 			"D.js": `
-        import {Foo} from "./B.js";
-        export class ScriptC {}
-      `,
+				import {Foo} from "./B.js";
+				export class ScriptC {}
+			`,
 		});
 
 		try {
@@ -151,17 +151,17 @@ Deno.test({
 
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"root/A.js": `
-        import {Bar} from "./scripts/B.js";
-        export class A {}
-      `,
+				import {Bar} from "./scripts/B.js";
+				export class A {}
+			`,
 			"root/scripts/B.js": `
-        import {Foo} from "../C.js";
-        export class B {}
-      `,
+				import {Foo} from "../C.js";
+				export class B {}
+			`,
 			"root/C.js": `
-        import {Foo} from "./A.js";
-        export class ScriptC {}
-      `,
+				import {Foo} from "./A.js";
+				export class ScriptC {}
+			`,
 		});
 
 		try {
@@ -197,22 +197,22 @@ Deno.test({
 
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"A.js": `
-        import "./B.js";
-        import "./C.js";
-      `,
+				import "./B.js";
+				import "./C.js";
+			`,
 			"B.js": `
-        import "./D.js";
-        import "./E.js";
-      `,
+				import "./D.js";
+				import "./E.js";
+			`,
 			"C.js": `
-        import "./E.js";
-        import "./F.js";
-      `,
+				import "./E.js";
+				import "./F.js";
+			`,
 			"D.js": "//empty",
 			"E.js": `
-        import "./G.js";
-        import "./H.js";
-      `,
+				import "./G.js";
+				import "./H.js";
+			`,
 			"F.js": "//empty",
 			"G.js": "//empty",
 			"H.js": "//empty",
@@ -242,22 +242,22 @@ Deno.test({
 
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"A.js": `
-        import "./B.js";
-        import "./E.js";
-      `,
+				import "./B.js";
+				import "./E.js";
+			`,
 			"B.js": `
-        import "./C.js";
-        import "./D.js";
-      `,
+				import "./C.js";
+				import "./D.js";
+			`,
 			"C.js": `
-        import "./F.js";
-      `,
+				import "./F.js";
+			`,
 			"D.js": `
-        import "./F.js";
-      `,
+				import "./F.js";
+			`,
 			"F.js": `
-        import "./E.js";
-      `,
+				import "./E.js";
+			`,
 			"E.js": "//empty",
 		});
 
@@ -285,21 +285,21 @@ Deno.test({
 
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"A.js": `
-        import "./B.js";
-      `,
+				import "./B.js";
+			`,
 			"B.js": `
-        import "./C.js";
-        import "./D.js";
-      `,
+				import "./C.js";
+				import "./D.js";
+			`,
 			"C.js": `
-        import "./F.js";
-      `,
+				import "./F.js";
+			`,
 			"D.js": `
-        import "./F.js";
-      `,
+				import "./F.js";
+			`,
 			"F.js": `
-        import "./D.js";
-      `,
+				import "./D.js";
+			`,
 		});
 
 		try {
@@ -336,8 +336,8 @@ Deno.test({
 
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"A.js": `
-        import "./A.js";
-      `,
+				import "./A.js";
+			`,
 		});
 
 		try {
@@ -368,13 +368,13 @@ Deno.test({
 
 		const { cleanup, basePath: tmpDirBasePath } = await setupScriptTempDir({
 			"A/A.js": `
-        import {B} from "../B/B.js";
-        export class A {}
-      `,
+				import {B} from "../B/B.js";
+				export class A {}
+			`,
 			"B/B.js": `
-        import {A} from "../A/A.js";
-        export class B {}
-      `,
+				import {A} from "../A/A.js";
+				export class B {}
+			`,
 		});
 
 		const basePath = tmpDirBasePath + "A/";

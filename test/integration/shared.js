@@ -46,12 +46,12 @@ export async function setupScriptTempDir(scriptFiles, {
 export async function simpleReplacementDir() {
 	return await setupScriptTempDir({
 		"main.js": `
-      import {replaced} from "./replaced.js";
-      export {replaced};
-    `,
+			import {replaced} from "./replaced.js";
+			export {replaced};
+		`,
 		"replaced.js": `
-      export const replaced = "not replaced";
-    `,
+			export const replaced = "not replaced";
+		`,
 	}, {
 		prefix: "simple_replacement_test",
 	});

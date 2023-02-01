@@ -7,12 +7,12 @@ Deno.test({
 	fn: async () => {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
-        import {mutable} from "./replaced.js";
-        export {mutable};
-      `,
+				import {mutable} from "./replaced.js";
+				export {mutable};
+			`,
 			"replaced.js": `
-        export const mutable = {changedBy: "not changed"};
-      `,
+				export const mutable = {changedBy: "not changed"};
+			`,
 		}, {
 			prefix: "import_twice_test",
 		});

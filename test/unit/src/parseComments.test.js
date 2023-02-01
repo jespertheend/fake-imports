@@ -18,13 +18,13 @@ Deno.test({
 	name: "line comment after non comment",
 	fn() {
 		const source = `
-      not a comment // comment
-    `;
+			not a comment // comment
+		`;
 
 		const result = getCommentLocations(source);
 
 		assertEquals(result, [
-			{ start: 21, end: 31 },
+			{ start: 18, end: 28 },
 		]);
 	},
 });
@@ -33,15 +33,15 @@ Deno.test({
 	name: "line comment in between non comments",
 	fn() {
 		const source = `
-      not a comment
-      not a comment // comment
-      not a comment
-    `;
+			not a comment
+			not a comment // comment
+			not a comment
+		`;
 
 		const result = getCommentLocations(source);
 
 		assertEquals(result, [
-			{ start: 41, end: 51 },
+			{ start: 35, end: 45 },
 		]);
 	},
 });
@@ -50,21 +50,21 @@ Deno.test({
 	name: "multiple line comments",
 	fn() {
 		const source = `
-      // comment
-      not a comment
-      not a comment // comment
-      not a comment // comment
-      not a comment
-      not a comment // comment
-    `;
+			// comment
+			not a comment
+			not a comment // comment
+			not a comment // comment
+			not a comment
+			not a comment // comment
+		`;
 
 		const result = getCommentLocations(source);
 
 		assertEquals(result, [
-			{ start: 7, end: 17 },
-			{ start: 58, end: 68 },
-			{ start: 89, end: 99 },
-			{ start: 140, end: 150 },
+			{ start: 4, end: 14 },
+			{ start: 49, end: 59 },
+			{ start: 77, end: 87 },
+			{ start: 122, end: 132 },
 		]);
 	},
 });
@@ -86,15 +86,15 @@ Deno.test({
 	name: "multi line block comment",
 	fn() {
 		const source = `
-      /*
-       comment
-       */
-    `;
+			/*
+			comment
+			*/
+		`;
 
 		const result = getCommentLocations(source);
 
 		assertEquals(result, [
-			{ start: 7, end: 34 },
+			{ start: 4, end: 23 },
 		]);
 	},
 });
@@ -103,15 +103,15 @@ Deno.test({
 	name: "jsdoc style comment",
 	fn() {
 		const source = `
-      /**
-       * @fileoverview test
-       */
-    `;
+			/**
+			 * @fileoverview test
+			 */
+		`;
 
 		const result = getCommentLocations(source);
 
 		assertEquals(result, [
-			{ start: 7, end: 48 },
+			{ start: 4, end: 39 },
 		]);
 	},
 });
@@ -120,15 +120,15 @@ Deno.test({
 	name: "line comment inside block comment",
 	fn() {
 		const source = `
-      /*
-      // comment
-      */
-    `;
+			/*
+			// comment
+			*/
+		`;
 
 		const result = getCommentLocations(source);
 
 		assertEquals(result, [
-			{ start: 7, end: 35 },
+			{ start: 4, end: 26 },
 		]);
 	},
 });
@@ -137,15 +137,15 @@ Deno.test({
 	name: "block comment between non comments",
 	fn() {
 		const source = `
-      not a comment
-      /* comment */
-      not a comment
-    `;
+			not a comment
+			/* comment */
+			not a comment
+		`;
 
 		const result = getCommentLocations(source);
 
 		assertEquals(result, [
-			{ start: 27, end: 40 },
+			{ start: 21, end: 34 },
 		]);
 	},
 });
@@ -154,14 +154,14 @@ Deno.test({
 	name: "block comment inside line comment",
 	fn() {
 		const source = `
-      // comment /* comment */
-      not a comment
-    `;
+			// comment /* comment */
+			not a comment
+		`;
 
 		const result = getCommentLocations(source);
 
 		assertEquals(result, [
-			{ start: 7, end: 31 },
+			{ start: 4, end: 28 },
 		]);
 	},
 });
@@ -170,16 +170,16 @@ Deno.test({
 	name: "non comment between two block comments",
 	fn() {
 		const source = `
-      /* comment */
-      not a comment
-      /* comment */
-    `;
+			/* comment */
+			not a comment
+			/* comment */
+		`;
 
 		const result = getCommentLocations(source);
 
 		assertEquals(result, [
-			{ start: 7, end: 20 },
-			{ start: 47, end: 60 },
+			{ start: 4, end: 17 },
+			{ start: 38, end: 51 },
 		]);
 	},
 });
@@ -188,8 +188,8 @@ Deno.test({
 	name: "line comment in a double quote string",
 	fn() {
 		const source = `
-      "not a // comment"
-    `;
+			"not a // comment"
+		`;
 
 		const result = getCommentLocations(source);
 
@@ -201,8 +201,8 @@ Deno.test({
 	name: "line comment in a single quote string",
 	fn() {
 		const source = `
-      'not a // comment'
-    `;
+			'not a // comment'
+		`;
 
 		const result = getCommentLocations(source);
 
@@ -214,15 +214,15 @@ Deno.test({
 	name: "line comment after a string",
 	fn() {
 		const source = `
-      "str" // comment"
-    `;
+			"str" // comment"
+		`;
 
 		const result = getCommentLocations(source);
 
 		assertEquals(result, [
 			{
-				start: 13,
-				end: 24,
+				start: 10,
+				end: 21,
 			},
 		]);
 	},
@@ -232,15 +232,15 @@ Deno.test({
 	name: "line comment after a double quote string with line comment",
 	fn() {
 		const source = `
-      "not // a // comment" // comment
-    `;
+			"not // a // comment" // comment
+		`;
 
 		const result = getCommentLocations(source);
 
 		assertEquals(result, [
 			{
-				start: 29,
-				end: 39,
+				start: 26,
+				end: 36,
 			},
 		]);
 	},
@@ -250,15 +250,15 @@ Deno.test({
 	name: "line comment after a single quote string with line comment",
 	fn() {
 		const source = `
-      'not // a // comment' // comment
-    `;
+			'not // a // comment' // comment
+		`;
 
 		const result = getCommentLocations(source);
 
 		assertEquals(result, [
 			{
-				start: 29,
-				end: 39,
+				start: 26,
+				end: 36,
 			},
 		]);
 	},
