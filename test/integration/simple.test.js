@@ -206,10 +206,10 @@ Deno.test({
 					assertEquals(
 						e.stack,
 						`TypeError: foo.nonExistentFunction is not a function
-    at c (${fooUrl}:15:15)
-    at b (${fooUrl}:10:11)
-    at a (${fooUrl}:6:11)
-    at ${fooUrl}:4:9`,
+    at c (${fooUrl}:15:9)
+    at b (${fooUrl}:10:5)
+    at a (${fooUrl}:6:5)
+    at ${fooUrl}:4:5`,
 					);
 				}
 			};
