@@ -3,43 +3,43 @@ import { simpleReplacementDir } from "./shared.js";
 import { Importer } from "../../mod.js";
 
 Deno.test({
-  name: "No arguments",
-  fn: async () => {
-    const { cleanup, basePath } = await simpleReplacementDir();
+	name: "No arguments",
+	fn: async () => {
+		const { cleanup, basePath } = await simpleReplacementDir();
 
-    try {
-      const importer = new Importer(basePath);
-      importer.fakeModule(
-        "./replaced.js",
-        () => `export const replaced = "replaced";`,
-      );
-      const main = await importer.import("./main.js");
+		try {
+			const importer = new Importer(basePath);
+			importer.fakeModule(
+				"./replaced.js",
+				() => `export const replaced = "replaced";`,
+			);
+			const main = await importer.import("./main.js");
 
-      assertEquals(main.replaced, "replaced");
-    } finally {
-      await cleanup();
-    }
-  },
+			assertEquals(main.replaced, "replaced");
+		} finally {
+			await cleanup();
+		}
+	},
 });
 
 Deno.test({
-  name: "Take fullContent",
-  fn: async () => {
-    const { cleanup, basePath } = await simpleReplacementDir();
+	name: "Take fullContent",
+	fn: async () => {
+		const { cleanup, basePath } = await simpleReplacementDir();
 
-    try {
-      const importer = new Importer(basePath);
-      importer.fakeModule(
-        "./replaced.js",
-        (original) => {
-          return original.fullContent.replace(`"not replaced"`, `"replaced"`);
-        },
-      );
-      const main = await importer.import("./main.js");
+		try {
+			const importer = new Importer(basePath);
+			importer.fakeModule(
+				"./replaced.js",
+				(original) => {
+					return original.fullContent.replace(`"not replaced"`, `"replaced"`);
+				},
+			);
+			const main = await importer.import("./main.js");
 
-      assertEquals(main.replaced, "replaced");
-    } finally {
-      await cleanup();
-    }
-  },
+			assertEquals(main.replaced, "replaced");
+		} finally {
+			await cleanup();
+		}
+	},
 });

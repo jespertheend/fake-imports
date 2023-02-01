@@ -18,23 +18,23 @@ import { diffLines } from "https://unpkg.com/diff@5.0.0/lib/index.mjs";
  * @param {string} to
  */
 export function computeDiffOffsets(from, to) {
-  const diff = diffLines(from, to);
-  /** @type {DiffOffsets} */
-  const offsets = [];
-  let cursor = 0;
-  let currentOffset = 0;
-  for (const part of diff) {
-    if (part.added) {
-      currentOffset += part.value.length;
-      continue;
-    }
-    if (part.removed) {
-      offsets.push([cursor, null]);
-      currentOffset -= part.value.length;
-    } else {
-      offsets.push([cursor, currentOffset]);
-    }
-    cursor += part.value.length;
-  }
-  return offsets;
+	const diff = diffLines(from, to);
+	/** @type {DiffOffsets} */
+	const offsets = [];
+	let cursor = 0;
+	let currentOffset = 0;
+	for (const part of diff) {
+		if (part.added) {
+			currentOffset += part.value.length;
+			continue;
+		}
+		if (part.removed) {
+			offsets.push([cursor, null]);
+			currentOffset -= part.value.length;
+		} else {
+			offsets.push([cursor, currentOffset]);
+		}
+		cursor += part.value.length;
+	}
+	return offsets;
 }

@@ -1,7 +1,7 @@
 {
-  "deno.enable": true,
-  "deno.lint": true,
-  "deno.unstable": true,
-  "typescript.tsserver.experimental.enableProjectDiagnostics": false,
-  "deno.config": "deno.jsonc"
+	"deno.enable": true,
+	"deno.lint": true,
+	"deno.unstable": true,
+	"typescript.tsserver.experimental.enableProjectDiagnostics": false,
+	"deno.config": "deno.jsonc"
 }

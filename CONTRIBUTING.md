@@ -35,5 +35,4 @@ When submitting a PR, you can run
 deno task check
 ```
 
-This runs the linter, formatter and finally all the tests. This is generally
-required to pass in order for ci to pass.
+This runs the linter, formatter and finally all the tests. This is generally required to pass in order for ci to pass.

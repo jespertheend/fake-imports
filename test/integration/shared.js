@@ -22,39 +22,39 @@ import { dirname, resolve } from "https://deno.land/std@0.119.0/path/mod.ts";
  * @returns {Promise<SetupScriptTempDirResult>}
  */
 export async function setupScriptTempDir(scriptFiles, {
-  prefix = "",
-  suffix = "",
+	prefix = "",
+	suffix = "",
 } = {}) {
-  const dirPath = await Deno.makeTempDir({ prefix, suffix });
-  const promises = [];
-  for (const [fileName, scriptContent] of Object.entries(scriptFiles)) {
-    const filePath = resolve(dirPath, fileName);
-    const promise = (async () => {
-      await Deno.mkdir(dirname(filePath), { recursive: true });
-      await Deno.writeTextFile(filePath, scriptContent);
-    })();
-    promises.push(promise);
-  }
-  await Promise.all(promises);
-  const cleanup = async () => {
-    await Deno.remove(dirPath, { recursive: true });
-  };
-  const basePath = toFileUrl(dirPath) + "/";
-  return { basePath, dirPath, cleanup };
+	const dirPath = await Deno.makeTempDir({ prefix, suffix });
+	const promises = [];
+	for (const [fileName, scriptContent] of Object.entries(scriptFiles)) {
+		const filePath = resolve(dirPath, fileName);
+		const promise = (async () => {
+			await Deno.mkdir(dirname(filePath), { recursive: true });
+			await Deno.writeTextFile(filePath, scriptContent);
+		})();
+		promises.push(promise);
+	}
+	await Promise.all(promises);
+	const cleanup = async () => {
+		await Deno.remove(dirPath, { recursive: true });
+	};
+	const basePath = toFileUrl(dirPath) + "/";
+	return { basePath, dirPath, cleanup };
 }
 
 export async function simpleReplacementDir() {
-  return await setupScriptTempDir({
-    "main.js": `
+	return await setupScriptTempDir({
+		"main.js": `
       import {replaced} from "./replaced.js";
       export {replaced};
     `,
-    "replaced.js": `
+		"replaced.js": `
       export const replaced = "not replaced";
     `,
-  }, {
-    prefix: "simple_replacement_test",
-  });
+	}, {
+		prefix: "simple_replacement_test",
+	});
 }
 
 /**
@@ -64,10 +64,10 @@ export async function simpleReplacementDir() {
  * @param {number} count
  */
 export async function assertFileCount(path, count) {
-  let fileCount = 0;
-  for await (const file of Deno.readDir(path)) {
-    if (!file.isFile) continue;
-    fileCount++;
-  }
-  assertEquals(fileCount, count);
+	let fileCount = 0;
+	for await (const file of Deno.readDir(path)) {
+		if (!file.isFile) continue;
+		fileCount++;
+	}
+	assertEquals(fileCount, count);
 }
