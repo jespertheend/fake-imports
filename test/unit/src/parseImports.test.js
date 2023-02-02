@@ -396,3 +396,18 @@ Deno.test({
 		}
 	},
 });
+
+Deno.test({
+	name: "'from' inside a string",
+	fn() {
+		const src = `
+			export function foo() {
+				const x = 'test from "yes" ';
+			}
+		`;
+
+		const imports = parseImports(src);
+
+		assertEquals(imports, []);
+	},
+});
