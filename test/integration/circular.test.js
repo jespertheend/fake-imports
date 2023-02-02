@@ -31,7 +31,7 @@ Deno.test({
 				Error,
 				`Circular imports are not supported:
 A.js -> B.js -> A.js
-Consider passing one of the following paths to \`importer.makeReal()\`:
+Consider faking or passing one of the following paths to \`importer.makeReal()\`:
 ./A.js
 ./B.js`,
 			);
@@ -76,7 +76,7 @@ Deno.test({
 				Error,
 				`Circular imports are not supported:
 A.js -> B.js -> C.js -> A.js
-Consider passing one of the following paths to \`importer.makeReal()\`:
+Consider faking or passing one of the following paths to \`importer.makeReal()\`:
 ./A.js
 ./B.js
 ./C.js`,
@@ -126,7 +126,7 @@ Deno.test({
 				Error,
 				`Circular imports are not supported:
 A.js -> B.js -> C.js -> D.js -> B.js
-Consider passing one of the following paths to \`importer.makeReal()\`:
+Consider faking or passing one of the following paths to \`importer.makeReal()\`:
 ./A.js
 ./B.js
 ./C.js
@@ -173,7 +173,7 @@ Deno.test({
 				Error,
 				`Circular imports are not supported:
 A.js -> B.js -> C.js -> A.js
-Consider passing one of the following paths to \`importer.makeReal()\`:
+Consider faking or passing one of the following paths to \`importer.makeReal()\`:
 ./root/A.js
 ./root/scripts/B.js
 ./root/C.js`,
@@ -311,7 +311,7 @@ Deno.test({
 				Error,
 				`Circular imports are not supported:
 A.js -> B.js -> D.js -> F.js -> D.js
-Consider passing one of the following paths to \`importer.makeReal()\`:
+Consider faking or passing one of the following paths to \`importer.makeReal()\`:
 ./A.js
 ./B.js
 ./D.js
@@ -388,7 +388,7 @@ Deno.test({
 				Error,
 				`Circular imports are not supported:
 A.js -> B.js -> A.js
-Consider passing one of the following paths to \`importer.makeReal()\`:
+Consider faking or passing one of the following paths to \`importer.makeReal()\`:
 ./A.js
 ../B/B.js`,
 			);

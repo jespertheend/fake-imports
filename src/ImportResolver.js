@@ -379,7 +379,7 @@ ${getRelativePath(this.#importMeta, url)}
 					throw new Error(
 						`Circular imports are not supported:
 ${importFileNames}
-Consider passing one of the following paths to \`importer.makeReal()\`:
+Consider faking or passing one of the following paths to \`importer.makeReal()\`:
 ${importPathsWithoutDuplicates.join("\n")}`,
 					);
 				}
