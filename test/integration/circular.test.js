@@ -358,7 +358,7 @@ Consider passing the following path to \`importer.makeReal()\`:
 });
 
 Deno.test({
-	name: "circular import with file above the base path",
+	name: "circular import with file above the base path, base path ends with a file name",
 	async fn() {
 		//    A  <-+
 		//    |    |
@@ -377,7 +377,7 @@ Deno.test({
 			`,
 		});
 
-		const basePath = tmpDirBasePath + "A/";
+		const basePath = tmpDirBasePath + "A/foo.js";
 
 		try {
 			const importer = new Importer(basePath);

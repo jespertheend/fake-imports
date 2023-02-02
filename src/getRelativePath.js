@@ -6,7 +6,10 @@ import { posix } from "https://deno.land/std@0.121.0/path/mod.ts";
  * @param {string} pathB
  */
 export function getRelativePath(pathA, pathB) {
-	const a = posix.fromFileUrl(pathA);
+	let a = posix.fromFileUrl(pathA);
+	if (!a.endsWith("/")) {
+		a = posix.dirname(a)
+	}
 	const b = posix.fromFileUrl(pathB);
 	let rel = posix.relative(a, b);
 	if (!rel.startsWith("/") && !rel.startsWith(".")) {
