@@ -1,4 +1,4 @@
-import { diffLines } from "https://unpkg.com/diff@5.0.0/lib/index.mjs";
+import { diffLines } from "https://cdn.jsdelivr.net/npm/diff@5.0.0/lib/index.mjs";
 
 /** @typedef {[number, (number | null)]} DiffOffsetRange */
 /** @typedef {DiffOffsetRange[]} DiffOffsets */
