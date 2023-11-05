@@ -176,38 +176,34 @@ export class Importer {
 	}
 
 	/**
-	 * Fakes a module with the content of another file. This is almost the same as fetching content
-	 * from a file and passing it to {@link fakeModule}, except that relative imports of the new
-	 * file are maintained.
+	 * Replaces a module with the content of another file.
+	 * This has the added benefit that any imports within the new file will be resolved relative to its new path.
+	 *
+	 * This is almost the same as fetching content from a file and passing it to {@link fakeModule},
+	 * except that imports of the new file are resolved relative to the new location.
 	 *
 	 * ## Usage
-	 * Say you have the following files:
+	 * Say you have the file `foo.js`:
 	 *
 	 * ```js
-	 * // /foo.js
-	 * import {bar} from "./bar.js";
-	 *
-	 * // /long/path/to/fakeFoo.js
-	 * import {fakeBar} from "./fakeBar.js";
+	 * export const foo = "foo";
 	 * ```
 	 *
-	 * You can point `/foo.js` to the new path using
-	 * ```
+	 * You can point `/foo.js` to another path using:
+	 * ```js
 	 * importer.redirectModule("/foo.js", "/long/path/to/fakeFoo.js");
 	 * ```
 	 *
-	 * This will ensure that `fakeBar.js` is imported from `/long/path/to/fakeBar.js`.
-	 *
-	 * #### Using fakeModule()
-	 *
-	 * If you were to try this with `fakeModule()` like so:
+	 * Now if `fakeFoo.js` contains an import like:
 	 * ```js
-	 * const fakeFoo = await fetch("/long/path/to/fakeFoo.js");
-	 * importer.fakeModule("/foo.js", await fakeFoo.text());
+	 * import {bar} from "./bar.js";
 	 * ```
+	 * then `bar` will be imported from `/long/path/to/bar.js`.
 	 *
-	 * You would run into errors, because like this `fakeBar.js` would be imported from `/fakeBar.js`,
-	 * which doesn't exist.
+	 * If you want access to the original exports, redirected modules can simply import 'themselves' from the old url:
+	 * ```js
+	 * import {foo} from "../../../foo.js";
+	 * ```
 	 *
 	 * @param {string | URL} url The old url you wish to replace.
 	 * Should be relative to the `importMeta` argument provided in the {@link constructor}.

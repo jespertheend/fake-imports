@@ -1,5 +1,6 @@
 {
 	"imports": {
-		"asserts": "https://deno.land/std@0.130.0/testing/asserts.ts"
+		"asserts": "https://deno.land/std@0.130.0/testing/asserts.ts",
+		"$std/": "https://deno.land/std@0.205.0/"
 	}
 }

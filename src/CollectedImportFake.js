@@ -57,15 +57,4 @@ export class CollectedImportFake extends CollectedImport {
 			};
 		}
 	}
-
-	/**
-	 * @override
-	 * @param {string} url The relative url to resolve.
-	 * @returns {import("./CollectedImport.js").ResolveImportData}
-	 */
-	handleResolveImport(url) {
-		const resolvedUrl = new URL(url, this.url);
-		const allowFakes = resolvedUrl.href !== this.url;
-		return { url, allowFakes };
-	}
 }

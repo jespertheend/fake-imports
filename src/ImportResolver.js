@@ -329,7 +329,7 @@ export class ImportResolver {
 	 * all modules are recursively collected.
 	 * @param {string} url The relative url specifier to collect, this is essentially the raw import string from scripts.
 	 * @param {Object} options
-	 * @param {boolean} [options.allowFakes] If true, the real module will be loaded instead of the fake one.
+	 * @param {boolean} [options.allowFakes] If false, the real module will be loaded instead of the fake one.
 	 * @param {CollectedImport?} [options.parentImporter] The parent collected import, used for circular import detection.
 	 */
 	createCollectedImport(url, {
@@ -389,19 +389,21 @@ ${importPathsWithoutDuplicates.join("\n")}`,
 
 		const seenRedirects = new Set();
 		let redirectedUrl = url;
-		while (true) {
-			if (seenRedirects.has(redirectedUrl)) {
-				const redirects = Array.from(seenRedirects);
-				redirects.push(redirects[0]);
-				const redirectsStr = redirects.map((r) => `"${r}"`).join(" -> ");
-				throw new Error(`Circular redirects detected.\n${redirectsStr}`);
-			}
-			seenRedirects.add(redirectedUrl);
-			const result = this.#redirectedModules.get(redirectedUrl);
-			if (result) {
-				redirectedUrl = result;
-			} else {
-				break;
+		if (allowFakes) {
+			while (true) {
+				if (seenRedirects.has(redirectedUrl)) {
+					const redirects = Array.from(seenRedirects);
+					redirects.push(redirects[0]);
+					const redirectsStr = redirects.map((r) => `"${r}"`).join(" -> ");
+					throw new Error(`Circular redirects detected.\n${redirectsStr}`);
+				}
+				seenRedirects.add(redirectedUrl);
+				const result = this.#redirectedModules.get(redirectedUrl);
+				if (result) {
+					redirectedUrl = result;
+				} else {
+					break;
+				}
 			}
 		}
 
@@ -412,10 +414,11 @@ ${importPathsWithoutDuplicates.join("\n")}`,
 			collectedImport = new CollectedImportFake(
 				moduleImplementation,
 				redirectedUrl,
+				url,
 				this,
 			);
 		} else {
-			collectedImport = new CollectedImportFetch(redirectedUrl, this);
+			collectedImport = new CollectedImportFetch(redirectedUrl, url, this);
 		}
 		if (this.generateCoverageMap) {
 			const collectedImport2 = collectedImport;

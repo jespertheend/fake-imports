@@ -14,6 +14,7 @@ function createCollectedImport(fakeModuleImplementation = () => "") {
 	const collectedImport = new CollectedImportFake(
 		fakeModuleImplementation,
 		scriptUrl,
+		scriptUrl,
 		/** @type {any} */ (stubResolver),
 	);
 	return { collectedImport, scriptUrl };
@@ -58,16 +59,6 @@ Deno.test({
 			uninstallMockFetch();
 		}
 	},
-});
-
-Deno.test("handleResolveImport", () => {
-	const { collectedImport, scriptUrl } = createCollectedImport();
-
-	const resolveData = collectedImport.handleResolveImport(scriptUrl);
-	assertEquals(resolveData, {
-		url: scriptUrl,
-		allowFakes: false,
-	});
 });
 
 Deno.test("handleGetContent no args", async () => {

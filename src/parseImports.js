@@ -2,9 +2,9 @@ import { getCommentLocations } from "./parseComments.js";
 
 /**
  * @typedef {Object} ImportLocation
- * @property {number} start
- * @property {number} length
- * @property {string} url
+ * @property {number} start The character index of the start of the specifier string.
+ * @property {number} length The length of the specifier string.
+ * @property {string} url The raw import specifier string as it exists in the file.
  */
 
 /**

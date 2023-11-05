@@ -37,6 +37,7 @@ import { replaceImports } from "./replaceImports.js";
  * CollectedImportFetch.
  */
 export class CollectedImport {
+	#originalUrl;
 	#resolver;
 
 	/** @type {string?} */
@@ -55,10 +56,13 @@ export class CollectedImport {
 
 	/**
 	 * @param {string} url The full (non relative) url to fetch.
+	 * @param {string} originalUrl The full (non relative) url that the import specifier pointed to.
+	 * This is usually the same as `url`, except when the module was faked.
 	 * @param {import("./ImportResolver.js").ImportResolver} resolver
 	 */
-	constructor(url, resolver) {
+	constructor(url, originalUrl, resolver) {
 		this.url = url;
+		this.#originalUrl = originalUrl;
 		this.#resolver = resolver;
 	}
 
@@ -84,14 +88,6 @@ export class CollectedImport {
 				mimeType: null,
 			})
 		);
-	}
-
-	/**
-	 * @param {string} url The relative url to resolve, this is essentially the raw string from the import statement.
-	 * @returns {ResolveImportData}
-	 */
-	handleResolveImport(url) {
-		return { url };
 	}
 
 	async initWithErrorHandling() {
@@ -120,11 +116,18 @@ export class CollectedImport {
 				if (realUrl != null) {
 					return realUrl;
 				}
-				const resolveData = this.handleResolveImport(importData.url);
+
+				// We want to allow fake modules to import themselves.
+				// This should import the real module instead of the fake one (which would cause circular imports anyway).
+				// To achieve this, we resolve the import specifier to figure out which file it points to.
+				// We then compare it to `this.#originalUrl` to see if the file imported itself.
+				const resolvedUrl = new URL(importData.url, this.url);
+				const allowFakes = resolvedUrl.href !== this.#originalUrl;
+
 				const collectedImport = this.#resolver.createCollectedImport(
-					resolveData.url,
+					importData.url,
 					{
-						allowFakes: resolveData.allowFakes,
+						allowFakes,
 						parentImporter: this,
 					},
 				);

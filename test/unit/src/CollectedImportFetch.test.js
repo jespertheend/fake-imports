@@ -9,6 +9,7 @@ function createCollectedImport() {
 
 	const collectedImport = new CollectedImportFetch(
 		scriptUrl,
+		scriptUrl,
 		/** @type {any} */ (stubResolver),
 	);
 	return { collectedImport, scriptUrl };
