@@ -6,7 +6,9 @@
 		// run the tests
 		"test": "deno test --no-check=remote --allow-read --allow-write",
 		// performs all tasks that are generally required for ci to pass
-		"check": "deno fmt && deno lint && deno task test"
+		"check": "deno fmt && deno lint && deno task test",
+		// Bundles and minifies the library and places it in the /dist/ directory.
+		"bundle": "deno run -A scripts/bundle.ts"
 	},
 	"importMap": "importmap.json",
 	"fmt": {
@@ -15,5 +17,8 @@
 			"useTabs": true,
 			"lineWidth": 300
 		}
-	}
+	},
+	"exclude": [
+		"dist"
+	]
 }

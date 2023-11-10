@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"target": "esnext",
+		"checkJs": true,
+		"module": "esnext",
+		"strict": true,
+		"declaration": true,
+		"outDir": "dist",
+		"emitDeclarationOnly": true,
+		"moduleResolution": "bundler"
+	},
+	"files": ["mod.js"]
+}

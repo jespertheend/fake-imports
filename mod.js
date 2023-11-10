@@ -117,8 +117,10 @@ export class Importer {
 	constructor(importMeta, options = {}) {
 		/** @type {import("./src/ImportResolver.js").Environment} */
 		let env = "browser";
+		let deno = null;
 		if ("Deno" in globalThis) {
 			env = "deno";
+			deno = Deno;
 		}
 		/** @type {string[]} */
 		let args = [];
@@ -128,7 +130,7 @@ export class Importer {
 		this.#resolver = new ImportResolver(importMeta, options, {
 			env,
 			args,
-			deno: Deno,
+			deno,
 		});
 	}
 
