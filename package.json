@@ -1,0 +1,33 @@
+{
+	"name": "fake-imports",
+	"version": "0.9.1",
+	"description": "Fake, mock and stub modules.",
+	"main": "dist/fake_imports.js",
+	"types": "dist/fake_imports.d.ts",
+	"type": "module",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/jespertheend/fake-imports.git"
+	},
+	"keywords": [
+		"esm",
+		"es modules",
+		"mock",
+		"mocks",
+		"mocking",
+		"test",
+		"testing",
+		"import",
+		"dynamic import",
+		"export",
+		"stub",
+		"fake",
+		"unit"
+	],
+	"author": "Jesper van den Ende",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/jespertheend/fake-imports/issues"
+	},
+	"homepage": "https://github.com/jespertheend/fake-imports#readme"
+}
