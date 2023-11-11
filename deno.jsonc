@@ -15,7 +15,8 @@
 		"options": {
 			"indentWidth": 4,
 			"useTabs": true,
-			"lineWidth": 300
+			"lineWidth": 300,
+			"proseWrap": "preserve"
 		}
 	},
 	"exclude": [
