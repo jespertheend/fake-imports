@@ -5,7 +5,7 @@ import { dirname, resolve } from "https://deno.land/std@0.119.0/path/mod.ts";
 /**
  * @typedef {Object} SetupScriptTempDirResult
  * @property {string} dirPath The path to the created directory
- * @property {string} basePath The path to the created directory in file:// format and anding with a /
+ * @property {string} basePath The path to the created directory in file:// format and ending with a trailing /
  * @property {() => Promise<void>} cleanup
  */
 
