@@ -7,7 +7,7 @@
 This is a small module for Deno and browser environments that can be used for modifying the contents of imported modules.
 It can be used for stubbing or mocking modules in unit tests, among other things.
 
-The most common example is modifying the contents of a constructor. Take the following module for instance:
+Take the following module for instance:
 
 ```js
 import {initConnection} from = "./database.js";
@@ -19,7 +19,7 @@ export async function readAndReturn() {
 ```
 
 If you want to write tests for the `readAndReturn()` call, there is no way to prevent the `initConnection()` from being called.
-Ideally, a problem like this would prompt you to rewrite your code so that no modules have any side effects, but this isn't always feasible.
+Ideally, a problem like this would prompt you to rewrite your code to use dependency injection, but this doesn't always make sense.
 
 This module was created to solve this problem. By allowing you to replace the contents of an imported file,
 you can change its behavior, or prevent it from doing anything at all.
