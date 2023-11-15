@@ -1,4 +1,4 @@
-import { assert, assertInstanceOf, assertRejects } from "asserts";
+import { assert, assertEquals, assertInstanceOf, assertRejects } from "asserts";
 import { setupScriptTempDir } from "./shared.js";
 import { Importer } from "../../mod.js";
 
@@ -185,9 +185,9 @@ Deno.test({
 			`,
 			"importmap.json": `
 				{
-				"imports": {
-				"barespecifier": "./notabarespecifier.js"
-				}
+					"imports": {
+						"barespecifier": "./notabarespecifier.js"
+					}
 				}
 			`,
 		}, {
@@ -231,9 +231,81 @@ Deno.test({
 			const importer = new Importer(basePath);
 			importer.makeReal("asserts", { useUnresolved: true });
 
-			// We don't expect the import to reject because our test suite does have
-			// "asserts" in the import map.
+			// We don't expect the import to reject because our test suite does have "asserts" in the import map.
+			// Even though the `Importer` doesn't know about the import map,
+			// the fact that it has been marked as real causes the `Importer` to ignore it.
 			await importer.import("./main.js");
+		} finally {
+			await cleanup();
+		}
+	},
+});
+
+Deno.test({
+	name: "faking a module that was marked as real should still work",
+	async fn() {
+		const { cleanup, basePath } = await setupScriptTempDir({
+			"foo.js": `
+				export const foo = {
+					real: true,
+				}
+			`,
+			"parent.js": `
+				import {foo} from "./foo.js";
+				export const real = foo.real;
+			`,
+		});
+
+		try {
+			const importer = new Importer(basePath);
+			importer.fakeModule(
+				"./foo.js",
+				`
+					export const foo = {
+						real: false,
+					}
+				`,
+			);
+			importer.makeReal("./foo.js");
+
+			const mod = await importer.import("./parent.js");
+			assertEquals(mod.real, false);
+		} finally {
+			await cleanup();
+		}
+	},
+});
+
+Deno.test({
+	name: "marking a redirected module as real",
+	async fn() {
+		const { cleanup, basePath } = await setupScriptTempDir({
+			"Foo.js": `
+				export class Foo {}
+			`,
+			"RedirectedFoo.js": `
+				export class Foo {}
+			`,
+			"main.js": `
+				import {Foo} from "./Foo.js";
+				export const instance = new Foo();
+			`,
+		});
+
+		try {
+			const importer = new Importer(basePath);
+			importer.redirectModule("./Foo.js", "./RedirectedFoo.js");
+			importer.makeReal("./RedirectedFoo.js");
+
+			const mod = await importer.import("./main.js");
+
+			const { Foo: FakeFoo } = await importer.import("./Foo.js");
+			assert(mod.instance instanceof FakeFoo, "Expected to be an instance of the fake Foo.");
+
+			const { Foo: RealFoo } = await import(basePath + "Foo.js");
+			const { Foo: RedirectedFoo } = await import(basePath + "RedirectedFoo.js");
+			assert(!(mod.instance instanceof RealFoo), "Expected not to be an instance of the real Foo.");
+			assert(mod.instance instanceof RedirectedFoo, "Expected to be an instance of the redirected Foo.");
 		} finally {
 			await cleanup();
 		}

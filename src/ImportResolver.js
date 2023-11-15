@@ -255,11 +255,10 @@ export class ImportResolver {
 	 */
 	async import(url) {
 		await this.loadImportMap();
-		const collectedImport = this.createCollectedImport(url);
-		collectedImport.markAsRoot();
+		const resolvedUrl = await this.getImportUrl(url);
 		let module;
 		try {
-			module = await import(await collectedImport.getBlobUrl());
+			module = await import(resolvedUrl);
 		} catch (e) {
 			if (e instanceof Error) {
 				e.message = this.replaceBlobUrls(e.message);
@@ -276,77 +275,42 @@ export class ImportResolver {
 	}
 
 	/**
-	 * Checks if a module has been marked as real, and if so, returns the url
-	 * that should be used for importing it instead of creating a collected import.
-	 * Returns null if the module is not marked as real.
-	 * @param {string} url
-	 * @param {string} baseUrl
-	 */
-	getRealUrl(url, baseUrl) {
-		if (this.#providedImportMap && !this.#hasParsedImportMap) {
-			throw new Error("Assertion failed, import map hasn't been parsed yet.");
-		}
-
-		const exactMatch = this.#forcedRealModules.get(url);
-		if (exactMatch && exactMatch.useUnresolved) {
-			return url;
-		}
-
-		const newUrl = resolveModuleSpecifier(
-			this.#parsedImportMap,
-			new URL(baseUrl),
-			url,
-		);
-		const newUrlSerialized = newUrl.href;
-
-		for (const forcedModule of this.#forcedRealModules.keys()) {
-			let newForcedModule;
-			try {
-				newForcedModule = resolveModuleSpecifier(
-					this.#parsedImportMap,
-					new URL(this.#importMeta),
-					forcedModule,
-				);
-			} catch {
-				// Resolving a specifier can fail for all sorts of reasons.
-				// However, we're iterating over all forced real modules, which
-				// might contain invalid values. We don't want this function to fail
-				// just because the forced real modules contains an invalid value.
-				// We'll just continue, since maybe the next forced module is a valid one.
-				continue;
-			}
-			if (newUrlSerialized == newForcedModule.href) {
-				return newUrlSerialized;
-			}
-		}
-
-		return null;
-	}
-
-	/**
-	 * Creates a new CollectedImport instance and adds it to the collectedImports map.
-	 * The created collected import will call this function as well, this way
-	 * all modules are recursively collected.
+	 * Returns the url which should be directly imported from either a dynamic `import()` or
+	 * from a `import * from ""` statement inside a module.
+	 *
+	 * This determines whether the module has been faked, redirected or marked as real.
+	 * When faked or redirected, this will return a blob url pointing to the new content.
+	 * When marked as real, this will point to the real url without creating any blob url.
 	 * @param {string} url The relative url specifier to collect, this is essentially the raw import string from scripts.
 	 * @param {Object} options
-	 * @param {boolean} [options.allowFakes] If false, the real module will be loaded instead of the fake one.
+	 * @param {boolean} [options.allowFakes] If false, the content of the real module will be loaded instead of the fake one.
 	 * @param {CollectedImport?} [options.parentImporter] The parent collected import, used for circular import detection.
 	 */
-	createCollectedImport(url, {
+	async getImportUrl(url, {
 		allowFakes = true,
 		parentImporter = null,
 	} = {}) {
 		const baseUrl = parentImporter ? parentImporter.url : this.#importMeta;
-		const newUrl = resolveModuleSpecifier(
-			this.#parsedImportMap,
-			new URL(baseUrl),
-			url,
-		);
-		url = newUrl.href;
+		let resolvedUrl;
+		try {
+			resolvedUrl = resolveModuleSpecifier(
+				this.#parsedImportMap,
+				new URL(baseUrl),
+				url,
+			).href;
+		} catch (e) {
+			// If something went wrong while resolving, we need to check if the raw specifier was marked as real.
+			// If so, the user likely has the specifier in their own import map which was not provided to the Importer.
+			// Or there might be another reason why this import could succeed even though we are not able to resolve it.
+			if (this.#isExactRealUrl(url)) {
+				return url;
+			}
+			throw e;
+		}
 
 		let collectedImportKey = "";
 		collectedImportKey += allowFakes ? "1" : "0";
-		collectedImportKey += url;
+		collectedImportKey += resolvedUrl;
 
 		const existing = this.#collectedImports.get(collectedImportKey);
 		if (existing) {
@@ -355,9 +319,9 @@ export class ImportResolver {
 			}
 			if (existing == parentImporter) {
 				throw new Error(
-					`Circular imports are not supported. "${url}" imports itself.
+					`Circular imports are not supported. "${resolvedUrl}" imports itself.
 Consider passing the following path to \`importer.makeReal()\`:
-${getRelativePath(this.#importMeta, url)}
+${getRelativePath(this.#importMeta, resolvedUrl)}
 `,
 				);
 			}
@@ -384,42 +348,34 @@ ${importPathsWithoutDuplicates.join("\n")}`,
 					);
 				}
 			}
-			return existing;
+			return await existing.getBlobUrl();
 		}
 
-		const seenRedirects = new Set();
-		let redirectedUrl = url;
-		if (allowFakes) {
-			while (true) {
-				if (seenRedirects.has(redirectedUrl)) {
-					const redirects = Array.from(seenRedirects);
-					redirects.push(redirects[0]);
-					const redirectsStr = redirects.map((r) => `"${r}"`).join(" -> ");
-					throw new Error(`Circular redirects detected.\n${redirectsStr}`);
-				}
-				seenRedirects.add(redirectedUrl);
-				const result = this.#redirectedModules.get(redirectedUrl);
-				if (result) {
-					redirectedUrl = result;
-				} else {
-					break;
-				}
-			}
-		}
-
-		let collectedImport;
-		if (this.#fakedModules.has(redirectedUrl) && allowFakes) {
+		let collectedImport = null;
+		if (allowFakes && this.#fakedModules.has(resolvedUrl)) {
 			const moduleImplementation = /** @type {import("../mod.js").ModuleImplementation} */ (this
-				.#fakedModules.get(redirectedUrl));
+				.#fakedModules.get(resolvedUrl));
 			collectedImport = new CollectedImportFake(
 				moduleImplementation,
-				redirectedUrl,
-				url,
+				resolvedUrl,
+				resolvedUrl,
 				this,
 			);
-		} else {
-			collectedImport = new CollectedImportFetch(redirectedUrl, url, this);
 		}
+
+		if (!collectedImport) {
+			let redirectedUrl = resolvedUrl;
+			if (allowFakes) {
+				redirectedUrl = this.#resolveRedirects(resolvedUrl);
+			}
+			if (this.#isExactRealUrl(url)) {
+				return url;
+			}
+			const realUrl = this.#getRealUrl(redirectedUrl, baseUrl);
+			if (realUrl) return realUrl;
+			collectedImport = new CollectedImportFetch(redirectedUrl, resolvedUrl, this);
+		}
+
 		if (this.generateCoverageMap) {
 			const collectedImport2 = collectedImport;
 			collectedImport.onCreatedBlobUrl(() => {
@@ -432,10 +388,89 @@ ${importPathsWithoutDuplicates.join("\n")}`,
 		}
 		if (parentImporter) {
 			collectedImport.addParentCollectedImport(parentImporter);
+		} else {
+			collectedImport.markAsRoot();
 		}
 		collectedImport.initWithErrorHandling();
 		this.#collectedImports.set(collectedImportKey, collectedImport);
-		return collectedImport;
+		return await collectedImport.getBlobUrl();
+	}
+
+	/**
+	 * Returns true when the specifier was marked as real with `useUnresolved` set to `true`.
+	 * @param {string} bareSpecifier
+	 */
+	#isExactRealUrl(bareSpecifier) {
+		const exactMatch = this.#forcedRealModules.get(bareSpecifier);
+		if (exactMatch && exactMatch.useUnresolved) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Checks if a module has been marked as real, and if so, returns the url
+	 * that should be used for importing it instead of creating a collected import.
+	 * Returns null if the module is not marked as real.
+	 * @param {string} url
+	 * @param {string} baseUrl
+	 */
+	#getRealUrl(url, baseUrl) {
+		if (this.#providedImportMap && !this.#hasParsedImportMap) {
+			throw new Error("Assertion failed, import map hasn't been parsed yet.");
+		}
+
+		const resolvedUrl = resolveModuleSpecifier(
+			this.#parsedImportMap,
+			new URL(baseUrl),
+			url,
+		).href;
+
+		for (const forcedModule of this.#forcedRealModules.keys()) {
+			let newForcedModule;
+			try {
+				newForcedModule = resolveModuleSpecifier(
+					this.#parsedImportMap,
+					new URL(this.#importMeta),
+					forcedModule,
+				);
+			} catch {
+				// Resolving a specifier can fail for all sorts of reasons.
+				// However, we're iterating over all forced real modules, which
+				// might contain invalid values. We don't want this function to fail
+				// just because the forced real modules contains an invalid value.
+				// We'll just continue, since maybe the next forced module is a valid one.
+				continue;
+			}
+			if (resolvedUrl == newForcedModule.href) {
+				return resolvedUrl;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * @param {string} url The absolute (import map resolved) url of the file.
+	 */
+	#resolveRedirects(url) {
+		const seenRedirects = new Set();
+		while (true) {
+			if (seenRedirects.has(url)) {
+				const redirects = Array.from(seenRedirects);
+				redirects.push(redirects[0]);
+				const redirectsStr = redirects.map((r) => `"${r}"`).join(" -> ");
+				throw new Error(`Circular redirects detected.\n${redirectsStr}`);
+			}
+			seenRedirects.add(url);
+			const result = this.#redirectedModules.get(url);
+			if (result) {
+				url = result;
+			} else {
+				break;
+			}
+		}
+		return url;
 	}
 
 	/**

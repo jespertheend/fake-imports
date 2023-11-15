@@ -112,11 +112,6 @@ export class CollectedImport {
 		const blobUrlPromises = [];
 		for (const importData of imports) {
 			const promise = (async () => {
-				const realUrl = this.#resolver.getRealUrl(importData.url, this.url);
-				if (realUrl != null) {
-					return realUrl;
-				}
-
 				// We want to allow fake modules to import themselves.
 				// This should import the real module instead of the fake one (which would cause circular imports anyway).
 				// To achieve this, we resolve the import specifier to figure out which file it points to.
@@ -124,14 +119,13 @@ export class CollectedImport {
 				const resolvedUrl = new URL(importData.url, this.url);
 				const allowFakes = resolvedUrl.href !== this.#originalUrl;
 
-				const collectedImport = this.#resolver.createCollectedImport(
+				return await this.#resolver.getImportUrl(
 					importData.url,
 					{
 						allowFakes,
 						parentImporter: this,
 					},
 				);
-				return await collectedImport.getBlobUrl();
 			})();
 			blobUrlPromises.push(promise);
 		}

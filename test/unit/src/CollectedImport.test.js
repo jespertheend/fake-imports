@@ -10,25 +10,15 @@ const erroringResolver = /** @type {import("../../../src/ImportResolver.js").Imp
 	/**
 	 * @returns {any}
 	 */
-	createCollectedImport(_url, _options) {
+	getImportUrl(_url, _options) {
 		throw new Error("Mock error");
 	},
 });
 
 function createSucceedingResolver() {
 	const succeedingResolver = /** @type {import("../../../src/ImportResolver.js").ImportResolver} */ ({
-		/**
-		 * @returns {any}
-		 */
-		createCollectedImport(_url, _options) {
-			return {
-				getBlobUrl() {
-					return Promise.resolve("bloburl");
-				},
-			};
-		},
-		getRealUrl(_url, _baseUrl) {
-			return null;
+		getImportUrl(_url, _options) {
+			return Promise.resolve("resolved url");
 		},
 	});
 	return succeedingResolver;
@@ -291,7 +281,7 @@ Deno.test({
 	name: "initWithErrorHandling() requests new import",
 	async fn() {
 		const succeedingResolver = createSucceedingResolver();
-		const createSpy = spy(succeedingResolver, "createCollectedImport");
+		const createSpy = spy(succeedingResolver, "getImportUrl");
 		const collectedImport = new ExtendecCollectedImport(
 			FAKE_URL,
 			FAKE_URL,
@@ -310,7 +300,7 @@ Deno.test({
 	name: "initWithErrorHandling() requests new import without fakes when it imports itself",
 	async fn() {
 		const succeedingResolver = createSucceedingResolver();
-		const createSpy = spy(succeedingResolver, "createCollectedImport");
+		const createSpy = spy(succeedingResolver, "getImportUrl");
 		const collectedImport = new ExtendecCollectedImport(
 			FAKE_URL,
 			"https://example.com/someUrl.js",
