@@ -1,4 +1,4 @@
-import { assert, assertEquals, assertInstanceOf, assertRejects } from "asserts";
+import { assert, assertEquals, assertExists, assertInstanceOf, assertRejects } from "asserts";
 import { setupScriptTempDir, simpleReplacementDir } from "./shared.js";
 import { Importer } from "../../mod.js";
 
@@ -141,18 +141,23 @@ Deno.test({
 			 * @param {unknown} e
 			 */
 			const errorCb = (e) => {
-				assertInstanceOf(e, TypeError);
-				if (e.stack) {
-					// If checkjs is enabled, (which it is when using deno task test),
+				if (e instanceof TypeError) {
+					assertExists(e.stack);
+					// If type checking is enabled, (which it is when using deno task test),
 					// the import will error with a type error from TypeScript rather
 					// than a runtime error. If this is the case, blob urls are not
 					// replaced, see https://github.com/denoland/deno/issues/14443
-					if (!e.stack.includes("TS1002")) {
-						assert(
-							e.stack.includes(fooUrl.href),
-							"Expected the stack trace to include the url to 'foo.js' at least once.",
-						);
-					}
+
+					// So unfortunately reliably assert that the blob urls are being replaced.
+					// But just in case, below is an extra check for when type checking is disabled.
+					// You can run the test suite with type checking disabled by replacing
+					// `--no-check=remote` with `--no-check` in deno.jsonc
+				} else if (e instanceof SyntaxError) {
+					assertExists(e.stack);
+					assert(
+						e.stack.includes(fooUrl.href),
+						"Expected the stack trace to include the url to 'foo.js' at least once.",
+					);
 				}
 			};
 			await assertRejects(
