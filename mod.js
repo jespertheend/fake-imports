@@ -40,7 +40,7 @@ import { ImportResolver } from "./src/ImportResolver.js";
  * });
  * ```
  * @property {boolean} [makeImportMapEntriesReal] When set to true (which is the default) all the entries
- * in the import map will be marked as real with `useUnresolved: true`. The
+ * in the import map will be marked as real with `exactMatch: true`. The
  * assumption is made that the import map you have provided is the same import
  * map as the one you are already using in your environment. In this case
  * leaving this set as `true` should be fine. But if you haven't set an import
@@ -50,7 +50,7 @@ import { ImportResolver } from "./src/ImportResolver.js";
 
 /**
  * @typedef MakeRealOptions
- * @property {boolean} [useUnresolved] If set to true (default is false), import
+ * @property {boolean} [exactMatch] If set to true (default is false), import
  * statement is left as is when they exactly match the provided url.
  * This causes the module to be loaded from the original URL.
  * Otherwise the import statements will be resolved and replaced according to the

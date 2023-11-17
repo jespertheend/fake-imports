@@ -298,7 +298,7 @@ Deno.test({
 });
 
 Deno.test({
-	name: "import map entries are automatically marked as real with useUnresolved: true",
+	name: "import map entries are automatically marked as real with exactMatch: true",
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
@@ -306,7 +306,7 @@ Deno.test({
 				assert(true);
 			`,
 		}, {
-			prefix: "makereal_bare_specifier_entry_with_useunresolved_test",
+			prefix: "makereal_bare_specifier_entry_with_exactmatch_test",
 		});
 
 		try {

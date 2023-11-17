@@ -77,7 +77,7 @@ Deno.test({
 
 		try {
 			const importer = new Importer(basePath);
-			importer.makeReal("invalidEntry", { useUnresolved: true });
+			importer.makeReal("invalidEntry", { exactMatch: true });
 			importer.makeReal("./shouldBeReal.js");
 			const { instance } = await importer.import("./main.js");
 			const { Foo } = await import(new URL("./shouldBeReal.js", basePath).href);
@@ -172,7 +172,7 @@ Deno.test({
 });
 
 Deno.test({
-	name: "making an import map bare specfier entry real with useUnresolved true",
+	name: "making an import map bare specfier entry real with exactMatch true",
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
@@ -198,7 +198,7 @@ Deno.test({
 			const importer = new Importer(basePath, {
 				importMap: "./importmap.json",
 			});
-			importer.makeReal("barespecifier", { useUnresolved: true });
+			importer.makeReal("barespecifier", { exactMatch: true });
 
 			// We expect the import to reject because our test suite doesn't have the
 			// same import map set as used for the `new Importer` above.
@@ -216,7 +216,7 @@ Deno.test({
 });
 
 Deno.test({
-	name: "making a bare specfier real with useUnresolved true without an entry in the import map",
+	name: "making a bare specfier real with exactMatch true without an entry in the import map",
 	async fn() {
 		const { cleanup, basePath } = await setupScriptTempDir({
 			"main.js": `
@@ -224,12 +224,12 @@ Deno.test({
 				assert(true);
 			`,
 		}, {
-			prefix: "makereal_bare_specifier_entry_with_useunresolved_test",
+			prefix: "makereal_bare_specifier_entry_with_exactmatch_test",
 		});
 
 		try {
 			const importer = new Importer(basePath);
-			importer.makeReal("asserts", { useUnresolved: true });
+			importer.makeReal("asserts", { exactMatch: true });
 
 			// We don't expect the import to reject because our test suite does have "asserts" in the import map.
 			// Even though the `Importer` doesn't know about the import map,

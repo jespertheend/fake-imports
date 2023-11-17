@@ -28,7 +28,7 @@ import { getRelativePath } from "./getRelativePath.js";
 
 /**
  * @typedef ForcedRealData
- * @property {boolean} useUnresolved
+ * @property {boolean} exactMatch
  */
 
 const COVERAGE_MAP_ARG = "--fi-coverage-map=";
@@ -195,10 +195,10 @@ export class ImportResolver {
 	 * @param {import("../mod.js").MakeRealOptions} options
 	 */
 	makeReal(url, {
-		useUnresolved = false,
+		exactMatch = false,
 	} = {}) {
 		this.#forcedRealModules.set(url, {
-			useUnresolved,
+			exactMatch,
 		});
 	}
 
@@ -238,7 +238,7 @@ export class ImportResolver {
 		if (this.#makeImportMapEntriesReal) {
 			for (const entry of Object.keys(this.#parsedImportMap.imports)) {
 				this.makeReal(entry, {
-					useUnresolved: true,
+					exactMatch: true,
 				});
 			}
 		}
@@ -397,12 +397,12 @@ ${importPathsWithoutDuplicates.join("\n")}`,
 	}
 
 	/**
-	 * Returns true when the specifier was marked as real with `useUnresolved` set to `true`.
+	 * Returns true when the specifier was marked as real with `exactMatch` set to `true`.
 	 * @param {string} bareSpecifier
 	 */
 	#isExactRealUrl(bareSpecifier) {
 		const exactMatch = this.#forcedRealModules.get(bareSpecifier);
-		if (exactMatch && exactMatch.useUnresolved) {
+		if (exactMatch && exactMatch.exactMatch) {
 			return true;
 		}
 		return false;
