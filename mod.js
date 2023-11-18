@@ -50,23 +50,32 @@ import { ImportResolver } from "./src/ImportResolver.js";
 
 /**
  * @typedef MakeRealOptions
- * @property {boolean} [exactMatch] If set to true (default is false), import
- * statement is left as is when they exactly match the provided url.
- * This causes the module to be loaded from the original URL.
- * Otherwise the import statements will be resolved and replaced according to the
- * import map provided in the `Importer` constructor.
+ * @property {boolean} [exactMatch] If set to true (default is false), only imports with this exact
+ * string are marked as real. Normally the the string you pass in should be relative to the `import.meta.url`
+ * passed to the `Importer` constructor, but with this option you can mark bare specifiers as real.
  *
- * This is useful if you have an import map set up outside of the importer, e.g.
- * through Deno's `--import-map` argument, or using <script type="importmap"> in
- * browsers. If your environment doesn't support import maps, or you simply
- * haven't set one, you will probably have to set this to false. Otherwise you
- * will likely get an error when trying to load the module as a bare specifier.
+ * This option is useful if you have an import map set up that the `Importer` doesn't know about, e.g.
+ * through Deno's `--import-map` argument, or using `<script type="importmap">` in
+ * browsers.
  *
- * Note that for this to work you have to provide the exact same url as imported
- * by any parent modules. So providing a path relative to your `import.meta.url`
- * won't work. But you generally only want to use this for bare specifiers, such
- * as `"lodash"` or `"moment"`, since all faked modules are impored as blob urls.
- * Meaning imports such as `"./relative/path/to/file.js"` will not work.
+ * For instance, say you have a file at `subdir/foo.js`:
+ *
+ * ```js
+ * import bar from "../bar.js";
+ * import * from "$std";
+ * ```
+ *
+ * If you want to make `bar.js` real, you can do so by providing a relative path from the root:
+ *
+ * ```js
+ * importer.makeReal("./bar.js");
+ * ```
+ *
+ * But `"$std"` doesn't have any way to point to it relative to the root, so you can use `exactMatch` in that case.
+ *
+ * ```js
+ * importer.makeReal("$std", {exactMatch: true});
+ * ```
  */
 
 /**
