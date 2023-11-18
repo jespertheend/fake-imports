@@ -1,4 +1,4 @@
-import { assert, assertEquals, assertInstanceOf, assertNotStrictEquals, assertRejects, assertStrictEquals } from "asserts";
+import { assert, assertEquals, assertInstanceOf, assertNotStrictEquals, assertRejects } from "asserts";
 import { setupScriptTempDir } from "./shared.js";
 import { Importer } from "../../mod.js";
 
