@@ -308,7 +308,10 @@ export class ImportResolver {
 			throw e;
 		}
 
+		const isExactRealUrl = this.#isExactRealUrl(url);
+
 		let collectedImportKey = "";
+		collectedImportKey += isExactRealUrl ? "1" : "0";
 		collectedImportKey += allowFakes ? "1" : "0";
 		collectedImportKey += resolvedUrl;
 
@@ -368,7 +371,7 @@ ${importPathsWithoutDuplicates.join("\n")}`,
 			if (allowFakes) {
 				redirectedUrl = this.#resolveRedirects(resolvedUrl);
 			}
-			if (this.#isExactRealUrl(url)) {
+			if (isExactRealUrl) {
 				return url;
 			}
 			const realUrl = this.#getRealUrl(redirectedUrl, baseUrl);
@@ -426,7 +429,8 @@ ${importPathsWithoutDuplicates.join("\n")}`,
 			url,
 		).href;
 
-		for (const forcedModule of this.#forcedRealModules.keys()) {
+		for (const [forcedModule, forcedRealData] of this.#forcedRealModules) {
+			if (forcedRealData.exactMatch) continue;
 			let newForcedModule;
 			try {
 				newForcedModule = resolveModuleSpecifier(

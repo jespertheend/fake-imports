@@ -1,4 +1,4 @@
-import { assert, assertEquals, assertInstanceOf, assertRejects } from "asserts";
+import { assert, assertEquals, assertInstanceOf, assertNotStrictEquals, assertRejects, assertStrictEquals } from "asserts";
 import { setupScriptTempDir } from "./shared.js";
 import { Importer } from "../../mod.js";
 
@@ -235,6 +235,47 @@ Deno.test({
 			// Even though the `Importer` doesn't know about the import map,
 			// the fact that it has been marked as real causes the `Importer` to ignore it.
 			await importer.import("./main.js");
+		} finally {
+			await cleanup();
+		}
+	},
+});
+
+Deno.test({
+	name: "making real with exactMatch true only affects specifiers that match exactly",
+	async fn() {
+		const { cleanup, basePath } = await setupScriptTempDir({
+			"foo.js": `
+				export const foo = Symbol("foo");
+			`,
+			"subdir/notReal.js": `
+				export * from "../foo.js";
+			`,
+			"real.js": `
+				export * from "./foo.js";
+			`,
+		}, {
+			prefix: "makereal_bare_specifier_entry_with_exactmatch_test",
+		});
+
+		try {
+			const importer = new Importer(basePath);
+			importer.makeReal("./foo.js", { exactMatch: true });
+
+			const realFooMod = await import(basePath + "foo.js");
+
+			const notRealReexport = await importer.import("./subdir/notReal.js");
+			assertNotStrictEquals(notRealReexport.foo, realFooMod.foo, "Expected notReal.js to not load the real module.");
+
+			await assertRejects(async () => {
+				// We expect the following to reject because "./foo.js" matches exactly and thus was marked as real.
+				// However, since it was an exact match, the Importer doesn't resolve the specifier to the absolute
+				// path of `foo.js`. But "real.js" has been replaced by a blob url, and as a result "./foo.js"
+				// is attempted to be imported from that blob url.
+				// This isn't possible, causing JavaScript (in our case Deno) to throw an error while making the
+				// dynamic import() call.
+				await importer.import("./real.js");
+			});
 		} finally {
 			await cleanup();
 		}
